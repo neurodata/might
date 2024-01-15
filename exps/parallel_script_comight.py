@@ -1,8 +1,8 @@
 import sys
 import os
-
+from itertools import product
 import numpy as np
-
+from joblib import delayed, Parallel
 from hyppo.conditional import ConditionalDcorr
 from sklearn.model_selection import StratifiedShuffleSplit
 from sktree.stats import (
@@ -99,6 +99,7 @@ def _run_parallel_comight(
     test_size,
     sim_type,
     rootdir,
+    output_dir,
 ):
     """Run parallel job on pre-generated data.
 
@@ -126,7 +127,7 @@ def _run_parallel_comight(
     n_features_ends = [100, None]
 
     # set output directory to save npz files
-    output_dir = os.path.join(rootdir, f"output/varying-dimensionality/{sim_type}/")
+    output_dir = os.path.join(rootdir, f"output/{output_dir}/{sim_type}/")
     os.makedirs(output_dir, exist_ok=True)
 
     # load data
@@ -202,6 +203,7 @@ def _run_parallel_cond_dcorr(
     test_size,
     sim_type,
     rootdir,
+    output_dir
 ):
     """Run parallel job on pre-generated data.
 
@@ -229,7 +231,7 @@ def _run_parallel_cond_dcorr(
     n_features_ends = [100, None]
 
     # set output directory to save npz files
-    output_dir = os.path.join(rootdir, f"output/varying-dimensionality/{sim_type}/")
+    output_dir = os.path.join(rootdir, f"output/{output_dir}/{sim_type}/")
     os.makedirs(output_dir, exist_ok=True)
 
     # load data
@@ -259,7 +261,7 @@ def _run_parallel_cond_dcorr(
     mask_array = mask_array.astype(bool)
 
     X_minus_Z = X[:, mask_array]
-    cdcorr_stat, cdcorr_pvalue = cdcorr.test(X_minus_Z.copy(), y.copy(), Z.copy())
+    cdcorr_stat, cdcorr_pvalue = cdcorr.test(X_minus_Z.copy(), y.copy(), Z.copy(), random_state=seed)
 
     np.savez(
         os.path.join(output_dir, f"conddcorr_{n_samples}_{n_features_2}_{idx}.npz"),
@@ -273,16 +275,88 @@ def _run_parallel_cond_dcorr(
 
 if __name__ == "__main__":
     # Ensure proper number of arguments are provided
-    if len(sys.argv) != 5:
-        print("Usage: python script.py idx n_samples n_features_2 sim_type")
-        sys.exit(1)
+    # if len(sys.argv) != 5:
+    #     print("Usage: python script.py idx n_samples n_features_2 sim_type")
+    #     sys.exit(1)
 
-    # Extract arguments from terminal input
-    idx = int(sys.argv[1])
-    n_samples = int(sys.argv[2])
-    n_features_2 = int(sys.argv[3])
-    sim_type = sys.argv[4]
-    rootdir = sys.argv[5]
+    # # Extract arguments from terminal input
+    # idx = int(sys.argv[1])
+    # n_samples = int(sys.argv[2])
+    # n_features_2 = int(sys.argv[3])
+    # sim_type = sys.argv[4]
+    # rootdir = sys.argv[5]
+
+    # varying-dimensionality, or varying-samples
+    output_dir = 'varying-dimensionality'
+    rootdir = ''
+    n_features_2 = 4096
+    n_samples = 512
 
     # Call your function with the extracted arguments
-    _run_parallel_comight(idx, n_samples, seed, n_features_2, test_size, sim_type, rootdir)
+    # _run_parallel_comight(idx, n_samples, seed, n_features_2, test_size, sim_type, rootdir, output_dir)
+
+    # 
+    n_repeats = 100
+    n_samples_list = [2**x for x in range(6, 11)]
+    pows = np.arange(2, 13, dtype=int)
+    n_features_2_list = [2**pow for pow in pows]
+
+    Parallel(n_jobs=-1)(
+        delayed(_run_parallel_cond_dcorr)(
+            idx_,
+            n_samples_,
+            seed + 1,
+            n_features_2,
+            test_size,
+            "log_collider",
+            rootdir,
+            "varying-samples",
+        )
+        for (idx_, n_samples_) in product(range(n_repeats), n_samples_list)
+    )
+    print("done with log-collider")
+
+    Parallel(n_jobs=-1)(
+        delayed(_run_parallel_cond_dcorr)(
+            idx_,
+            n_samples_,
+            seed + 1,
+            n_features_2,
+            test_size,
+            "confounder",
+            rootdir,
+            "varying-samples",
+        )
+        for (idx_, n_samples_) in product(range(n_repeats), n_samples_list)
+    )
+    print("done with confounder")
+
+    # Parallel(n_jobs=-1)(
+    #     delayed(_run_parallel_cond_dcorr)(
+    #         idx_,
+    #         n_samples,
+    #         seed + 1,
+    #         n_features_2_,
+    #         test_size,
+    #         "log_collider",
+    #         rootdir,
+    #         "varying-dimensionality",
+    #     )
+    #     for (idx_, n_features_2_) in product(range(n_repeats), n_features_2_list)
+    # )
+    # print("done with log-collider dimensionality")
+
+    # Parallel(n_jobs=-1)(
+    #     delayed(_run_parallel_cond_dcorr)(
+    #         idx_,
+    #         n_samples,
+    #         seed + 1,
+    #         n_features_2_,
+    #         test_size,
+    #         "confounder",
+    #         rootdir,
+    #         "varying-dimensionality",
+    #     )
+    #     for (idx_, n_features_2_) in product(range(n_repeats), n_features_2_list)
+    # )
+    # print("done with confounder dimensionality")
