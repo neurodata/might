@@ -153,7 +153,7 @@ sns.despine(right=True, ax=three_g)
 #three_g.legend(loc='lower right',ncol=2, title="Feature Type")
 h,l = three_g.get_legend_handles_labels()
 three_g.legend_.remove()
-three_g.legend(h,l, ncol=2,title='Variable Type',loc='bottom right')
+three_g.legend(h,l, ncol=2,title='Variable Type',loc='lower right')
 plt.setp(three_g.get_legend().get_texts(), fontsize='7')
 plt.setp(three_g.get_legend().get_title(), fontsize='7')
 
@@ -224,7 +224,6 @@ plt.savefig(f'{dir}/Figure3.svg')#, bbox_inches='tight')
 ################################################################################
 
 
-dir='/data/kvhdata1/Projects/MIGHT/results/ByStage/StageIV'
 #-- thresholds for 98% specificity --#
 tdict={'LogisticRegression':0.8083700148675955,
         'SVM':0.7343152912682109,
@@ -241,12 +240,8 @@ for x in range(2):
 
 for count,i in enumerate(['LogisticRegression','SVM','RandomForest']):
     threshold=tdict[i]
-    if i=='DefaultEnsembles':
-        df=pd.read_csv(f'{dir}/{i}/WiseCondorX_1Mb/AluFraction/test.posteriors.csv')
-        i='Multi-View\nHonest Forest'
-    else:
-        df=pd.read_csv(f'{dir}/{i}/Wise/AluFraction/test.posteriors.csv')
-        t=pd.read_csv(f'{dir}/{i}/Wise/AluFraction/performance.csv')
+    df=pd.read_csv(f'{dir}/{i}.validation.posteriors')
+    t=pd.read_csv(f'{dir}/{i}.validation.performance')
     df=df.sort_values('Posterior',ignore_index=True)
     print(i)
     print(df['Cancer Status'].value_counts())
@@ -301,7 +296,6 @@ plt.savefig(f'{dir}/Figure4.svg')
 
 plots=[]
 LABELS=['A','B','C']
-dir='/data/kvhdata1/Projects/MIGHT/results/ByStage/StageIV'
 plot_dict={}
 for idx,model in enumerate(['LogisticRegression','SVM','RandomForest']):
     fig = plt.figure(layout=None,figsize=(14,5))
@@ -319,7 +313,7 @@ for idx,model in enumerate(['LogisticRegression','SVM','RandomForest']):
     plots.append(fig)
 
 for idx,model in enumerate(['LogisticRegression','SVM','RandomForest']):
-    df=pd.read_csv(f'{dir}/{model}/WiseCondorX_1Mb/AluLociFraction/test.posteriors.csv')
+    df=pd.read_csv(f'{dir}/{model}.validation.posteriors')
     df['Stage']=df['Stage'].apply(lambda x:str(x).strip('A'))
     df['Stage']=df['Stage'].apply(lambda x:str(x).strip('A1'))
     df['Stage']=df['Stage'].apply(lambda x:str(x).strip('A2'))
@@ -329,7 +323,7 @@ for idx,model in enumerate(['LogisticRegression','SVM','RandomForest']):
     df['Stage']=df['Stage'].replace('nan','Normal')
     df['Stage']=df['Stage'].replace('IIIV','III')
     df['Stage']=df['Stage'].replace('IIII','III')
-    threshold=pd.read_csv(f'{dir}/{model}/WiseCondorX_1Mb/AluLociFraction/performance.csv').iloc[2,1]
+    threshold=pd.read_csv(f'{dir}/{model}.validation.performance').iloc[2,1]
     performance=[]
     for type in df['Tumor type'].unique():
         if type=='Esophagus':continue
