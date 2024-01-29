@@ -196,14 +196,7 @@ def _run_parallel_comight(
 
 
 def _run_parallel_cond_dcorr(
-    idx,
-    n_samples,
-    seed,
-    n_features_2,
-    test_size,
-    sim_type,
-    rootdir,
-    output_dir
+    idx, n_samples, seed, n_features_2, test_size, sim_type, rootdir, output_dir
 ):
     """Run parallel job on pre-generated data.
 
@@ -259,18 +252,26 @@ def _run_parallel_cond_dcorr(
     mask_array = np.ones(X.shape[1])
     mask_array[covariate_index] = 0
     mask_array = mask_array.astype(bool)
+    try:
+        X_minus_Z = X[:, mask_array]
+        if np.var(y) < 0.001:
+            raise RuntimeError(
+                f"{n_samples}_{n_features_2}_{idx} errored out with no variance in y"
+            )
+        cdcorr_stat, cdcorr_pvalue = cdcorr.test(
+            X_minus_Z.copy(), y.copy(), Z.copy(), random_state=seed
+        )
 
-    X_minus_Z = X[:, mask_array]
-    cdcorr_stat, cdcorr_pvalue = cdcorr.test(X_minus_Z.copy(), y.copy(), Z.copy(), random_state=seed)
-
-    np.savez(
-        os.path.join(output_dir, f"conddcorr_{n_samples}_{n_features_2}_{idx}.npz"),
-        n_samples=n_samples,
-        n_features_2=n_features_2,
-        y_true=y,
-        cdcorr_pvalue=cdcorr_pvalue,
-        cdcorr_stat=cdcorr_stat,
-    )
+        np.savez(
+            os.path.join(output_dir, f"conddcorr_{n_samples}_{n_features_2}_{idx}.npz"),
+            n_samples=n_samples,
+            n_features_2=n_features_2,
+            y_true=y,
+            cdcorr_pvalue=cdcorr_pvalue,
+            cdcorr_stat=cdcorr_stat,
+        )
+    except Exception as e:
+        print(e)
 
 
 if __name__ == "__main__":
@@ -287,15 +288,15 @@ if __name__ == "__main__":
     # rootdir = sys.argv[5]
 
     # varying-dimensionality, or varying-samples
-    output_dir = 'varying-dimensionality'
-    rootdir = ''
+    output_dir = "varying-dimensionality"
+    rootdir = "~/Desktop/cancer/"
     n_features_2 = 4096
     n_samples = 512
 
     # Call your function with the extracted arguments
     # _run_parallel_comight(idx, n_samples, seed, n_features_2, test_size, sim_type, rootdir, output_dir)
 
-    # 
+    #
     n_repeats = 100
     n_samples_list = [2**x for x in range(6, 11)]
     pows = np.arange(2, 13, dtype=int)
