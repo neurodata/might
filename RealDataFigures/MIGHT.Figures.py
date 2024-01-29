@@ -30,6 +30,7 @@ plots=[]
 
 #dir='/data/kvhdata1/Projects/MIGHT/results/ByStage/StageIV'
 dir='./'
+outdir='./figs'
 mv=pd.read_csv(f'{dir}/122723_ConsolidatedMIGHT.multiview.metrics.csv')
 pt=pd.read_csv(f'{dir}/122723_ConsolidatedMIGHT.singleview.metrics.perTree.csv')
 df=pd.read_csv(f'{dir}/122723_ConsolidatedMIGHT.singleview.metrics.csv')
@@ -212,8 +213,8 @@ three_i.set_xlabel('')
 #plt.tight_layout()
 plots.append((fig,ax))
 
-plt.savefig(f'{dir}/Figure3.png')#, bbox_inches='tight')
-plt.savefig(f'{dir}/Figure3.svg')#, bbox_inches='tight')
+plt.savefig(f'{outdir}/Figure3.png')#, bbox_inches='tight')
+plt.savefig(f'{outdir}/Figure3.svg')#, bbox_inches='tight')
 
 ################################################################################
 
@@ -283,8 +284,8 @@ for count,i in enumerate(['LogisticRegression','SVM','RandomForest']):
                     )
     ax[0,count].set_xlabel('Sample')
 
-plt.savefig(f'{dir}/Figure4.png')
-plt.savefig(f'{dir}/Figure4.svg')
+plt.savefig(f'{outdir}/Figure4.png')
+plt.savefig(f'{outdir}/Figure4.svg')
 
 ################################################################################
 
@@ -395,5 +396,5 @@ for idx,model in enumerate(['LogisticRegression','SVM','RandomForest']):
         h,l = plot_dict[idx][1].get_legend_handles_labels()
         plot_dict[idx][1].legend_.remove()
         plot_dict[idx][0].legend(h,l, ncol=2,title='Stage',loc='upper left')
-    plots[idx].savefig(f'{dir}/FigureS8{LABELS[idx]}.png')
-    plots[idx].savefig(f'{dir}/FigureS8{LABELS[idx]}.svg')
+    plots[idx].savefig(f'{outdir}/FigureS8{LABELS[idx]}.png')
+    plots[idx].savefig(f'{outdir}/FigureS8{LABELS[idx]}.svg')
