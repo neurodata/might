@@ -139,9 +139,11 @@ def _run_parallel_might(
             seed=idx,
         )
     X = np.float32(X)
-    y = np.float32(y)
+    y = np.float32(y).reshape(-1, 1)
 
     for model_name in OOB_MODEL_NAMES.keys():
+        print(f"Evaluating {model_name} on {sim_type} with {n_samples} samples")
+
         # set output directory to save npz files
         output_dir = os.path.join(rootdir, f"output/{model_name}/{sim_type}/")
         os.makedirs(output_dir, exist_ok=True)
@@ -255,7 +257,7 @@ if __name__ == "__main__":
     # rootdir = sys.argv[6]
 
     # TODO: add root dir here
-    rootdir = ""
+    rootdir = "~/Desktop/cancer/test/"
 
     SIM_TYPES = ["trunk", "trunk-overlap"]
     n_samples_list = [2**i for i in range(8, 12)]
