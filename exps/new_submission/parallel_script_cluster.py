@@ -22,6 +22,7 @@ test_size = 0.2
 
 # TODO: depends on how many CPUs are assigned per job
 n_jobs = -1
+n_jobs_trees = 1
 
 
 def _run_parallel_might_permutations(
@@ -196,7 +197,7 @@ NON_OOB_MODEL_NAMES = {
         "n_estimators": 500,
         "random_state": seed,
         "honest_fraction": 0.5,
-        "n_jobs": n_jobs,
+        "n_jobs": n_jobs_trees,
         "bootstrap": False,
         "stratify": True,
         # "max_samples": ,
@@ -209,7 +210,7 @@ OOB_MODEL_NAMES = {
         "n_estimators": n_estimators,
         "random_state": seed,
         "honest_fraction": 0.5,
-        "n_jobs": n_jobs,
+        "n_jobs": n_jobs_trees,
         "bootstrap": True,
         "stratify": True,
         "max_samples": 1.6,
@@ -219,7 +220,7 @@ OOB_MODEL_NAMES = {
         "n_estimators": n_estimators,
         "random_state": seed,
         "honest_fraction": 0.5,
-        "n_jobs": n_jobs,
+        "n_jobs": n_jobs_trees,
         "bootstrap": True,
         "stratify": True,
         "max_samples": 1.6,
@@ -229,7 +230,7 @@ OOB_MODEL_NAMES = {
         "n_estimators": n_estimators,
         "random_state": seed,
         "honest_fraction": 0.25,
-        "n_jobs": n_jobs,
+        "n_jobs": n_jobs_trees,
         "bootstrap": True,
         "stratify": True,
         "max_samples": 1.6,
@@ -239,7 +240,7 @@ OOB_MODEL_NAMES = {
         "n_estimators": n_estimators,
         "random_state": seed,
         "honest_fraction": 0.75,
-        "n_jobs": n_jobs,
+        "n_jobs": n_jobs_trees,
         "bootstrap": True,
         "stratify": True,
         "max_samples": 1.6,
@@ -257,15 +258,17 @@ if __name__ == "__main__":
     # rootdir = sys.argv[6]
 
     # TODO: add root dir here
-    rootdir = "~/Desktop/cancer/test/"
+    rootdir = "./test/"
 
     SIM_TYPES = ["trunk", "trunk-overlap"]
     n_samples_list = [2**i for i in range(8, 12)]
     n_repeats = 100
     n_dims = 4096
 
-    for sim_type in SIM_TYPES:
-        for n_samples in n_samples_list:
-            for idx in range(n_repeats):
-                # Call your function with the extracted arguments
-                _run_parallel_might(idx, n_samples, n_dims, sim_type, rootdir)
+    # Run the parallel job
+    Parallel(n_jobs=n_jobs, backend="loky")(
+        delayed(_run_parallel_might)(idx, n_samples, n_dims, sim_type, rootdir)
+        for idx, n_samples, sim_type in product(
+            range(n_repeats), n_samples_list, SIM_TYPES
+        )
+    )
