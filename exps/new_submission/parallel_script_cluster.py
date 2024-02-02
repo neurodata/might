@@ -118,64 +118,65 @@ def _run_parallel_might(
     output_dir : str
         The directory under ``rootdir`` to store output.
     """
-    # set output directory to save npz files
-    output_dir = os.path.join(rootdir, f"output/{model_name}/{sim_type}/")
-    os.makedirs(output_dir, exist_ok=True)
+    for model_name in OOB_MODEL_NAMES.keys():
+        # set output directory to save npz files
+        output_dir = os.path.join(rootdir, f"output/{model_name}/{sim_type}/")
+        os.makedirs(output_dir, exist_ok=True)
 
-    # now compute the pvalue when shuffling all
-    covariate_index = None
+        # now compute the pvalue when shuffling all
+        covariate_index = None
 
-    # load data
-    if sim_type == "trunk-overlap":
-        X, y, mu, cov = make_trunk_classification(
-            n_samples=n_samples,
-            n_dim=n_dims,
-            m_factor=1,
-            return_params=True,
-            seed=idx,
+        # load data
+        if sim_type == "trunk-overlap":
+            X, y, mu, cov = make_trunk_classification(
+                n_samples=n_samples,
+                n_dim=n_dims,
+                m_factor=1,
+                return_params=True,
+                seed=idx,
+            )
+        elif sim_type == "trunk":
+            X, y, mu, cov = make_trunk_classification(
+                n_samples=n_samples,
+                n_dim=n_dims,
+                return_params=True,
+                seed=idx,
+            )
+        X = np.float32(X)
+        y = np.float32(y)
+
+        forest_params = OOB_MODEL_NAMES[model_name]
+        est = HonestForestClassifier(**forest_params)
+
+        # compute pvalue
+        (
+            observe_test_stat,
+            pvalue,
+            orig_forest_proba,
+            perm_forest_proba,
+        ) = build_coleman_forest(
+            est,
+            X,
+            y,
+            covariate_index=covariate_index,
+            metric="s@s98",
+            n_repeats=1000,
+            seed=None,
+            return_posteriors=True,
         )
-    elif sim_type == "trunk":
-        X, y, mu, cov = make_trunk_classification(
+
+        np.savez(
+            os.path.join(
+                output_dir, f"might_{sim_type}_{n_samples}_{n_features}_{idx}.npz"
+            ),
             n_samples=n_samples,
-            n_dim=n_dims,
-            return_params=True,
-            seed=idx,
+            n_features=n_features,
+            y_true=y,
+            might_pvalue=pvalue,
+            might_stat=observe_test_stat,
+            might_posteriors=orig_forest_proba,
+            might_null_posteriors=perm_forest_proba,
         )
-    X = np.float32(X)
-    y = np.float32(y)
-
-    forest_params = OOB_MODEL_NAMES[model_name]
-    est = HonestForestClassifier(**forest_params)
-
-    # compute pvalue
-    (
-        observe_test_stat,
-        pvalue,
-        orig_forest_proba,
-        perm_forest_proba,
-    ) = build_coleman_forest(
-        est,
-        X,
-        y,
-        covariate_index=covariate_index,
-        metric="s@s98",
-        n_repeats=1000,
-        seed=None,
-        return_posteriors=True,
-    )
-
-    np.savez(
-        os.path.join(
-            output_dir, f"might_{sim_type}_{n_samples}_{n_features}_{idx}.npz"
-        ),
-        n_samples=n_samples,
-        n_features=n_features,
-        y_true=y,
-        might_pvalue=pvalue,
-        might_stat=observe_test_stat,
-        might_posteriors=orig_forest_proba,
-        might_null_posteriors=perm_forest_proba,
-    )
 
 
 NON_OOB_MODEL_NAMES = {
@@ -236,12 +237,23 @@ OOB_MODEL_NAMES = {
 
 if __name__ == "__main__":
     # Extract arguments from terminal input
-    idx = int(sys.argv[1])
-    n_samples = int(sys.argv[2])
-    n_dims = int(sys.argv[3])
-    model_name = sys.argv[4]
-    sim_type = sys.argv[5]
-    rootdir = sys.argv[6]
+    # idx = int(sys.argv[1])
+    # n_samples = int(sys.argv[2])
+    # n_dims = int(sys.argv[3])
+    # model_name = sys.argv[4]
+    # sim_type = sys.argv[5]
+    # rootdir = sys.argv[6]
 
-    # Call your function with the extracted arguments
-    _run_parallel_might(idx, n_samples, n_dims, sim_type, rootdir, output_dir)
+    # TODO: add root dir here
+    rootdir = ""
+
+    SIM_TYPES = ["trunk", "trunk-overlap"]
+    n_samples_list = [2**i for i in range(8, 12)]
+    n_repeats = 100
+    n_dims = 4096
+
+    for sim_type in SIM_TYPES:
+        for n_samples in n_samples_list:
+            for idx in range(n_repeats):
+                # Call your function with the extracted arguments
+                _run_parallel_might(idx, n_samples, n_dims, sim_type, rootdir)
