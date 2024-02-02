@@ -6,7 +6,11 @@ import numpy as np
 from joblib import Parallel, delayed
 from sktree import HonestForestClassifier
 from sktree.datasets import make_trunk_classification
-from sktree.stats import PermutationForestClassifier, build_coleman_forest
+from sktree.stats import (
+    PermutationForestClassifier,
+    build_coleman_forest,
+    PermutationHonestForestClassifier,
+)
 
 seed = 12345
 rng = np.random.default_rng(seed)
@@ -118,6 +122,25 @@ def _run_parallel_might(
     output_dir : str
         The directory under ``rootdir`` to store output.
     """
+    # load data
+    if sim_type == "trunk-overlap":
+        X, y, mu, cov = make_trunk_classification(
+            n_samples=n_samples,
+            n_dim=n_dims,
+            m_factor=1,
+            return_params=True,
+            seed=idx,
+        )
+    elif sim_type == "trunk":
+        X, y, mu, cov = make_trunk_classification(
+            n_samples=n_samples,
+            n_dim=n_dims,
+            return_params=True,
+            seed=idx,
+        )
+    X = np.float32(X)
+    y = np.float32(y)
+
     for model_name in OOB_MODEL_NAMES.keys():
         # set output directory to save npz files
         output_dir = os.path.join(rootdir, f"output/{model_name}/{sim_type}/")
@@ -126,27 +149,13 @@ def _run_parallel_might(
         # now compute the pvalue when shuffling all
         covariate_index = None
 
-        # load data
-        if sim_type == "trunk-overlap":
-            X, y, mu, cov = make_trunk_classification(
-                n_samples=n_samples,
-                n_dim=n_dims,
-                m_factor=1,
-                return_params=True,
-                seed=idx,
-            )
-        elif sim_type == "trunk":
-            X, y, mu, cov = make_trunk_classification(
-                n_samples=n_samples,
-                n_dim=n_dims,
-                return_params=True,
-                seed=idx,
-            )
-        X = np.float32(X)
-        y = np.float32(y)
-
         forest_params = OOB_MODEL_NAMES[model_name]
+        permute_per_tree = forest_params.pop("permute_per_tree", False)
+
         est = HonestForestClassifier(**forest_params)
+        perm_est = PermutationHonestForestClassifier(
+            permute_per_tree=permute_per_tree, **forest_params
+        )
 
         # compute pvalue
         (
@@ -156,6 +165,7 @@ def _run_parallel_might(
             perm_forest_proba,
         ) = build_coleman_forest(
             est,
+            perm_est,
             X,
             y,
             covariate_index=covariate_index,
