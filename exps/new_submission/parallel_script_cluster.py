@@ -172,6 +172,13 @@ def _run_parallel_might_permutations_chenchen(
     X_test = X[indices_test, :]
     y_test = y[indices_test, :]
 
+    indices = indices.reshape(-1, 1)
+    rng = np.random.default_rng(idx)
+    rng.shuffle(indices)
+    X_perm = X.copy()
+    perm_X_cov = X_perm[indices, covariate_index]
+    X_perm[:, covariate_index] = perm_X_cov
+
     permute_per_tree = might_kwargs.pop("permute_per_tree", False)
     est = HonestForestClassifier(**might_kwargs)
 
@@ -182,9 +189,13 @@ def _run_parallel_might_permutations_chenchen(
         y_test, y_score, target_specificity=0.98, pos_label=1
     )
 
-    rng.shuffle(indices_train)
-    perm_X_cov = X_train[indices_train, covariate_index]
-    X_train[:, covariate_index] = perm_X_cov
+    # indices_train = np.arange(X_train.shape[0], dtype=np.intp).reshape(-1, 1)
+    # print(indices_train.shape, X_train.shape, covariate_index.shape)
+    # perm_X_cov = X_train[indices_train, covariate_index]
+    # X_train[:, covariate_index] = perm_X_cov
+    X_train = X_perm[indices_train, :]
+    X_test = X_perm[indices_test, :]
+
     # train a new forest on the permuted data
     # XXX: should there be a train/test split here? even w/ honest forests?
     est.fit(X_train, y_train.ravel())
@@ -366,12 +377,12 @@ if __name__ == "__main__":
     n_dims = 4096
 
     # Run the parallel job
-    Parallel(n_jobs=n_jobs, backend="loky")(
-        delayed(_run_parallel_might)(idx, n_samples, n_dims, sim_type, rootdir)
-        for idx, n_samples, sim_type in product(
-            range(n_repeats), n_samples_list, SIM_TYPES
-        )
-    )
+    # Parallel(n_jobs=n_jobs, backend="loky")(
+    #     delayed(_run_parallel_might)(idx, n_samples, n_dims, sim_type, rootdir)
+    #     for idx, n_samples, sim_type in product(
+    #         range(n_repeats), n_samples_list, SIM_TYPES
+    #     )
+    # )
 
     # re-run parallel MIGHT with permutations
     Parallel(n_jobs=n_jobs, backend="loky")(
