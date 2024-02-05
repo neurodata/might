@@ -97,6 +97,7 @@ def _run_parallel_might_permutations(
         X, y, mu, cov = make_trunk_classification(
             n_samples=n_samples,
             n_dim=n_dims,
+            n_informative=min(256, n_dims),
             m_factor=1,
             return_params=True,
             seed=idx,
@@ -105,6 +106,7 @@ def _run_parallel_might_permutations(
         X, y, mu, cov = make_trunk_classification(
             n_samples=n_samples,
             n_dim=n_dims,
+            n_informative=min(256, n_dims),
             return_params=True,
             seed=idx,
         )
@@ -208,6 +210,7 @@ def _run_parallel_might(
         X, y, mu, cov = make_trunk_classification(
             n_samples=n_samples,
             n_dim=n_dims,
+            n_informative=min(256, n_dims),
             m_factor=1,
             return_params=True,
             seed=idx,
@@ -216,6 +219,7 @@ def _run_parallel_might(
         X, y, mu, cov = make_trunk_classification(
             n_samples=n_samples,
             n_dim=n_dims,
+            n_informative=min(256, n_dims),
             return_params=True,
             seed=idx,
         )
@@ -286,16 +290,16 @@ NON_OOB_MODEL_NAMES = {
 }
 
 OOB_MODEL_NAMES = {
-    "might-honestfraction05-bootstrap-permuteonce": {
-        "n_estimators": n_estimators,
-        "random_state": seed,
-        "honest_fraction": 0.5,
-        "n_jobs": n_jobs_trees,
-        "bootstrap": True,
-        "stratify": True,
-        "max_samples": 1.6,
-        "permute_per_tree": False,
-    },
+    # "might-honestfraction05-bootstrap-permuteonce": {
+    #     "n_estimators": n_estimators,
+    #     "random_state": seed,
+    #     "honest_fraction": 0.5,
+    #     "n_jobs": n_jobs_trees,
+    #     "bootstrap": True,
+    #     "stratify": True,
+    #     "max_samples": 1.6,
+    #     "permute_per_tree": False,
+    # },
     "might-honestfraction05-bootstrap": {
         "n_estimators": n_estimators,
         "random_state": seed,
@@ -330,30 +334,30 @@ OOB_MODEL_NAMES = {
 
 if __name__ == "__main__":
     # Extract arguments from terminal input
-    idx = int(sys.argv[1])
-    n_samples = int(sys.argv[2])
-    n_dims = int(sys.argv[3])
-    model_name = sys.argv[4]
-    sim_type = sys.argv[5]
-    rootdir = sys.argv[6]
+    # idx = int(sys.argv[1])
+    # n_samples = int(sys.argv[2])
+    # n_dims = int(sys.argv[3])
+    # sim_type = sys.argv[4]
+    # rootdir = sys.argv[5]
 
-    _run_parallel_might_permutations(idx, n_samples, n_dims, sim_type, rootdir)
+    # _run_parallel_might_permutations(idx, n_samples, n_dims, sim_type, rootdir)
 
     # TODO: add root dir here
-    # rootdir = "./test/"
+    rootdir = "./test/"
 
-    # SIM_TYPES = ["trunk", "trunk-overlap"]
-    # n_samples_list = [2**i for i in range(8, 12)]
-    # n_repeats = 100
-    # n_dims = 4096
+    SIM_TYPES = ["trunk", "trunk-overlap"]
+    [256, 512, 1024, 2048]
+    n_samples_list = [2**i for i in range(8, 12)]
+    n_repeats = 100
+    n_dims = 4096
 
-    # # Run the parallel job
-    # Parallel(n_jobs=n_jobs, backend="loky")(
-    #     delayed(_run_parallel_might)(idx, n_samples, n_dims, sim_type, rootdir)
-    #     for idx, n_samples, sim_type in product(
-    #         range(n_repeats), n_samples_list, SIM_TYPES
-    #     )
-    # )
+    # Run the parallel job
+    Parallel(n_jobs=n_jobs, backend="loky")(
+        delayed(_run_parallel_might)(idx, n_samples, n_dims, sim_type, rootdir)
+        for idx, n_samples, sim_type in product(
+            range(n_repeats), n_samples_list, SIM_TYPES
+        )
+    )
 
     # rootdir = "./test/"
 
