@@ -1,18 +1,17 @@
-import sys
 import os
+import sys
 from itertools import product
+
 import numpy as np
-from joblib import delayed, Parallel
 from hyppo.conditional import ConditionalDcorr
-from sklearn.model_selection import StratifiedShuffleSplit
-from sktree.stats import (
-    FeatureImportanceForestClassifier,
-)
-from sktree import HonestForestClassifier
-from sktree.tree import MultiViewDecisionTreeClassifier
+from joblib import Parallel, delayed
 from numpy import log
 from scipy.special import digamma
+from sklearn.model_selection import StratifiedShuffleSplit
 from sklearn.neighbors import BallTree, KDTree
+from sktree import HonestForestClassifier
+from sktree.stats import FeatureImportanceForestClassifier
+from sktree.tree import MultiViewDecisionTreeClassifier
 
 
 def add_noise(x, intens=1e-10):

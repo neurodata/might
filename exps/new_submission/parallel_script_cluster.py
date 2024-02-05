@@ -4,15 +4,13 @@ from itertools import product
 
 import numpy as np
 from joblib import Parallel, delayed
-from sklearn.model_selection import train_test_split
 from sklearn.metrics import roc_curve
+from sklearn.model_selection import train_test_split
 from sktree import HonestForestClassifier
 from sktree.datasets import make_trunk_classification
-from sktree.stats import (
-    PermutationForestClassifier,
-    build_coleman_forest,
-    PermutationHonestForestClassifier,
-)
+from sktree.stats import (PermutationForestClassifier,
+                          PermutationHonestForestClassifier,
+                          build_coleman_forest)
 
 seed = 12345
 rng = np.random.default_rng(seed)
@@ -361,7 +359,9 @@ if __name__ == "__main__":
 
     # re-run parallel MIGHT with permutations
     Parallel(n_jobs=n_jobs, backend="loky")(
-        delayed(_run_parallel_might_permutations)(idx, n_samples, n_dims, sim_type, rootdir)
+        delayed(_run_parallel_might_permutations)(
+            idx, n_samples, n_dims, sim_type, rootdir
+        )
         for idx, n_samples, sim_type in product(
             range(n_repeats), n_samples_list, SIM_TYPES
         )
