@@ -27,7 +27,7 @@ n_jobs_trees = 1
 n_repeats = 1000
 
 
-might_kwargs =  {
+might_kwargs = {
     "n_estimators": n_estimators,
     "random_state": None,
     "honest_fraction": 0.5,
@@ -39,7 +39,7 @@ might_kwargs =  {
 }
 
 COLEMAN_MODELS = {
-    'permute_once': {
+    "permute_once": {
         "n_estimators": n_estimators,
         "random_state": None,
         "honest_fraction": 0.5,
@@ -49,7 +49,7 @@ COLEMAN_MODELS = {
         "max_samples": 1.6,
         "permute_per_tree": False,
     },
-    'permute_per_tree': {
+    "permute_per_tree": {
         "n_estimators": n_estimators,
         "random_state": None,
         "honest_fraction": 0.5,
@@ -58,8 +58,9 @@ COLEMAN_MODELS = {
         "stratify": True,
         "max_samples": 1.6,
         "permute_per_tree": True,
-    }
+    },
 }
+
 
 def sensitivity_at_specificity(y_true, y_score, target_specificity=0.98, pos_label=1):
     n_trees, n_samples, n_classes = y_score.shape
@@ -128,7 +129,7 @@ def _run_parallel_might_permutations_chenchen(
     rootdir : str
         The root directory where 'data/' and 'output/' will be.
     """
-    model_name = 'permutation-test'
+    model_name = "permutation-test"
 
     # load data
     if sim_type == "trunk-overlap":
@@ -164,14 +165,8 @@ def _run_parallel_might_permutations_chenchen(
 
     # Get drawn indices along both sample and feature axes
     indices = np.arange(n_samples, dtype=int)
-    indices_train, indices_test = train_test_split(
-        indices, test_size=test_size, shuffle=True, random_state=seed
-    )
-    X_train = X[indices_train, :]
-    y_train = y[indices_train, :]
-    X_test = X[indices_test, :]
-    y_test = y[indices_test, :]
 
+    # Create a shuffled version of the dataset
     indices = indices.reshape(-1, 1)
     rng = np.random.default_rng(idx)
     rng.shuffle(indices)
@@ -183,27 +178,19 @@ def _run_parallel_might_permutations_chenchen(
     est = HonestForestClassifier(**might_kwargs)
 
     # compute test statistic
-    est.fit(X_train, y_train.ravel())
-    y_score = est.predict_proba_per_tree(X_test)
+    est.fit(X, y.ravel())
+    y_score = est.predict_proba_per_tree(X, est.oob_samples_)
     observe_test_stat = sensitivity_at_specificity(
-        y_test, y_score, target_specificity=0.98, pos_label=1
+        y, y_score, target_specificity=0.98, pos_label=1
     )
 
-    # indices_train = np.arange(X_train.shape[0], dtype=np.intp).reshape(-1, 1)
-    # print(indices_train.shape, X_train.shape, covariate_index.shape)
-    # perm_X_cov = X_train[indices_train, covariate_index]
-    # X_train[:, covariate_index] = perm_X_cov
-    X_train = X_perm[indices_train, :]
-    X_test = X_perm[indices_test, :]
-
     # train a new forest on the permuted data
-    # XXX: should there be a train/test split here? even w/ honest forests?
-    est.fit(X_train, y_train.ravel())
-    y_score = est.predict_proba_per_tree(X_test)
+    est.fit(X_perm, y.ravel())
+    y_score = est.predict_proba_per_tree(X_perm, est.oob_samples_)
 
     # compute two instances of the metric from the sampled trees
     metric_val = sensitivity_at_specificity(
-        y_test, y_score, target_specificity=0.98, pos_label=1
+        y, y_score, target_specificity=0.98, pos_label=1
     )
 
     np.savez(
@@ -276,7 +263,7 @@ def _run_parallel_might(
 
         # now compute the pvalue when shuffling all
         covariate_index = None
-        
+
         permute_per_tree = might_kwargs.pop("permute_per_tree", False)
 
         est = HonestForestClassifier(**might_kwargs)

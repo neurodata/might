@@ -1,5 +1,6 @@
 import contextlib
 from collections import defaultdict
+
 import joblib
 import matplotlib.pyplot as plt
 import numpy as np
@@ -79,9 +80,9 @@ for seed in range(n_repeats):
         _, posterior_arr = build_hyppo_oob_forest(est, X, y, verbose=False)
         sas98 = sensitivity_at_specificity(y, posterior_arr, target_specificity=0.98)
         sas98s.append(sas98)
-        results['sas98'].append(sas98)
-        results['n_estimators'].append(n_estimators)
-        results['seed'].append(seed)
+        results["sas98"].append(sas98)
+        results["n_estimators"].append(n_estimators)
+        results["seed"].append(seed)
 
 # np.save("./n_trees_exp.npy", sas98)
 np.savez("./n_trees_exp.npz", results=results)
