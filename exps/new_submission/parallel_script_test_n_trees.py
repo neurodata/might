@@ -14,7 +14,28 @@ N_ESTIMATORS = list(range(100, 4001, 100))
 REPS = 5
 
 
-def sensitivity_at_specificity(y_true, y_score, target_specificity=0.98, pos_label=1):
+
+def sensitivity_at_specificity(y_true: ArrayLike, y_score: ArrayLike, target_specificity: float=0.98, pos_label: int=1):
+    """Compute sensitivity at a specific specificity level.
+
+    This is a metric for binary classification.
+
+    Parameters
+    ----------
+    y_true : ArrayLike of shape (n_samples,)
+        The true labels.
+    y_score : ArrayLike of shape (n_estimators, n_samples, n_classes)
+        The predicted probabilities for each estimator.
+    target_specificity : float, optional
+        The required specificity, by default 0.98.
+    pos_label : int, optional
+        Positive label in ``y_true``, by default 1.
+
+    Returns
+    -------
+    sensitivity : float
+        The sensitivity at specified target_specificity.
+    """
     n_trees, n_samples, n_classes = y_score.shape
 
     # Compute nan-averaged y_score along the trees axis
@@ -38,10 +59,6 @@ def sensitivity_at_specificity(y_true, y_score, target_specificity=0.98, pos_lab
     index = np.argmax(fpr >= (1 - target_specificity))
     threshold_at_specificity = thresholds[index]
 
-    # Compute sensitivity at the chosen specificity
-    # sensitivity = tpr[index]
-    # return sensitivity
-
     # Use the threshold to classify predictions
     y_pred_at_specificity = (y_score_binary >= threshold_at_specificity).astype(int)
 
@@ -49,6 +66,7 @@ def sensitivity_at_specificity(y_true, y_score, target_specificity=0.98, pos_lab
     sensitivity = np.sum((y_pred_at_specificity == 1) & (y_true == 1)) / np.sum(
         y_true == 1
     )
+
     return sensitivity
 
 
@@ -56,8 +74,10 @@ sas98s = []
 n_samples = 2048
 n_dim = 4096
 n_informative = 256
-n_repeats = 2
+n_repeats = 100
 results = defaultdict(list)
+
+
 
 for seed in range(n_repeats):
     X, y = make_trunk_classification(
@@ -66,7 +86,7 @@ for seed in range(n_repeats):
         n_informative=n_informative,
         seed=seed,
     )
-    for n_estimators in N_ESTIMATORS[0:2]:
+    for n_estimators in N_ESTIMATORS:
         est = HonestForestClassifier(
             n_estimators=n_estimators,
             random_state=seed,
@@ -85,7 +105,7 @@ for seed in range(n_repeats):
         results["seed"].append(seed)
 
 # np.save("./n_trees_exp.npy", sas98)
-np.savez("./n_trees_exp.npz", results=results)
+np.savez("./n_trees_exp.npz", sas98=results['sas98'], n_estimators=results['n_estimators'], seed=results['seed'])
 
 # fig, ax = plt.subplots()
 # ax.hist(sas98s)
