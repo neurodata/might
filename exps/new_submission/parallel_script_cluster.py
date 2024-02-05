@@ -321,12 +321,12 @@ if __name__ == "__main__":
     n_dims = 4096
 
     # Run the parallel job
-    # Parallel(n_jobs=n_jobs, backend="loky")(
-    #     delayed(_run_parallel_might)(idx, n_samples, n_dims, sim_type, rootdir)
-    #     for idx, n_samples, sim_type in product(
-    #         range(n_repeats), n_samples_list, SIM_TYPES
-    #     )
-    # )
+    Parallel(n_jobs=n_jobs, backend="loky")(
+        delayed(_run_parallel_might)(idx, n_samples, n_dims, sim_type, rootdir)
+        for idx, n_samples, sim_type in product(
+            range(n_repeats), n_samples_list, SIM_TYPES
+        )
+    )
 
     # re-run parallel MIGHT with permutations
     Parallel(n_jobs=n_jobs, backend="loky")(
