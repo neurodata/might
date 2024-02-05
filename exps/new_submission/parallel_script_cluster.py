@@ -27,6 +27,40 @@ n_jobs_trees = 1
 n_repeats = 1000
 
 
+might_kwargs =  {
+    "n_estimators": n_estimators,
+    "random_state": None,
+    "honest_fraction": 0.5,
+    "n_jobs": n_jobs_trees,
+    "bootstrap": True,
+    "stratify": True,
+    "max_samples": 1.6,
+    "permute_per_tree": False,
+}
+
+COLEMAN_MODELS = {
+    'permute_once': {
+        "n_estimators": n_estimators,
+        "random_state": None,
+        "honest_fraction": 0.5,
+        "n_jobs": n_jobs_trees,
+        "bootstrap": True,
+        "stratify": True,
+        "max_samples": 1.6,
+        "permute_per_tree": False,
+    },
+    'permute_per_tree': {
+        "n_estimators": n_estimators,
+        "random_state": None,
+        "honest_fraction": 0.5,
+        "n_jobs": n_jobs_trees,
+        "bootstrap": True,
+        "stratify": True,
+        "max_samples": 1.6,
+        "permute_per_tree": True,
+    }
+}
+
 def sensitivity_at_specificity(y_true, y_score, target_specificity=0.98, pos_label=1):
     n_trees, n_samples, n_classes = y_score.shape
 
@@ -66,14 +100,18 @@ def sensitivity_at_specificity(y_true, y_score, target_specificity=0.98, pos_lab
     return sensitivity
 
 
-def _run_parallel_might_permutations(
+def _run_parallel_might_permutations_chenchen(
     idx,
     n_samples,
     n_features,
     sim_type,
     rootdir,
 ):
-    """Run parallel job on pre-generated data.
+    """Run parallel MIGHT on permuted and original pre-generated data.
+
+    Generates two test statistics:
+    - one on the observed data
+    - one on the permuted data
 
     Parameters
     ----------
@@ -90,6 +128,8 @@ def _run_parallel_might_permutations(
     rootdir : str
         The root directory where 'data/' and 'output/' will be.
     """
+    model_name = 'permutation-test'
+
     # load data
     if sim_type == "trunk-overlap":
         X, y, mu, cov = make_trunk_classification(
@@ -111,72 +151,60 @@ def _run_parallel_might_permutations(
     X = np.float32(X)
     y = np.float32(y).reshape(-1, 1)
 
-    for model_name in NON_OOB_MODEL_NAMES.keys():
-        print(
-            f"Evaluating {model_name} on {sim_type} with {n_samples} samples and {n_features} features"
-        )
+    print(
+        f"Evaluating {model_name} on {sim_type} with {n_samples} samples and {n_features} features"
+    )
 
-        # set output directory to save npz files
-        output_dir = os.path.join(rootdir, f"output/{model_name}/{sim_type}/")
-        os.makedirs(output_dir, exist_ok=True)
+    # set output directory to save npz files
+    output_dir = os.path.join(rootdir, f"output/{model_name}/{sim_type}/")
+    os.makedirs(output_dir, exist_ok=True)
 
-        # now compute the pvalue when shuffling all
-        covariate_index = np.arange(n_features, dtype=int)
+    # now compute the pvalue when shuffling all
+    covariate_index = np.arange(n_features, dtype=int)
 
-        # Get drawn indices along both sample and feature axes
-        indices = np.arange(n_samples, dtype=int)
-        indices_train, indices_test = train_test_split(
-            indices, test_size=test_size, shuffle=True, random_state=seed
-        )
-        X_train = X[indices_train, :]
-        y_train = y[indices_train, :]
-        X_test = X[indices_test, :]
-        y_test = y[indices_test, :]
+    # Get drawn indices along both sample and feature axes
+    indices = np.arange(n_samples, dtype=int)
+    indices_train, indices_test = train_test_split(
+        indices, test_size=test_size, shuffle=True, random_state=seed
+    )
+    X_train = X[indices_train, :]
+    y_train = y[indices_train, :]
+    X_test = X[indices_test, :]
+    y_test = y[indices_test, :]
 
-        forest_params = NON_OOB_MODEL_NAMES[model_name]
-        permute_per_tree = forest_params.pop("permute_per_tree", False)
-        est = HonestForestClassifier(**forest_params)
+    permute_per_tree = might_kwargs.pop("permute_per_tree", False)
+    est = HonestForestClassifier(**might_kwargs)
 
-        # compute test statistic
-        est.fit(X_train, y_train.ravel())
-        y_score = est.predict_proba_per_tree(X_test)
-        observe_test_stat = sensitivity_at_specificity(
-            y_test, y_score, target_specificity=0.98, pos_label=1
-        )
+    # compute test statistic
+    est.fit(X_train, y_train.ravel())
+    y_score = est.predict_proba_per_tree(X_test)
+    observe_test_stat = sensitivity_at_specificity(
+        y_test, y_score, target_specificity=0.98, pos_label=1
+    )
 
-        # compute null distribution
-        null_metrics = np.zeros((n_repeats,))
-        indices_train = np.arange(X_train.shape[0], dtype=int).reshape(-1, 1)
-        for idx in range(n_repeats):
-            est = HonestForestClassifier(**forest_params)
+    rng.shuffle(indices_train)
+    perm_X_cov = X_train[indices_train, covariate_index]
+    X_train[:, covariate_index] = perm_X_cov
+    # train a new forest on the permuted data
+    # XXX: should there be a train/test split here? even w/ honest forests?
+    est.fit(X_train, y_train.ravel())
+    y_score = est.predict_proba_per_tree(X_test)
 
-            rng.shuffle(indices_train)
-            perm_X_cov = X_train[indices_train, covariate_index]
-            X_train[:, covariate_index] = perm_X_cov
+    # compute two instances of the metric from the sampled trees
+    metric_val = sensitivity_at_specificity(
+        y_test, y_score, target_specificity=0.98, pos_label=1
+    )
 
-            # train a new forest on the permuted data
-            # XXX: should there be a train/test split here? even w/ honest forests?
-            est.fit(X_train, y_train.ravel())
-            y_score = est.predict_proba_per_tree(X_test)
-
-            # compute two instances of the metric from the sampled trees
-            metric_val = sensitivity_at_specificity(
-                y_test, y_score, target_specificity=0.98, pos_label=1
-            )
-
-            null_metrics[idx] = metric_val
-
-        pvalue = (1 + (null_metrics <= observe_test_stat).sum()) / (1 + n_repeats)
-        np.savez(
-            os.path.join(
-                output_dir, f"might_{sim_type}_{n_samples}_{n_features}_{idx}.npz"
-            ),
-            n_samples=n_samples,
-            n_features=n_features,
-            y_true=y,
-            might_pvalue=pvalue,
-            might_stat=observe_test_stat,
-        )
+    np.savez(
+        os.path.join(
+            output_dir, f"might_{sim_type}_{n_samples}_{n_features}_{idx}.npz"
+        ),
+        n_samples=n_samples,
+        n_features=n_features,
+        y_true=y,
+        might_permute_stat=metric_val,
+        might_stat=observe_test_stat,
+    )
 
 
 def _run_parallel_might(
@@ -187,6 +215,8 @@ def _run_parallel_might(
     rootdir,
 ):
     """Run parallel job on pre-generated data.
+
+    Runs two forests and generates a PValue using the Coleman method and its variations.
 
     Parameters
     ----------
@@ -226,7 +256,7 @@ def _run_parallel_might(
     X = np.float32(X)
     y = np.float32(y).reshape(-1, 1)
 
-    for model_name in OOB_MODEL_NAMES.keys():
+    for model_name in COLEMAN_MODELS:
         print(f"Evaluating {model_name} on {sim_type} with {n_samples} samples")
 
         # set output directory to save npz files
@@ -235,13 +265,12 @@ def _run_parallel_might(
 
         # now compute the pvalue when shuffling all
         covariate_index = None
+        
+        permute_per_tree = might_kwargs.pop("permute_per_tree", False)
 
-        forest_params = OOB_MODEL_NAMES[model_name]
-        permute_per_tree = forest_params.pop("permute_per_tree", False)
-
-        est = HonestForestClassifier(**forest_params)
+        est = HonestForestClassifier(**might_kwargs)
         perm_est = PermutationHonestForestClassifier(
-            permute_per_tree=permute_per_tree, **forest_params
+            permute_per_tree=permute_per_tree, **might_kwargs
         )
 
         # compute pvalue
@@ -276,61 +305,48 @@ def _run_parallel_might(
         )
 
 
-NON_OOB_MODEL_NAMES = {
-    "might-honestfraction05-og": {
-        "n_estimators": 500,
-        "random_state": None,
-        "honest_fraction": 0.5,
-        "n_jobs": n_jobs_trees,
-        "bootstrap": False,
-        "stratify": True,
-        # "max_samples": ,
-        "permute_per_tree": False,
-    },
-}
-
-OOB_MODEL_NAMES = {
-    "might-honestfraction05-bootstrap-permuteonce": {
-        "n_estimators": n_estimators,
-        "random_state": None,
-        "honest_fraction": 0.5,
-        "n_jobs": n_jobs_trees,
-        "bootstrap": True,
-        "stratify": True,
-        "max_samples": 1.6,
-        "permute_per_tree": False,
-    },
-    "might-honestfraction05-bootstrap": {
-        "n_estimators": n_estimators,
-        "random_state": None,
-        "honest_fraction": 0.5,
-        "n_jobs": n_jobs_trees,
-        "bootstrap": True,
-        "stratify": True,
-        "max_samples": 1.6,
-        "permute_per_tree": True,
-    },
-    "might-honestfraction025-bootstrap": {
-        "n_estimators": n_estimators,
-        "random_state": None,
-        "honest_fraction": 0.25,
-        "n_jobs": n_jobs_trees,
-        "bootstrap": True,
-        "stratify": True,
-        "max_samples": 1.6,
-        "permute_per_tree": True,
-    },
-    "might-honestfraction075-bootstrap": {
-        "n_estimators": n_estimators,
-        "random_state": None,
-        "honest_fraction": 0.75,
-        "n_jobs": n_jobs_trees,
-        "bootstrap": True,
-        "stratify": True,
-        "max_samples": 1.6,
-        "permute_per_tree": True,
-    },
-}
+# OOB_MODEL_NAMES = {
+#     "might_kwargs": {
+#         "n_estimators": n_estimators,
+#         "random_state": None,
+#         "honest_fraction": 0.5,
+#         "n_jobs": n_jobs_trees,
+#         "bootstrap": True,
+#         "stratify": True,
+#         "max_samples": 1.6,
+#         "permute_per_tree": False,
+#     },
+#     "might-honestfraction05-bootstrap": {
+#         "n_estimators": n_estimators,
+#         "random_state": None,
+#         "honest_fraction": 0.5,
+#         "n_jobs": n_jobs_trees,
+#         "bootstrap": True,
+#         "stratify": True,
+#         "max_samples": 1.6,
+#         "permute_per_tree": True,
+#     },
+#     "might-honestfraction025-bootstrap": {
+#         "n_estimators": n_estimators,
+#         "random_state": None,
+#         "honest_fraction": 0.25,
+#         "n_jobs": n_jobs_trees,
+#         "bootstrap": True,
+#         "stratify": True,
+#         "max_samples": 1.6,
+#         "permute_per_tree": True,
+#     },
+#     "might-honestfraction075-bootstrap": {
+#         "n_estimators": n_estimators,
+#         "random_state": None,
+#         "honest_fraction": 0.75,
+#         "n_jobs": n_jobs_trees,
+#         "bootstrap": True,
+#         "stratify": True,
+#         "max_samples": 1.6,
+#         "permute_per_tree": True,
+#     },
+# }
 
 if __name__ == "__main__":
     # Extract arguments from terminal input
@@ -359,7 +375,7 @@ if __name__ == "__main__":
 
     # re-run parallel MIGHT with permutations
     Parallel(n_jobs=n_jobs, backend="loky")(
-        delayed(_run_parallel_might_permutations)(
+        delayed(_run_parallel_might_permutations_chenchen)(
             idx, n_samples, n_dims, sim_type, rootdir
         )
         for idx, n_samples, sim_type in product(
