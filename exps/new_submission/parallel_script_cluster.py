@@ -150,6 +150,8 @@ def _run_parallel_might_permutations(
         null_metrics = np.zeros((n_repeats,))
         indices_train = np.arange(X_train.shape[0], dtype=int).reshape(-1, 1)
         for idx in range(n_repeats):
+            est = HonestForestClassifier(**forest_params)
+
             rng.shuffle(indices_train)
             perm_X_cov = X_train[indices_train, covariate_index]
             X_train[:, covariate_index] = perm_X_cov
@@ -279,7 +281,7 @@ def _run_parallel_might(
 NON_OOB_MODEL_NAMES = {
     "might-honestfraction05-og": {
         "n_estimators": 500,
-        "random_state": seed,
+        "random_state": None,
         "honest_fraction": 0.5,
         "n_jobs": n_jobs_trees,
         "bootstrap": False,
@@ -290,19 +292,19 @@ NON_OOB_MODEL_NAMES = {
 }
 
 OOB_MODEL_NAMES = {
-    # "might-honestfraction05-bootstrap-permuteonce": {
-    #     "n_estimators": n_estimators,
-    #     "random_state": seed,
-    #     "honest_fraction": 0.5,
-    #     "n_jobs": n_jobs_trees,
-    #     "bootstrap": True,
-    #     "stratify": True,
-    #     "max_samples": 1.6,
-    #     "permute_per_tree": False,
-    # },
+    "might-honestfraction05-bootstrap-permuteonce": {
+        "n_estimators": n_estimators,
+        "random_state": None,
+        "honest_fraction": 0.5,
+        "n_jobs": n_jobs_trees,
+        "bootstrap": True,
+        "stratify": True,
+        "max_samples": 1.6,
+        "permute_per_tree": False,
+    },
     "might-honestfraction05-bootstrap": {
         "n_estimators": n_estimators,
-        "random_state": seed,
+        "random_state": None,
         "honest_fraction": 0.5,
         "n_jobs": n_jobs_trees,
         "bootstrap": True,
@@ -312,7 +314,7 @@ OOB_MODEL_NAMES = {
     },
     "might-honestfraction025-bootstrap": {
         "n_estimators": n_estimators,
-        "random_state": seed,
+        "random_state": None,
         "honest_fraction": 0.25,
         "n_jobs": n_jobs_trees,
         "bootstrap": True,
@@ -322,7 +324,7 @@ OOB_MODEL_NAMES = {
     },
     "might-honestfraction075-bootstrap": {
         "n_estimators": n_estimators,
-        "random_state": seed,
+        "random_state": None,
         "honest_fraction": 0.75,
         "n_jobs": n_jobs_trees,
         "bootstrap": True,
@@ -340,8 +342,6 @@ if __name__ == "__main__":
     # sim_type = sys.argv[4]
     # rootdir = sys.argv[5]
 
-    # _run_parallel_might_permutations(idx, n_samples, n_dims, sim_type, rootdir)
-
     # TODO: add root dir here
     rootdir = "./test/"
 
@@ -354,6 +354,14 @@ if __name__ == "__main__":
     # Run the parallel job
     Parallel(n_jobs=n_jobs, backend="loky")(
         delayed(_run_parallel_might)(idx, n_samples, n_dims, sim_type, rootdir)
+        for idx, n_samples, sim_type in product(
+            range(n_repeats), n_samples_list, SIM_TYPES
+        )
+    )
+
+    # re-run parallel MIGHT with permutations
+    Parallel(n_jobs=n_jobs, backend="loky")(
+        delayed(_run_parallel_might_permutations)(idx, n_samples, n_dims, sim_type, rootdir)
         for idx, n_samples, sim_type in product(
             range(n_repeats), n_samples_list, SIM_TYPES
         )
