@@ -303,49 +303,6 @@ def _run_parallel_might(
         )
 
 
-# OOB_MODEL_NAMES = {
-#     "might_kwargs": {
-#         "n_estimators": n_estimators,
-#         "random_state": None,
-#         "honest_fraction": 0.5,
-#         "n_jobs": n_jobs_trees,
-#         "bootstrap": True,
-#         "stratify": True,
-#         "max_samples": 1.6,
-#         "permute_per_tree": False,
-#     },
-#     "might-honestfraction05-bootstrap": {
-#         "n_estimators": n_estimators,
-#         "random_state": None,
-#         "honest_fraction": 0.5,
-#         "n_jobs": n_jobs_trees,
-#         "bootstrap": True,
-#         "stratify": True,
-#         "max_samples": 1.6,
-#         "permute_per_tree": True,
-#     },
-#     "might-honestfraction025-bootstrap": {
-#         "n_estimators": n_estimators,
-#         "random_state": None,
-#         "honest_fraction": 0.25,
-#         "n_jobs": n_jobs_trees,
-#         "bootstrap": True,
-#         "stratify": True,
-#         "max_samples": 1.6,
-#         "permute_per_tree": True,
-#     },
-#     "might-honestfraction075-bootstrap": {
-#         "n_estimators": n_estimators,
-#         "random_state": None,
-#         "honest_fraction": 0.75,
-#         "n_jobs": n_jobs_trees,
-#         "bootstrap": True,
-#         "stratify": True,
-#         "max_samples": 1.6,
-#         "permute_per_tree": True,
-#     },
-# }
-
 if __name__ == "__main__":
     # Extract arguments from terminal input
     # idx = int(sys.argv[1])
