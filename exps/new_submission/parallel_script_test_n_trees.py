@@ -1,6 +1,6 @@
 import contextlib
 from collections import defaultdict
-
+from pathlib import Path
 import joblib
 import matplotlib.pyplot as plt
 import numpy as np
@@ -70,42 +70,82 @@ def sensitivity_at_specificity(y_true: ArrayLike, y_score: ArrayLike, target_spe
     return sensitivity
 
 
-sas98s = []
-n_samples = 2048
-n_dim = 4096
-n_informative = 256
-n_repeats = 100
-results = defaultdict(list)
-
-
-
-for seed in range(n_repeats):
+# Define a function to encapsulate the inner loop logic
+def run_experiment(seed, n_estimators, output_dir, overwrite=False):
+    fname = output_dir / f'{seed}_{n_estimators}.npz'
+    if fname.exists() and not overwrite:
+        return
+    
     X, y = make_trunk_classification(
         n_samples=2048,
         n_dim=n_dim,
         n_informative=n_informative,
         seed=seed,
     )
-    for n_estimators in N_ESTIMATORS:
-        est = HonestForestClassifier(
-            n_estimators=n_estimators,
-            random_state=seed,
-            honest_fraction=0.5,
-            n_jobs=-1,
-            bootstrap=True,
-            stratify=True,
-            max_samples=1.6,
-            # permute_per_tree=True,
-        )
-        _, posterior_arr = build_hyppo_oob_forest(est, X, y, verbose=False)
-        sas98 = sensitivity_at_specificity(y, posterior_arr, target_specificity=0.98)
-        sas98s.append(sas98)
-        results["sas98"].append(sas98)
-        results["n_estimators"].append(n_estimators)
-        results["seed"].append(seed)
+    est = HonestForestClassifier(
+        n_estimators=n_estimators,
+        random_state=seed,
+        honest_fraction=0.5,
+        n_jobs=1,
+        bootstrap=True,
+        stratify=True,
+        max_samples=1.6,
+        # permute_per_tree=True,
+    )
+    _, posterior_arr = build_hyppo_oob_forest(est, X, y, verbose=False)
+    sas98 = sensitivity_at_specificity(y, posterior_arr, target_specificity=0.98)
+
+    np.savez(fname, sas98=sas98, n_estimators=n_estimators, seed=seed)
+    return {'sas98': sas98, 'n_estimators': n_estimators, 'seed': seed}
+
+
+sas98s = []
+n_samples = 2048
+n_dim = 4096
+n_jobs = -1
+n_informative = 256
+n_repeats = 100
+results = defaultdict(list)
+
+# TODO: change this
+output_dir = Path('./test/')
+output_dir.mkdir(exist_ok=True, parents=True)
+
+# Execute the loop in parallel
+output = Parallel(n_jobs=n_jobs, backend='loky')(
+    delayed(run_experiment)(seed, n_estimators, output_dir)
+    for seed in range(n_repeats)
+    for n_estimators in N_ESTIMATORS
+)
+
+
+# for seed in range(n_repeats):
+#     X, y = make_trunk_classification(
+#         n_samples=2048,
+#         n_dim=n_dim,
+#         n_informative=n_informative,
+#         seed=seed,
+#     )
+#     for n_estimators in N_ESTIMATORS:
+#         est = HonestForestClassifier(
+#             n_estimators=n_estimators,
+#             random_state=seed,
+#             honest_fraction=0.5,
+#             n_jobs=-1,
+#             bootstrap=True,
+#             stratify=True,
+#             max_samples=1.6,
+#             # permute_per_tree=True,
+#         )
+#         _, posterior_arr = build_hyppo_oob_forest(est, X, y, verbose=False)
+#         sas98 = sensitivity_at_specificity(y, posterior_arr, target_specificity=0.98)
+#         sas98s.append(sas98)
+#         results["sas98"].append(sas98)
+#         results["n_estimators"].append(n_estimators)
+#         results["seed"].append(seed)
 
 # np.save("./n_trees_exp.npy", sas98)
-np.savez("./n_trees_exp.npz", sas98=results['sas98'], n_estimators=results['n_estimators'], seed=results['seed'])
+# np.savez("./n_trees_exp.npz", sas98=results['sas98'], n_estimators=results['n_estimators'], seed=results['seed'])
 
 # fig, ax = plt.subplots()
 # ax.hist(sas98s)

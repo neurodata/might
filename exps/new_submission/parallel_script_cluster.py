@@ -211,6 +211,7 @@ def _run_parallel_might(
     n_features,
     sim_type,
     rootdir,
+    overwrite=False
 ):
     """Run parallel job on pre-generated data.
 
@@ -260,7 +261,12 @@ def _run_parallel_might(
         # set output directory to save npz files
         output_dir = os.path.join(rootdir, f"output/{model_name}/{sim_type}/")
         os.makedirs(output_dir, exist_ok=True)
-
+        output_fname = os.path.join(
+                output_dir, f"might_{sim_type}_{n_samples}_{n_features}_{idx}.npz"
+            )
+        if not overwrite and os.path.exists(output_fname):
+            continue
+        
         # now compute the pvalue when shuffling all
         covariate_index = None
 
@@ -290,9 +296,7 @@ def _run_parallel_might(
         )
 
         np.savez(
-            os.path.join(
-                output_dir, f"might_{sim_type}_{n_samples}_{n_features}_{idx}.npz"
-            ),
+            output_fname,
             n_samples=n_samples,
             n_features=n_features,
             y_true=y,
@@ -319,6 +323,7 @@ if __name__ == "__main__":
     n_samples_list = [2**i for i in range(8, 12)]
     n_repeats = 100
     n_dims = 4096
+    overwrite = False
 
     # Run the parallel job
     Parallel(n_jobs=n_jobs, backend="loky")(
