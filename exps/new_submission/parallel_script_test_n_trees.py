@@ -9,6 +9,7 @@ from sklearn.metrics import roc_curve
 from sktree.datasets import make_trunk_classification
 from sktree.ensemble import HonestForestClassifier
 from sktree.stats import build_hyppo_oob_forest
+from numpy.typing import ArrayLike
 
 N_ESTIMATORS = list(range(100, 4001, 100))
 REPS = 5
