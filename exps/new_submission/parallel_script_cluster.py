@@ -8,9 +8,11 @@ from sklearn.metrics import roc_curve
 from sklearn.model_selection import train_test_split
 from sktree import HonestForestClassifier
 from sktree.datasets import make_trunk_classification
-from sktree.stats import (PermutationForestClassifier,
-                          PermutationHonestForestClassifier,
-                          build_coleman_forest)
+from sktree.stats import (
+    PermutationForestClassifier,
+    PermutationHonestForestClassifier,
+    build_coleman_forest,
+)
 
 seed = 12345
 rng = np.random.default_rng(seed)
@@ -205,14 +207,7 @@ def _run_parallel_might_permutations_chenchen(
     )
 
 
-def _run_parallel_might(
-    idx,
-    n_samples,
-    n_features,
-    sim_type,
-    rootdir,
-    overwrite=False
-):
+def _run_parallel_might(idx, n_samples, n_features, sim_type, rootdir, overwrite=False):
     """Run parallel job on pre-generated data.
 
     Runs two forests and generates a PValue using the Coleman method and its variations.
@@ -262,11 +257,11 @@ def _run_parallel_might(
         output_dir = os.path.join(rootdir, f"output/{model_name}/{sim_type}/")
         os.makedirs(output_dir, exist_ok=True)
         output_fname = os.path.join(
-                output_dir, f"might_{sim_type}_{n_samples}_{n_features}_{idx}.npz"
-            )
+            output_dir, f"might_{sim_type}_{n_samples}_{n_features}_{idx}.npz"
+        )
         if not overwrite and os.path.exists(output_fname):
             continue
-        
+
         # now compute the pvalue when shuffling all
         covariate_index = None
 
@@ -321,7 +316,8 @@ if __name__ == "__main__":
     SIM_TYPES = ["trunk", "trunk-overlap"]
     [256, 512, 1024, 2048]
     n_samples_list = [2**i for i in range(8, 12)]
-    n_repeats = 100
+    n_repeats_start = 100
+    n_repeats = 500
     n_dims = 4096
     overwrite = False
 
@@ -329,7 +325,7 @@ if __name__ == "__main__":
     Parallel(n_jobs=n_jobs, backend="loky")(
         delayed(_run_parallel_might)(idx, n_samples, n_dims, sim_type, rootdir)
         for idx, n_samples, sim_type in product(
-            range(n_repeats), n_samples_list, SIM_TYPES
+            range(n_repeats_start, n_repeats), n_samples_list, SIM_TYPES
         )
     )
 
@@ -339,7 +335,7 @@ if __name__ == "__main__":
             idx, n_samples, n_dims, sim_type, rootdir
         )
         for idx, n_samples, sim_type in product(
-            range(n_repeats), n_samples_list, SIM_TYPES
+            range(n_repeats_start, n_repeats), n_samples_list, SIM_TYPES
         )
     )
 

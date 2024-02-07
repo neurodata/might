@@ -15,8 +15,12 @@ N_ESTIMATORS = list(range(100, 4001, 100))
 REPS = 5
 
 
-
-def sensitivity_at_specificity(y_true: ArrayLike, y_score: ArrayLike, target_specificity: float=0.98, pos_label: int=1):
+def sensitivity_at_specificity(
+    y_true: ArrayLike,
+    y_score: ArrayLike,
+    target_specificity: float = 0.98,
+    pos_label: int = 1,
+):
     """Compute sensitivity at a specific specificity level.
 
     This is a metric for binary classification.
@@ -73,10 +77,10 @@ def sensitivity_at_specificity(y_true: ArrayLike, y_score: ArrayLike, target_spe
 
 # Define a function to encapsulate the inner loop logic
 def run_experiment(seed, n_estimators, output_dir, overwrite=False):
-    fname = output_dir / f'{seed}_{n_estimators}.npz'
+    fname = output_dir / f"{seed}_{n_estimators}.npz"
     if fname.exists() and not overwrite:
         return
-    
+
     X, y = make_trunk_classification(
         n_samples=2048,
         n_dim=n_dim,
@@ -97,7 +101,7 @@ def run_experiment(seed, n_estimators, output_dir, overwrite=False):
     sas98 = sensitivity_at_specificity(y, posterior_arr, target_specificity=0.98)
 
     np.savez(fname, sas98=sas98, n_estimators=n_estimators, seed=seed)
-    return {'sas98': sas98, 'n_estimators': n_estimators, 'seed': seed}
+    return {"sas98": sas98, "n_estimators": n_estimators, "seed": seed}
 
 
 sas98s = []
@@ -109,11 +113,11 @@ n_repeats = 100
 results = defaultdict(list)
 
 # TODO: change this
-output_dir = Path('./test/')
+output_dir = Path("./test/")
 output_dir.mkdir(exist_ok=True, parents=True)
 
 # Execute the loop in parallel
-output = Parallel(n_jobs=n_jobs, backend='loky')(
+output = Parallel(n_jobs=n_jobs, backend="loky")(
     delayed(run_experiment)(seed, n_estimators, output_dir)
     for seed in range(n_repeats)
     for n_estimators in N_ESTIMATORS
