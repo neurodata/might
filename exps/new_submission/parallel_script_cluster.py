@@ -51,16 +51,16 @@ COLEMAN_MODELS = {
         "max_samples": 1.6,
         "permute_per_tree": False,
     },
-    "permute_per_tree": {
-        "n_estimators": n_estimators,
-        "random_state": None,
-        "honest_fraction": 0.5,
-        "n_jobs": n_jobs_trees,
-        "bootstrap": True,
-        "stratify": True,
-        "max_samples": 1.6,
-        "permute_per_tree": True,
-    },
+    # "permute_per_tree": {
+    #     "n_estimators": n_estimators,
+    #     "random_state": None,
+    #     "honest_fraction": 0.5,
+    #     "n_jobs": n_jobs_trees,
+    #     "bootstrap": True,
+    #     "stratify": True,
+    #     "max_samples": 1.6,
+    #     "permute_per_tree": True,
+    # },
 }
 
 
