@@ -316,8 +316,8 @@ if __name__ == "__main__":
     SIM_TYPES = ["trunk", "trunk-overlap"]
     [256, 512, 1024, 2048]
     n_samples_list = [2**i for i in range(8, 12)]
-    n_repeats_start = 100
-    n_repeats = 500
+    n_repeats_start = 0
+    n_repeats = 100
     n_dims = 4096
     overwrite = False
 
@@ -330,14 +330,14 @@ if __name__ == "__main__":
     )
 
     # re-run parallel MIGHT with permutations
-    Parallel(n_jobs=n_jobs, backend="loky")(
-        delayed(_run_parallel_might_permutations_chenchen)(
-            idx, n_samples, n_dims, sim_type, rootdir
-        )
-        for idx, n_samples, sim_type in product(
-            range(n_repeats_start, n_repeats), n_samples_list, SIM_TYPES
-        )
-    )
+    # Parallel(n_jobs=n_jobs, backend="loky")(
+    #     delayed(_run_parallel_might_permutations_chenchen)(
+    #         idx, n_samples, n_dims, sim_type, rootdir
+    #     )
+    #     for idx, n_samples, sim_type in product(
+    #         range(n_repeats_start, n_repeats), n_samples_list, SIM_TYPES
+    #     )
+    # )
 
     # rootdir = "./test/"
 
