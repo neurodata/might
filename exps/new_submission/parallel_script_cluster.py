@@ -148,6 +148,7 @@ def _run_parallel_might_permutations_chenchen(
             n_samples=n_samples,
             n_dim=n_dims,
             n_informative=min(256, n_dims),
+            m_factor = 0.5,
             return_params=True,
             seed=idx,
         )
@@ -244,6 +245,7 @@ def _run_parallel_might(idx, n_samples, n_features, sim_type, rootdir, overwrite
             n_samples=n_samples,
             n_dim=n_dims,
             n_informative=min(256, n_dims),
+            m_factor=0.5,
             return_params=True,
             seed=idx,
         )
@@ -311,7 +313,7 @@ if __name__ == "__main__":
     # rootdir = sys.argv[5]
 
     # TODO: add root dir here
-    rootdir = "./test/"
+    rootdir = "./test_with_05/"
 
     SIM_TYPES = ["trunk", "trunk-overlap"]
     [256, 512, 1024, 2048]
