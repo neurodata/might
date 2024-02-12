@@ -315,7 +315,9 @@ if __name__ == "__main__":
     # TODO: add root dir here
     rootdir = "./test_with_05/"
 
-    SIM_TYPES = ["trunk", "trunk-overlap"]
+    SIM_TYPES = ["trunk",
+                #   "trunk-overlap"
+                  ]
     [256, 512, 1024, 2048]
     n_samples_list = [2**i for i in range(8, 12)]
     n_repeats_start = 0
