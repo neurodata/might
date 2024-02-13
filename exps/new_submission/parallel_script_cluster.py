@@ -286,7 +286,7 @@ def _run_parallel_might(idx, n_samples, n_features, sim_type, rootdir, overwrite
             X,
             y,
             covariate_index=covariate_index,
-            metric="s@98",
+            metric="s@s98",
             n_repeats=1000,
             seed=None,
             return_posteriors=True,
