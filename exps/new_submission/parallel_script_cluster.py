@@ -51,16 +51,16 @@ COLEMAN_MODELS = {
         "max_samples": 1.6,
         "permute_per_tree": False,
     },
-    # "permute_per_tree": {
-    #     "n_estimators": n_estimators,
-    #     "random_state": None,
-    #     "honest_fraction": 0.5,
-    #     "n_jobs": n_jobs_trees,
-    #     "bootstrap": True,
-    #     "stratify": True,
-    #     "max_samples": 1.6,
-    #     "permute_per_tree": True,
-    # },
+    "permute_per_tree": {
+        "n_estimators": n_estimators,
+        "random_state": None,
+        "honest_fraction": 0.5,
+        "n_jobs": n_jobs_trees,
+        "bootstrap": True,
+        "stratify": True,
+        "max_samples": 1.6,
+        "permute_per_tree": True,
+    },
 }
 
 
@@ -334,14 +334,14 @@ if __name__ == "__main__":
     )
 
     # re-run parallel MIGHT with permutations
-    # Parallel(n_jobs=n_jobs, backend="loky")(
-    #     delayed(_run_parallel_might_permutations_chenchen)(
-    #         idx, n_samples, n_dims, sim_type, rootdir
-    #     )
-    #     for idx, n_samples, sim_type in product(
-    #         range(n_repeats_start, n_repeats), n_samples_list, SIM_TYPES
-    #     )
-    # )
+    Parallel(n_jobs=n_jobs, backend="loky")(
+        delayed(_run_parallel_might_permutations_chenchen)(
+            idx, n_samples, n_dims, sim_type, rootdir
+        )
+        for idx, n_samples, sim_type in product(
+            range(n_repeats_start, n_repeats), n_samples_list, SIM_TYPES
+        )
+    )
 
     # rootdir = "./test/"
 
