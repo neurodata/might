@@ -42,7 +42,7 @@ might_kwargs = {
 
 COLEMAN_MODELS = {
     "permute_once": {
-        "n_estimators": n_estimators,
+        "n_estimators": n_estimators * 4,
         "random_state": None,
         "honest_fraction": 0.5,
         "n_jobs": n_jobs_trees,
@@ -52,7 +52,7 @@ COLEMAN_MODELS = {
         "permute_per_tree": False,
     },
     "permute_per_tree": {
-        "n_estimators": n_estimators,
+        "n_estimators": n_estimators * 4,
         "random_state": None,
         "honest_fraction": 0.5,
         "n_jobs": n_jobs_trees,
@@ -286,7 +286,7 @@ def _run_parallel_might(idx, n_samples, n_features, sim_type, rootdir, overwrite
             X,
             y,
             covariate_index=covariate_index,
-            metric="s@s98",
+            metric="s@98",
             n_repeats=1000,
             seed=None,
             return_posteriors=True,
@@ -313,15 +313,17 @@ if __name__ == "__main__":
     # rootdir = sys.argv[5]
 
     # TODO: add root dir here
-    rootdir = "./test_with_05/"
+    rootdir = "./test_with_05-4xtrees/"
+    # rootdir = '/Volumes/Extreme Pro/cancer/output/m_factor=-1/'
 
-    SIM_TYPES = ["trunk",
+    SIM_TYPES = [
+        "trunk",
                 #   "trunk-overlap"
                   ]
     [256, 512, 1024, 2048]
     n_samples_list = [2**i for i in range(8, 12)]
     n_repeats_start = 0
-    n_repeats = 100
+    n_repeats = 50
     n_dims = 4096
     overwrite = False
 
@@ -334,14 +336,14 @@ if __name__ == "__main__":
     )
 
     # re-run parallel MIGHT with permutations
-    Parallel(n_jobs=n_jobs, backend="loky")(
-        delayed(_run_parallel_might_permutations_chenchen)(
-            idx, n_samples, n_dims, sim_type, rootdir
-        )
-        for idx, n_samples, sim_type in product(
-            range(n_repeats_start, n_repeats), n_samples_list, SIM_TYPES
-        )
-    )
+    # Parallel(n_jobs=n_jobs, backend="loky")(
+    #     delayed(_run_parallel_might_permutations_chenchen)(
+    #         idx, n_samples, n_dims, sim_type, rootdir
+    #     )
+    #     for idx, n_samples, sim_type in product(
+    #         range(n_repeats_start, n_repeats), n_samples_list, SIM_TYPES
+    #     )
+    # )
 
     # rootdir = "./test/"
 
