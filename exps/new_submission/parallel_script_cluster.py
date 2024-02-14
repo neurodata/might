@@ -19,6 +19,7 @@ rng = np.random.default_rng(seed)
 
 # hard-coded parameters
 n_estimators = 1500
+n_estimators_coleman = 100_000
 max_features = 0.3
 test_size = 0.2
 
@@ -42,7 +43,7 @@ might_kwargs = {
 
 COLEMAN_MODELS = {
     "permute_once": {
-        "n_estimators": n_estimators * 4,
+        "n_estimators": n_estimators_coleman,
         "random_state": None,
         "honest_fraction": 0.5,
         "n_jobs": n_jobs_trees,
@@ -52,7 +53,7 @@ COLEMAN_MODELS = {
         "permute_per_tree": False,
     },
     "permute_per_tree": {
-        "n_estimators": n_estimators * 4,
+        "n_estimators": n_estimators_coleman,
         "random_state": None,
         "honest_fraction": 0.5,
         "n_jobs": n_jobs_trees,
@@ -313,7 +314,7 @@ if __name__ == "__main__":
     # rootdir = sys.argv[5]
 
     # TODO: add root dir here
-    rootdir = "./test_with_05-4xtrees/"
+    rootdir = "./test_with_05-100k/"
     # rootdir = '/Volumes/Extreme Pro/cancer/output/m_factor=-1/'
 
     SIM_TYPES = [
