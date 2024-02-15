@@ -27,7 +27,7 @@ test_size = 0.2
 n_jobs = -1
 n_jobs_trees = 1
 
-n_repeats = 1000
+n_repeats = 50_000
 
 
 might_kwargs = {
@@ -288,7 +288,7 @@ def _run_parallel_might(idx, n_samples, n_features, sim_type, rootdir, overwrite
             y,
             covariate_index=covariate_index,
             metric="s@98",
-            n_repeats=1000,
+            n_repeats=n_repeats,
             seed=None,
             return_posteriors=True,
         )
@@ -314,7 +314,7 @@ if __name__ == "__main__":
     # rootdir = sys.argv[5]
 
     # TODO: add root dir here
-    rootdir = "./test_with_05-100k/"
+    rootdir = "./test_with_05-100k10kreps"
     # rootdir = '/Volumes/Extreme Pro/cancer/output/m_factor=-1/'
 
     SIM_TYPES = [
@@ -324,7 +324,7 @@ if __name__ == "__main__":
     [256, 512, 1024, 2048]
     n_samples_list = [2**i for i in range(8, 12)]
     n_repeats_start = 0
-    n_repeats = 50
+    n_repeat_sims = 50
     n_dims = 4096
     overwrite = False
 
@@ -332,7 +332,7 @@ if __name__ == "__main__":
     Parallel(n_jobs=n_jobs, backend="loky")(
         delayed(_run_parallel_might)(idx, n_samples, n_dims, sim_type, rootdir)
         for idx, n_samples, sim_type in product(
-            range(n_repeats_start, n_repeats), n_samples_list, SIM_TYPES
+            range(n_repeats_start, n_repeat_sims), n_samples_list, SIM_TYPES
         )
     )
 
@@ -342,7 +342,7 @@ if __name__ == "__main__":
     #         idx, n_samples, n_dims, sim_type, rootdir
     #     )
     #     for idx, n_samples, sim_type in product(
-    #         range(n_repeats_start, n_repeats), n_samples_list, SIM_TYPES
+    #         range(n_repeats_start, n_repeat_sims), n_samples_list, SIM_TYPES
     #     )
     # )
 
@@ -350,7 +350,6 @@ if __name__ == "__main__":
 
     # SIM_TYPES = ["trunk", "trunk-overlap"]
     # n_samples_list = [2**i for i in range(8, 12)]
-    # n_repeats = 100
     # n_dims = 4096
 
     # # Run the parallel job
@@ -359,6 +358,6 @@ if __name__ == "__main__":
     #         idx, n_samples, n_dims, sim_type, rootdir
     #     )
     #     for idx, n_samples, sim_type in product(
-    #         range(n_repeats), n_samples_list, SIM_TYPES
+    #         range(n_repeat_sims), n_samples_list, SIM_TYPES
     #     )
     # )
