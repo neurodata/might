@@ -18,16 +18,16 @@ seed = 12345
 rng = np.random.default_rng(seed)
 
 # hard-coded parameters
-n_estimators = 1500
-n_estimators_coleman = 100_000
+n_estimators = 500
+n_estimators_coleman = 6_000
 max_features = 0.3
 test_size = 0.2
 
 # TODO: depends on how many CPUs are assigned per job
-n_jobs = -1
+n_jobs = -2
 n_jobs_trees = 1
 
-n_repeats = 50_000
+n_repeats = 10_000
 
 
 might_kwargs = {
@@ -149,7 +149,7 @@ def _run_parallel_might_permutations_chenchen(
             n_samples=n_samples,
             n_dim=n_dims,
             n_informative=min(256, n_dims),
-            m_factor = 0.5,
+            m_factor=0.5,
             return_params=True,
             seed=idx,
         )
@@ -314,17 +314,18 @@ if __name__ == "__main__":
     # rootdir = sys.argv[5]
 
     # TODO: add root dir here
-    rootdir = "./test_with_05-100k10kreps"
+    rootdir = "./test_with_05-10k5kreps"
+    # rootdir = "./test_with_500trees"
     # rootdir = '/Volumes/Extreme Pro/cancer/output/m_factor=-1/'
 
     SIM_TYPES = [
         "trunk",
-                #   "trunk-overlap"
-                  ]
+        #   "trunk-overlap"
+    ]
     [256, 512, 1024, 2048]
     n_samples_list = [2**i for i in range(8, 12)]
-    n_repeats_start = 0
-    n_repeat_sims = 50
+    n_repeats_start = 100
+    n_repeat_sims = 500
     n_dims = 4096
     overwrite = False
 
