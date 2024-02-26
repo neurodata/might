@@ -248,7 +248,7 @@ def make_multi_equal(
         mu_1=mu_1,
         simulation="trunk_mix",
         mix=mix,
-        seed=seed,
+        seed=rng.integers(0, np.iinfo(np.int32).max),
     )
     # only keep the second half of samples, corresponding to the mixture
     X1 = X1[n_samples // 2 :, :]
@@ -260,7 +260,7 @@ def make_multi_equal(
         mu_1=mu_1,
         simulation="trunk_mix",
         mix=mix,
-        seed=seed,
+        seed=rng.integers(0, np.iinfo(np.int32).max),
     )
     # only keep the second half of samples, corresponding to the mixture
     X2 = X2[n_samples // 2 :, :]
