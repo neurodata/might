@@ -29,6 +29,16 @@ SIMULATIONS = {
         # "5": {"mix": 0.5},
     }
 
+def _estimate_threshold(y_true, y_score, target_specificity=0.98, pos_label=1):
+    # Compute ROC curve
+    fpr, tpr, thresholds = roc_curve(y_true, y_score, pos_label=pos_label)
+
+    # Find the threshold corresponding to the target specificity
+    index = np.argmax(fpr >= (1 - target_specificity))
+    threshold_at_specificity = thresholds[index]
+
+    return threshold_at_specificity
+
 def sensitivity_at_specificity(y_true, y_score, target_specificity=0.98, pos_label=1, threshold=None):
     n_trees, n_samples, n_classes = y_score.shape
 
@@ -47,16 +57,8 @@ def sensitivity_at_specificity(y_true, y_score, target_specificity=0.98, pos_lab
     y_true = y_true[~nan_rows]
 
     if threshold is None:
-        # Compute ROC curve
-        fpr, tpr, thresholds = roc_curve(y_true, y_score_binary, pos_label=pos_label)
-
         # Find the threshold corresponding to the target specificity
-        index = np.argmax(fpr >= (1 - target_specificity))
-        threshold_at_specificity = thresholds[index]
-
-        # Compute sensitivity at the chosen specificity
-        # sensitivity = tpr[index]
-        # return sensitivity
+        threshold_at_specificity = _estimate_threshold(y_true, y_score_binary, target_specificity=0.98, pos_label=1)
     else:
         threshold_at_specificity = threshold
 
@@ -152,15 +154,22 @@ def _run_simulation(
             # Remove NaN rows from y_score_binary and y_true
             y_score_binary = y_score_binary[~nan_rows]
             y_true = y_true[~nan_rows]
-
-            # Compute ROC curve
-            fpr, tpr, thresholds = roc_curve(y_true, y_score_binary, pos_label=1)
-
-            # Find the threshold corresponding to the target specificity
-            index = np.argmax(fpr >= (1 - target_specificity))
-            threshold_at_specificity = thresholds[index]
         else:
-            threshold_at_specificity = None
+            # Compute nan-averaged y_score along the trees axis
+            y_score_avg = np.nanmean(posterior_arr, axis=0)
+
+            # Extract true labels and nan-averaged predicted scores for the positive class
+            y_true = y.ravel()
+            y_score_binary = y_score_avg[:, 1]
+
+            # Identify rows with NaN values in y_score_binary
+            nan_rows = np.isnan(y_score_binary)
+
+            # Remove NaN rows from y_score_binary and y_true
+            y_score_binary = y_score_binary[~nan_rows]
+            y_true = y_true[~nan_rows]
+
+        threshold_at_specificity = _estimate_threshold(y_true, y_score_binary, target_specificity=0.98, pos_label=1)
 
         # generate S@S98 from posterior array
         sas98 = sensitivity_at_specificity(y, posterior_arr, target_specificity=target_specificity,
@@ -173,6 +182,9 @@ def _run_simulation(
             n_dims=n_dims,
             sas98=sas98,
             sim_type=sim_name,
+            y=y,
+            posterior_arr=posterior_arr,
+            threshold=threshold_at_specificity
         )
 
 
@@ -209,7 +221,7 @@ if __name__ == "__main__":
     use_second_split_for_threshold = False
     model_name = 'might-threshold-third-split'
 
-    n_repeats = 5
+    n_repeats = 2
     n_samples_list = [2**x for x in range(8, 13)]
     n_samples_ = 4096
     n_dims_ = 4096
