@@ -15,6 +15,7 @@ from sklearn.model_selection import (
 from sklearn.metrics import roc_curve
 from joblib import delayed, Parallel
 from sktree import HonestForestClassifier
+from sktree.tree import MultiViewDecisionTreeClassifier
 from sktree.stats import (
     build_hyppo_oob_forest,
 )
@@ -438,7 +439,9 @@ def _run_simulation(
     )
     if not output_fname.exists() or overwrite:
         might_kwargs = MODEL_NAMES["might"]
-        est = HonestForestClassifier(**might_kwargs)
+        feature_set_ends = [n_dims_1, n_dims_1 + n_dims_2_]  # [4090, 4096] for varying samples
+        assert X.shape[1] == feature_set_ends[1]
+        est = HonestForestClassifier(feature_set_ends=feature_set_ends, **might_kwargs)
 
         est, posterior_arr = build_hyppo_oob_forest(
             est,
@@ -516,6 +519,7 @@ MODEL_NAMES = {
         "bootstrap": True,
         "stratify": True,
         "max_samples": 1.6,
+        'tree_estimator': MultiViewDecisionTreeClassifier()
     },
 }
 
@@ -528,12 +532,13 @@ if __name__ == "__main__":
     overwrite = False
 
     n_repeats = 100
+    n_jobs = -1
 
     # Section: varying over dimensions
     n_samples = 4096
     n_dims_list = [2**i - 6 for i in range(3, 13)]
     print(n_dims_list)
-    results = Parallel(n_jobs=-2)(
+    results = Parallel(n_jobs=n_jobs)(
         delayed(_run_simulation)(
             n_samples,
             n_dims_1,
@@ -542,6 +547,7 @@ if __name__ == "__main__":
             sim_name,
             model_name,
             overwrite=False,
+            generate_data=True,
         )
         for sim_name in SIMULATIONS_NAMES
         for n_dims_1 in n_dims_list
