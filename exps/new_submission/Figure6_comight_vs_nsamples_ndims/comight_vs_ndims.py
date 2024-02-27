@@ -385,7 +385,6 @@ def _run_simulation(
     n_samples_ = 4096
     n_dims_2_ = 6
     n_dims_1_ = 4090
-    overwrite = True
     target_specificity = 0.98
 
     fname = (
@@ -394,6 +393,18 @@ def _run_simulation(
         / sim_name
         / f"{sim_name}_{n_samples_}_{n_dims_1_}_{n_dims_2_}_{idx}.npz"
     )
+    output_fname = (
+        root_dir
+        / "output"
+        / model_name
+        / sim_name
+        / f"{sim_name}_{n_samples}_{n_dims_1}_{n_dims_2_}_{idx}.npz"
+    )
+    output_fname.parent.mkdir(exist_ok=True, parents=True)
+    output_fname.parent.mkdir(exist_ok=True, parents=True)
+    print(f"Output file: {output_fname} {output_fname.exists()}")
+    if not overwrite and output_fname.exists():
+        return
     if generate_data:
         if sim_name == "mean_shift":
             X, y = make_mean_shift(root_dir, seed=seed)
@@ -420,15 +431,6 @@ def _run_simulation(
         assert view_two.shape[1] == n_dims_2_
         X = np.concatenate((view_one, view_two), axis=1)
 
-    output_fname = (
-        root_dir
-        / "output"
-        / model_name
-        / sim_name
-        / f"{sim_name}_{n_samples}_{n_dims_1}_{n_dims_2_}_{idx}.npz"
-    )
-    output_fname.parent.mkdir(exist_ok=True, parents=True)
-
     print(
         "Running analysis for: ",
         output_fname,
@@ -439,9 +441,14 @@ def _run_simulation(
     )
     if not output_fname.exists() or overwrite:
         might_kwargs = MODEL_NAMES["might"]
-        feature_set_ends = [n_dims_1, n_dims_1 + n_dims_2_]  # [4090, 4096] for varying samples
+        feature_set_ends = [
+            n_dims_1,
+            n_dims_1 + n_dims_2_,
+        ]  # [4090, 4096] for varying samples
         assert X.shape[1] == feature_set_ends[1]
-        est = HonestForestClassifier(feature_set_ends=feature_set_ends, **might_kwargs)
+        est = HonestForestClassifier(
+            seed=seed, feature_set_ends=feature_set_ends, **might_kwargs
+        )
 
         est, posterior_arr = build_hyppo_oob_forest(
             est,
@@ -519,7 +526,7 @@ MODEL_NAMES = {
         "bootstrap": True,
         "stratify": True,
         "max_samples": 1.6,
-        'tree_estimator': MultiViewDecisionTreeClassifier()
+        "tree_estimator": MultiViewDecisionTreeClassifier(),
     },
 }
 
