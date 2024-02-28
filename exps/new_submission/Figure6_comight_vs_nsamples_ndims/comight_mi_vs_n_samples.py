@@ -1,0 +1,483 @@
+"""Generating data for CoMIGHT simulations with S@S98."""
+
+# A : Control ~ N(0, 1), Cancer ~ N(1, 1)
+# B:  Control ~ N(0, 1), Cancer ~ 0.75*N(1, 1) + 0.25*N(5, 1)
+# C:  Control~ 0.75*N(1, 1) + 0.25*N(5, 1), Cancer ~ 0.75*N(1, 1) + 0.25*N(5, 1)
+from pathlib import Path
+import numpy as np
+from sktree.datasets import make_trunk_classification, make_trunk_mixture_classification
+from pathlib import Path
+from collections import defaultdict
+import numpy as np
+from sklearn.model_selection import (
+    StratifiedShuffleSplit,
+)
+from sklearn.metrics import roc_curve
+from joblib import delayed, Parallel
+from sktree import HonestForestClassifier
+from sktree.tree import MultiViewDecisionTreeClassifier
+from sktree.stats import (
+    build_hyppo_oob_forest,
+    PermutationHonestForestClassifier,
+)
+from sktree.stats.utils import _mutual_information
+from sktree.datasets import make_trunk_classification
+
+
+seed = 12345
+rng = np.random.default_rng(seed)
+
+### hard-coded parameters
+n_estimators = 6000
+max_features = 0.3
+
+
+def make_mean_shift(
+    root_dir,
+    n_samples=4096,
+    n_dim_1=4090,
+    mu_0=0,
+    mu_1=1,
+    seed=None,
+    n_dim_2=6,
+    return_params=False,
+):
+    """Make mean shifted binary classification data.
+
+    X comprises of [view_1, view_2] where view_1 is the first ``n_dim_1`` dimensions
+    and view_2 is the last ``n_dim_2`` dimensions.
+
+    view_1 is generated, such that [A, B] corresponding to class labels [0, 1]
+    are generated as follows:
+
+    A ~ N(1, I)
+    B ~ N(m_factor, I)
+
+    view_2 is generated, such that [A, B] corresponding to class labels [0, 1]
+    are generated as follows:
+
+    A ~ N(1 / np.sqrt(2), I)
+    B ~ N(1 / np.sqrt(2) * m_factor, I)
+
+    Parameters
+    ----------
+    n_samples : int, optional
+        The number of samples to generate, by default 1024.
+    n_dim_1 : int, optional
+        The number of dimensions in first view, by default 4090.
+    mu_0 : int, optional
+        The mean of the first class, by default -1.
+    mu_1 : int, optional
+        The mean of the second class, by default 1.
+    seed : int, optional
+        Random seed, by default None.
+    n_dim_2 : int, optional
+        The number of dimensions in second view, by default 6.
+    return_params : bool
+        Whether to return parameters of the generating model or not. Default is False.
+
+    Returns
+    -------
+    X : ArrayLike of shape (n_samples, n_dim_1 + n_dim_2)
+        Data.
+    y : ArrayLike of shape (n_samples,)
+        Labels.
+    """
+    output_fname = (
+        root_dir
+        / "data"
+        / "mean_shift"
+        / f"mean_shift_{n_samples}_{n_dim_1}_{n_dim_2}_{seed}.npz"
+    )
+    output_fname.parent.mkdir(exist_ok=True, parents=True)
+
+    rng = np.random.default_rng(seed)
+    default_n_informative = 2
+
+    X, y, means, cov = make_trunk_classification(
+        n_samples=n_samples,
+        n_dim=n_dim_1 + 1,
+        n_informative=default_n_informative,
+        mu_0=mu_0,
+        mu_1=mu_1,
+        return_params=True,
+        rho=0.5,
+        seed=seed,
+    )
+    # get the second informative dimension
+    view_1 = X[:, 1:]
+
+    # only take one informative dimension
+    view_2 = X[:, (0,)]
+
+    # add noise to the second view so that view_2 = (n_samples, n_dim_2)
+    view_2 = np.concatenate(
+        (view_2, rng.standard_normal(size=(n_samples, n_dim_2 - view_2.shape[1]))),
+        axis=1,
+    )
+
+    X = np.concatenate((view_1, view_2), axis=1)
+    return X, y
+    # np.savez_compressed(output_fname, X=X, y=y)
+
+
+def make_multi_modal(
+    root_dir,
+    n_samples=4096,
+    n_dim_1=4090,
+    mu_0=0,
+    mu_1=5,
+    mix=0.75,
+    seed=None,
+    n_dim_2=6,
+    return_params=False,
+):
+    """Make multi-modal binary classification data.
+
+    X comprises of [view_1, view_2] where view_1 is the first ``n_dim_1`` dimensions
+    and view_2 is the last ``n_dim_2`` dimensions.
+
+    view_1 is generated, such that [A, B] corresponding to class labels [0, 1]
+    are generated as follows:
+
+    A ~ N(0, I)
+    B ~ mix * N(1, I) + (1 - mix) * N(m_factor, I)
+
+    view_2 is generated, such that [A, B] corresponding to class labels [0, 1]
+    are generated as follows:
+
+    A ~ N(0, I)
+    B ~ mix * N(1 / np.sqrt(2), I) + (1 - mix) * N(1 / np.sqrt(2) * m_factor, I)
+
+    Parameters
+    ----------
+    n_samples : int, optional
+        The number of samples to generate, by default 1024.
+    n_dim_1 : int, optional
+        The number of dimensions in first view, by default 4090.
+    mu_0 : int, optional
+        The mean of the first class, by default 1.
+    mu_1 : int, optional
+        The mean of the second class, by default -1.
+    seed : int, optional
+        Random seed, by default None.
+    n_dim_2 : int, optional
+        The number of dimensions in second view, by default 6.
+    return_params : bool
+        Whether to return parameters of the generating model or not. Default is False.
+
+    Returns
+    -------
+    X : ArrayLike of shape (n_samples, n_dim_1 + n_dim_2)
+        Data.
+    y : ArrayLike of shape (n_samples,)
+        Labels.
+    """
+    output_fname = (
+        root_dir
+        / "data"
+        / "multi_modal"
+        / f"multi_modal_{n_samples}_{n_dim_1}_{n_dim_2}_{seed}.npz"
+    )
+    output_fname.parent.mkdir(exist_ok=True, parents=True)
+
+    rng = np.random.default_rng(seed)
+    default_n_informative = 2
+
+    X, y, means, covs, X_mixture = make_trunk_mixture_classification(
+        n_samples=n_samples,
+        n_dim=n_dim_1 + 1,
+        n_informative=default_n_informative,
+        mu_0=mu_0,
+        mu_1=mu_1,
+        mix=mix,
+        scaling_factor=1,
+        seed=seed,
+        rho=0.5,
+        return_params=True,
+    )
+    # get the second informative dimension
+    view_1 = X[:, 1:]
+
+    # only take one informative dimension
+    view_2 = X[:, (0,)]
+
+    # add noise to the second view so that view_2 = (n_samples, n_dim_2)
+    view_2 = np.concatenate(
+        (view_2, rng.standard_normal(size=(n_samples, n_dim_2 - view_2.shape[1]))),
+        axis=1,
+    )
+    X = np.concatenate((view_1, view_2), axis=1)
+    # np.savez_compressed(output_fname, X=X, y=y)
+    return X, y
+
+
+def make_multi_equal(
+    root_dir,
+    n_samples=4096,
+    n_dim_1=4090,
+    mu_0=1,
+    mu_1=5,
+    mix=0.75,
+    seed=None,
+    n_dim_2=6,
+    return_params=False,
+):
+    """Make multi-modal binary classification data.
+
+    X comprises of [view_1, view_2] where view_1 is the first ``n_dim_1`` dimensions
+    and view_2 is the last ``n_dim_2`` dimensions.
+
+    view_1 is generated, such that [A, B] corresponding to class labels [0, 1]
+    are generated as follows:
+
+    A ~ mix * N(1, I) + (1 - mix) * N(m_factor, I)
+    B ~ mix * N(1, I) + (1 - mix) * N(m_factor, I)
+
+    view_2 is generated, such that [A, B] corresponding to class labels [0, 1]
+    are generated as follows:
+
+    A ~ mix * N(1 / np.sqrt(2), I) + (1 - mix) * N(1 / np.sqrt(2) * m_factor, I)
+    B ~ mix * N(1 / np.sqrt(2), I) + (1 - mix) * N(1 / np.sqrt(2) * m_factor, I)
+
+    Parameters
+    ----------
+    n_samples : int, optional
+        The number of samples to generate, by default 1024.
+    n_dim_1 : int, optional
+        The number of dimensions in first view, by default 4090.
+    mu_0 : int, optional
+        The mean of the first class, by default 1.
+    mu_1 : int, optional
+        The mean of the second class, by default -1.
+    seed : int, optional
+        Random seed, by default None.
+    n_dim_2 : int, optional
+        The number of dimensions in second view, by default 6.
+    return_params : bool
+        Whether to return parameters of the generating model or not. Default is False.
+
+    Returns
+    -------
+    X : ArrayLike of shape (n_samples, n_dim_1 + n_dim_2)
+        Data.
+    y : ArrayLike of shape (n_samples,)
+        Labels.
+    """
+    output_fname = (
+        root_dir
+        / "data"
+        / "multi_equal"
+        / f"multi_equal_{n_samples}_{n_dim_1}_{n_dim_2}_{seed}.npz"
+    )
+    output_fname.parent.mkdir(exist_ok=True, parents=True)
+
+    rng = np.random.default_rng(seed)
+    default_n_informative = 2
+
+    X1, _ = make_trunk_mixture_classification(
+        n_samples=n_samples,
+        n_dim=n_dim_1 + 1,
+        n_informative=default_n_informative,
+        mu_0=mu_0,
+        mu_1=mu_1,
+        mix=mix,
+        rho=0.5,
+        seed=rng.integers(0, np.iinfo(np.int32).max),
+        return_params=False,
+    )
+    # only keep the second half of samples, corresponding to the mixture
+    X1 = X1[n_samples // 2 :, :]
+
+    X2, _ = make_trunk_mixture_classification(
+        n_samples=n_samples,
+        n_dim=n_dim_1 + 1,
+        n_informative=default_n_informative,
+        mu_0=mu_0,
+        mu_1=mu_1,
+        mix=mix,
+        rho=0.5,
+        seed=rng.integers(0, np.iinfo(np.int32).max),
+        return_params=False,
+    )
+    # only keep the second half of samples, corresponding to the mixture
+    X2 = X2[n_samples // 2 :, :]
+
+    X = np.vstack((X1, X2))
+    y = np.hstack((np.zeros(n_samples // 2), np.ones(n_samples // 2)))
+
+    # get the second informative dimension
+    view_1 = X[:, 1:]
+
+    # only take one informative dimension
+    view_2 = X[:, (0,)]
+
+    # add noise to the second view so that view_2 = (n_samples, n_dim_2)
+    view_2 = np.concatenate(
+        (view_2, rng.standard_normal(size=(n_samples, n_dim_2 - view_2.shape[1]))),
+        axis=1,
+    )
+    X = np.concatenate((view_1, view_2), axis=1)
+    # np.savez_compressed(output_fname, X=X, y=y)
+    return X, y
+
+
+def _run_simulation(
+    n_samples,
+    n_dims_1,
+    idx,
+    root_dir,
+    sim_name,
+    model_name,
+    overwrite=False,
+    use_second_split_for_threshold=False,
+    generate_data=False,
+):
+    n_samples_ = 4096
+    n_dims_2_ = 6
+    n_dims_1_ = 4090
+    target_specificity = 0.98
+
+    fname = (
+        root_dir
+        / "data"
+        / sim_name
+        / f"{sim_name}_{n_samples_}_{n_dims_1_}_{n_dims_2_}_{idx}.npz"
+    )
+
+    output_fname = (
+        root_dir
+        / "output-mi"
+        / model_name
+        / sim_name
+        / f"{sim_name}_{n_samples}_{n_dims_1}_{n_dims_2_}_{idx}.npz"
+    )
+    output_fname.parent.mkdir(exist_ok=True, parents=True)
+    print(f"Output file: {output_fname} {output_fname.exists()}")
+    if not overwrite and output_fname.exists():
+        return
+    if generate_data:
+        if sim_name == "mean_shift":
+            X, y = make_mean_shift(root_dir, seed=seed)
+        elif sim_name == "multi_modal":
+            X, y = make_multi_modal(root_dir, seed=seed)
+        elif sim_name == "multi_equal":
+            X, y = make_multi_equal(root_dir, seed=seed)
+    else:
+        if not fname.exists():
+            raise RuntimeError(f"{fname} does not exist")
+        print(f"Reading {fname}")
+        data = np.load(fname, allow_pickle=True)
+        X, y = data["X"], data["y"]
+    print(X.shape, y.shape)
+    if n_samples < X.shape[0]:
+        _cv = StratifiedShuffleSplit(n_splits=1, train_size=n_samples)
+        for train_idx, _ in _cv.split(X, y):
+            continue
+        X = X[train_idx, :]
+        y = y[train_idx, ...].squeeze()
+    if n_dims_1 < n_dims_1_:
+        view_one = X[:, :n_dims_1]
+        view_two = X[:, n_dims_1_:]
+        assert view_two.shape[1] == n_dims_2_
+        X = np.concatenate((view_one, view_two), axis=1)
+
+    print(
+        "Running analysis for: ",
+        output_fname,
+        overwrite,
+        X.shape,
+        n_samples,
+        n_dims_1 + n_dims_2_,
+    )
+    if not output_fname.exists() or overwrite:
+        might_kwargs = MODEL_NAMES["might"]
+        feature_set_ends = [
+            n_dims_1,
+            n_dims_1 + n_dims_2_,
+        ]  # [4090, 4096] for varying samples
+        assert X.shape[1] == feature_set_ends[1]
+        est = HonestForestClassifier(
+            seed=seed, feature_set_ends=feature_set_ends, **might_kwargs
+        )
+        perm_est = PermutationHonestForestClassifier(
+            seed=seed, feature_set_ends=feature_set_ends, **might_kwargs
+        )
+        # permute the second view
+        covariate_index = np.arange(n_dims_1, n_dims_1 + n_dims_2_)
+
+        est, posterior_arr = build_hyppo_oob_forest(
+            est,
+            X,
+            y,
+            verbose=False,
+        )
+        perm_est, perm_posterior_arr = build_hyppo_oob_forest(
+            perm_est, X, y, verbose=False, covariate_index=covariate_index
+        )
+
+        # mutual information for both
+        y_pred_proba = posterior_arr.mean(axis=0)
+        I_X1X2_Y = _mutual_information(y, y_pred_proba)
+
+        y_pred_proba = perm_posterior_arr.mean(axis=0)
+        I_X1_Y = _mutual_information(y, y_pred_proba)
+
+        np.savez_compressed(
+            output_fname,
+            idx=idx,
+            n_samples=n_samples,
+            n_dims_1=n_dims_1,
+            n_dims_2=n_dims_2_,
+            cmi=I_X1X2_Y - I_X1_Y,
+            I_X1X2_Y=I_X1X2_Y,
+            I_X1_Y=I_X1_Y,
+            sim_type=sim_name,
+            y=y,
+            posterior_arr=posterior_arr,
+            perm_posterior_arr=perm_posterior_arr,
+        )
+
+
+MODEL_NAMES = {
+    "might": {
+        "n_estimators": n_estimators,
+        "honest_fraction": 0.5,
+        "n_jobs": -2,
+        "bootstrap": True,
+        "stratify": True,
+        "max_samples": 1.6,
+        "tree_estimator": MultiViewDecisionTreeClassifier(),
+    },
+}
+
+if __name__ == "__main__":
+    root_dir = Path("/Volumes/Extreme Pro/cancer")
+
+    SIMULATIONS_NAMES = ["mean_shift", "multi_modal", "multi_equal"]
+
+    model_name = "comight"
+    overwrite = False
+
+    n_repeats = 100
+    n_jobs = 1
+
+    # Section: varying over sample-sizes
+    n_samples_list = [2**x for x in range(8, 13)]
+    n_dims_1 = 4090
+    print(n_samples_list)
+    results = Parallel(n_jobs=n_jobs)(
+        delayed(_run_simulation)(
+            n_samples,
+            n_dims_1,
+            idx,
+            root_dir,
+            sim_name,
+            model_name,
+            overwrite=False,
+            generate_data=False,
+        )
+        for sim_name in SIMULATIONS_NAMES
+        for n_samples in n_samples_list
+        for idx in range(n_repeats)
+    )

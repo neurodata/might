@@ -435,6 +435,8 @@ def _run_simulation(
         overwrite,
         X.shape,
         n_samples,
+        n_dims_1,
+        n_dims_2_,
         n_dims_1 + n_dims_2_,
     )
     if not output_fname.exists() or overwrite:
@@ -454,6 +456,8 @@ def _run_simulation(
             y,
             verbose=False,
         )
+        print(feature_set_ends, X.shape, n_samples, n_dims_1, n_dims_2_)
+        print(max([tree.get_depth() for tree in est.estimators_]))
 
         if use_second_split_for_threshold:
             # array-like of shape (n_estimators, n_samples, n_classes)
@@ -531,7 +535,11 @@ MODEL_NAMES = {
 if __name__ == "__main__":
     root_dir = Path("/Volumes/Extreme Pro/cancer")
 
-    SIMULATIONS_NAMES = ["mean_shift", "multi_modal", "multi_equal"]
+    SIMULATIONS_NAMES = [
+        "mean_shift", 
+                         "multi_modal",
+                           "multi_equal"
+                           ]
 
     model_name = "comight"
     overwrite = False
