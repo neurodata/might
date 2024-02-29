@@ -543,7 +543,7 @@ if __name__ == "__main__":
     overwrite = False
 
     n_repeats = 100
-    n_jobs = 6
+    n_jobs = 3
 
     # Section: varying over dimensions
     n_samples = 4096
