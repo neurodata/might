@@ -543,13 +543,13 @@ if __name__ == "__main__":
     overwrite = False
 
     n_repeats = 100
-    n_jobs = 12
+    n_jobs = 6
 
     # Section: varying over dimensions
     n_samples = 4096
     n_dims_list = [2**i - 6 for i in range(3, 13)]
     print(n_dims_list)
-    results = Parallel(n_jobs=n_jobs)(
+    results = Parallel(n_jobs=n_jobs, verbose=True)(
         delayed(_run_simulation)(
             n_samples,
             n_dims_1,
