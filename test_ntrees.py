@@ -412,25 +412,31 @@ X.shape, y.shape
 
 # In[ ]:
 
-
+from sklearn.ensemble import RandomForestClassifier
 sas98s = []
-for seed in trange(100, desc="Reps Histogram S@98"):
+for seed in range(100):
+    print("Create Object")
     est = HonestForestClassifier(
-        n_estimators=1,
+        n_estimators=100000,
         random_state=seed,
-        honest_fraction=0.5,
+        # honest_fraction=0.5,
         n_jobs=-1,
         bootstrap=True,
-        stratify=True,
-        max_samples=1.6,
+        # stratify=True,
+        # max_samples=1.6,
         # permute_per_tree=True,
     )
+    # print("Fit Estimator")
+    # est.fit(X, y)
+    print("Get Posteriors")
+    # posterior_arr = est.predict_proba(X)
     _, posterior_arr = build_hyppo_oob_forest(
         est,
         X,
         y,
         verbose=False
     )
+    print("Compute S@98")
     sas98 = sensitivity_at_specificity(
         y, posterior_arr, target_specificity=0.98
     )
