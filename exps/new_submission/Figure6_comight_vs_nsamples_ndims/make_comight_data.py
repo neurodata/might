@@ -31,6 +31,7 @@ def make_mean_shift(
     seed=None,
     n_dim_2=6,
     return_params=False,
+    overwrite=False
 ):
     """Make mean shifted binary classification data.
 
@@ -76,29 +77,47 @@ def make_mean_shift(
     output_fname = (
         root_dir
         / "data"
-        / "mean_shift"
-        / f"mean_shift_{n_samples}_{n_dim_1}_{n_dim_2}_{seed}.npz"
+        / "mean_shift_compounding"
+        / f"mean_shift_compounding_{n_samples}_{n_dim_1}_{n_dim_2}_{seed}.npz"
     )
     output_fname.parent.mkdir(exist_ok=True, parents=True)
-
+    if not overwrite and output_fname.exists():
+        return
     rng = np.random.default_rng(seed)
-    default_n_informative = 2
+    default_n_informative = 1
 
-    X, y, means, cov = make_trunk_classification(
-        n_samples=n_samples,
-        n_dim=n_dim_1 + 1,
-        n_informative=default_n_informative,
-        mu_0=mu_0,
-        mu_1=mu_1,
-        return_params=True,
-        rho=0.5,
-        seed=seed,
+    # X, y, means, cov = make_trunk_classification(
+    #     n_samples=n_samples // 2,
+    #     n_dim=n_dim_1 + 1,
+    #     n_informative=default_n_informative,
+    #     mu_0=mu_0,
+    #     mu_1=mu_1,
+    #     return_params=True,
+    #     rho=0.5,
+    #     seed=seed,
+    # )
+
+    method = 'svd'
+    mu_1_vec = np.array([-0.5, 0.5])
+    mu_0_vec = np.array([0 / np.sqrt(i) for i in range(1, 3)])
+    cov = np.array([[1., 0.5], [0.5, 1.]])
+
+    X = np.vstack(
+        (
+            rng.multivariate_normal(mu_1_vec, cov, n_samples // 2, method=method),
+            rng.multivariate_normal(mu_0_vec, cov, n_samples // 2, method=method),
+        )
     )
-    # get the second informative dimension
-    view_1 = X[:, 1:]
+    assert X.shape[1] == 2
+    view_1 = X[:, (0,)]
+    view_1 = np.hstack((view_1, rng.normal(loc=0, scale=1, size=(X.shape[0], n_dim_1 - 1))))
+    view_2 = X[:, 1:]
 
-    # only take one informative dimension
-    view_2 = X[:, (0,)]
+    # # get the second informative dimension
+    # view_1 = X[:, 1:]
+
+    # # only take one informative dimension
+    # view_2 = X[:, (0,)]
 
     # add noise to the second view so that view_2 = (n_samples, n_dim_2)
     view_2 = np.concatenate(
@@ -107,6 +126,7 @@ def make_mean_shift(
     )
 
     X = np.concatenate((view_1, view_2), axis=1)
+    y = np.concatenate((np.zeros(n_samples // 2), np.ones(n_samples // 2)))
 
     np.savez_compressed(output_fname, X=X, y=y)
 
@@ -121,6 +141,7 @@ def make_multi_modal(
     seed=None,
     n_dim_2=6,
     return_params=False,
+    overwrite=False
 ):
     """Make multi-modal binary classification data.
 
@@ -166,31 +187,49 @@ def make_multi_modal(
     output_fname = (
         root_dir
         / "data"
-        / "multi_modal"
-        / f"multi_modal_{n_samples}_{n_dim_1}_{n_dim_2}_{seed}.npz"
+        / "multi_modal_compounding"
+        / f"multi_modal_compounding_{n_samples}_{n_dim_1}_{n_dim_2}_{seed}.npz"
     )
     output_fname.parent.mkdir(exist_ok=True, parents=True)
-
+    if not overwrite and output_fname.exists():
+        return
+    
     rng = np.random.default_rng(seed)
     default_n_informative = 2
 
-    X, y, means, covs, X_mixture = make_trunk_mixture_classification(
-        n_samples=n_samples,
-        n_dim=n_dim_1 + 1,
-        n_informative=default_n_informative,
-        mu_0=mu_0,
-        mu_1=mu_1,
-        mix=mix,
-        scaling_factor=1,
-        seed=seed,
-        rho=0.5,
-        return_params=True,
-    )
+    # X, y, means, covs, X_mixture = make_trunk_mixture_classification(
+    #     n_samples=n_samples,
+    #     n_dim=n_dim_1 + 1,
+    #     n_informative=default_n_informative,
+    #     mu_0=mu_0,
+    #     mu_1=mu_1,
+    #     mix=mix,
+    #     scaling_factor=1,
+    #     seed=seed,
+    #     rho=0.5,
+    #     return_params=True,
+    # )
     # get the second informative dimension
-    view_1 = X[:, 1:]
+    # view_1 = X[:, 1:]
 
-    # only take one informative dimension
-    view_2 = X[:, (0,)]
+    # # only take one informative dimension
+    # view_2 = X[:, (0,)]
+
+    method = 'svd'
+    mu_1_vec = np.array([-1, 2])
+    mu_0_vec = np.array([0 / np.sqrt(i) for i in range(1, 3)])
+    cov = np.array([[1., 0.5], [0.5, 1.]])
+
+    X = np.vstack(
+        (
+            rng.multivariate_normal(mu_1_vec, cov, n_samples // 2, method=method),
+            rng.multivariate_normal(mu_0_vec, cov, n_samples // 2, method=method),
+        )
+    )
+    assert X.shape[1] == 2
+    view_1 = X[:, (0,)]
+    view_1 = np.hstack((view_1, rng.normal(loc=0, scale=1, size=(X.shape[0], n_dim_1 - 1))))
+    view_2 = X[:, 1:]
 
     # add noise to the second view so that view_2 = (n_samples, n_dim_2)
     view_2 = np.concatenate(
@@ -198,6 +237,7 @@ def make_multi_modal(
         axis=1,
     )
     X = np.concatenate((view_1, view_2), axis=1)
+    y = np.concatenate((np.zeros(n_samples // 2), np.ones(n_samples // 2)))
     np.savez_compressed(output_fname, X=X, y=y)
 
 
@@ -491,7 +531,6 @@ MODEL_NAMES = {
 }
 
 if __name__ == "__main__":
-    root_dir = Path("/Volumes/Extreme Pro/cancer")
     
     SIMULATIONS_NAMES = ['mean_shift', 'multi_modal', 'multi_equal']
 
@@ -502,32 +541,45 @@ if __name__ == "__main__":
 
     # Section: Make data
     root_dir = Path("/Volumes/Extreme Pro/cancer")
-
+    root_dir = Path('/data/adam/')
+    
     n_repeats = 100
-    for seed in range(n_repeats):
-        make_mean_shift(root_dir, seed=seed)
-        make_multi_modal(root_dir, seed=seed)
-        make_multi_equal(root_dir, seed=seed)
+    Parallel(n_jobs=-1)(
+        delayed(func)(
+            root_dir,
+            seed=seed,
+        )
+        for seed in range(n_repeats)
+        for func in [
+            make_mean_shift, 
+            make_multi_modal
+            ]
+    )
+
+    # for seed in range(n_repeats):
+    #     make_mean_shift(root_dir, seed=seed)
+    #     make_multi_modal(root_dir, seed=seed)
+        # make_multi_equal(root_dir, seed=seed)
 
     
     # Section: varying over sample-sizes
-    n_samples_list = [2**x for x in range(8, 13)]
-    n_dims_1 = 4090
-    print(n_samples_list)
-    results = Parallel(n_jobs=-2)(
-        delayed(_run_simulation)(
-            n_samples,
-            n_dims_1,
-            idx,
-            root_dir,
-            sim_name,
-            model_name,
-            overwrite=False,
-        )
-        for sim_name in SIMULATIONS_NAMES
-        for n_samples in n_samples_list
-        for idx in range(n_repeats)
-    )
+    # n_samples_list = [2**x for x in range(8, 13)]
+    # n_dims_1 = 4090
+    # print(n_samples_list)
+    # results = Parallel(n_jobs=-2)(
+    #     delayed(_run_simulation)(
+    #         n_samples,
+    #         n_dims_1,
+    #         idx,
+    #         root_dir,
+    #         sim_name,
+    #         model_name,
+    #         overwrite=False,
+    #     )
+    #     for sim_name in SIMULATIONS_NAMES
+    #     for n_samples in n_samples_list
+    #     for idx in range(n_repeats)
+    # )
 
     # Section: varying over dimensions
     # n_samples = 4096

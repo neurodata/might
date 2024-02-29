@@ -532,9 +532,13 @@ MODEL_NAMES = {
 
 if __name__ == "__main__":
     root_dir = Path("/Volumes/Extreme Pro/cancer")
-
-    SIMULATIONS_NAMES = ["mean_shift", "multi_modal", "multi_equal"]
-
+    root_dir = Path('/data/adam/')
+    
+    SIMULATIONS_NAMES = [
+        "mean_shift_compounding",
+        "multi_modal_compounding",
+        #    "multi_equal"
+    ]
     model_name = "comight"
     overwrite = False
 
@@ -554,7 +558,7 @@ if __name__ == "__main__":
             sim_name,
             model_name,
             overwrite=False,
-            generate_data=True,
+            generate_data=False,
         )
         for sim_name in SIMULATIONS_NAMES
         for n_dims_1 in n_dims_list

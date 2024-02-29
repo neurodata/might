@@ -414,8 +414,13 @@ def _run_simulation(
         if not fname.exists():
             raise RuntimeError(f"{fname} does not exist")
         print(f"Reading {fname}")
-        data = np.load(fname, allow_pickle=True)
-        X, y = data["X"], data["y"]
+        try:
+            data = np.load(fname, allow_pickle=True)
+            X, y = data["X"], data["y"]
+        except Exception as e:
+            print(e, "Error with: ", fname)
+            return
+        
     print(X.shape, y.shape)
     if n_samples < X.shape[0]:
         _cv = StratifiedShuffleSplit(n_splits=1, train_size=n_samples)
@@ -536,16 +541,16 @@ if __name__ == "__main__":
     root_dir = Path("/Volumes/Extreme Pro/cancer")
 
     SIMULATIONS_NAMES = [
-        "mean_shift", 
-                         "multi_modal",
-                           "multi_equal"
-                           ]
+        "mean_shift_compounding",
+        "multi_modal_compounding",
+        #    "multi_equal"
+    ]
 
     model_name = "comight"
     overwrite = False
 
     n_repeats = 100
-    n_jobs = -1
+    n_jobs = -2
 
     # Section: varying over sample-sizes
     n_samples_list = [2**x for x in range(8, 13)]
