@@ -160,7 +160,7 @@ def make_trunk_classification(
 
 class Dcorr_PCA:
     def test(self, x, y):
-        n_components = int(np.sqrt(x.shape[0]))
+        n_components = 0.95
         x_pca = PCA(n_components=n_components).fit_transform(x)
         return Dcorr().test(x_pca, y)
 
@@ -241,7 +241,7 @@ _ = Parallel(n_jobs=-1, verbose=100)(
         delayed(compute_null)(rep, est, est_name, sim, p=dim, sim_kwargs=sim_kwargs)
         for rep in REPS
         for est_name, est in TESTS.items()
-        for sim in SIMULATIONS.keys()
+        for sim, sim_kwargs in SIMULATIONS.items()
         for dim in DIMENSIONS
     ]
 )
