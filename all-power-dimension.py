@@ -165,6 +165,20 @@ class Dcorr_PCA:
         return Dcorr().test(x_pca, y)
 
 
+# In[1]:
+
+
+class hypoRF:
+    def __init__(self, n_estimators=2000):
+        self.n_estimators = n_estimators
+
+    def statistic(self, X, y):
+        clf = RandomForestClassifier(n_estimators=self.n_estimators, oob_score=True)
+        clf.fit(X, y)
+        oob_error = 1 - clf.oob_score_
+        return oob_error
+
+
 # In[5]:
 
 
@@ -187,8 +201,9 @@ SIMULATIONS = {
 }
 
 TESTS = {
-    "Dcorr" : Dcorr(),
-    "Dcorr_PCA" : Dcorr_PCA(),
+    # "Dcorr" : Dcorr(),
+    # "Dcorr_PCA" : Dcorr_PCA(),
+    "hypoRF" : hypoRF(),
 }
 
 
@@ -204,6 +219,18 @@ def _indep_sim_gen(X, p):
     return X_t, y_t
 
 
+def _perm_stat(est, X, p=4096):
+    """
+    Generates null and alternate distributions
+    """
+    X, y = _indep_sim_gen(X, p)
+    obs_stat = est.statistic(X, y)
+    permy = np.random.permutation(y)
+    perm_stat = est.statistic(X, permy)
+
+    return obs_stat, perm_stat
+
+
 def _nonperm_pval(est, X, p=4096):
     """
     Generates fast  permutation pvalues
@@ -216,7 +243,7 @@ def _nonperm_pval(est, X, p=4096):
 # In[6]:
 
 
-def compute_null(rep, est, est_name, sim, n=100, p=1, sim_kwargs={}):
+def compute_null(rep, est, est_name, sim, n=100, p=1, **sim_kwargs):
     """
     Calculates empirical null and alternate distribution for each test.
     """
@@ -227,8 +254,12 @@ def compute_null(rep, est, est_name, sim, n=100, p=1, sim_kwargs={}):
         seed=rep,
         **sim_kwargs
     )
-    pval = _nonperm_pval(est, X, p)
-    np.savetxt("{}/{}_{}_{}_{}.txt".format(SAVE_PATH, sim.lower(), est_name, p, rep), [pval])
+    if est_name == "hypoRF":
+        alt_dist, null_dist = _perm_stat(est, X, p)
+        np.savetxt("{}/{}_{}_{}_{}.txt".format(SAVE_PATH, sim.lower(), est_name, p, rep), [alt_dist, null_dist], delimiter=",")
+    else:
+        pval = _nonperm_pval(est, X, p)
+        np.savetxt("{}/{}_{}_{}_{}.txt".format(SAVE_PATH, sim.lower(), est_name, p, rep), [pval])
 
 
 # In[7]:
@@ -236,9 +267,9 @@ def compute_null(rep, est, est_name, sim, n=100, p=1, sim_kwargs={}):
 
 # Run this block to regenerate power curves. Note that this takes a very long time!
 
-_ = Parallel(n_jobs=-1, verbose=100)(
+_ = Parallel(n_jobs=24, verbose=100)(
     [
-        delayed(compute_null)(rep, est, est_name, sim, p=dim, sim_kwargs=sim_kwargs)
+        delayed(compute_null)(rep, est, est_name, sim, p=dim, **sim_kwargs)
         for rep in REPS
         for est_name, est in TESTS.items()
         for sim, sim_kwargs in SIMULATIONS.items()
