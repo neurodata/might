@@ -133,10 +133,14 @@ def _run_simulation(
         y = y[train_idx, ...].squeeze()
     if run_view == "view_one":
         X = X[:, :n_dims_1]
+        assert X.shape[1] == n_dims_1
     elif run_view == "view_two":
         X = X[:, -n_dims_2_:]
+        assert X.shape[1] == n_dims_2_
     elif run_view == "view_oneandtwo":
         X = X
+        assert X.shape[1] == n_dims_1 + n_dims_2_
+
 
     print(
         "Running analysis for: ",
@@ -149,7 +153,7 @@ def _run_simulation(
     )
     if not output_fname.exists() or overwrite:
         might_kwargs = MODEL_NAMES["might"]
-        assert X.shape[1] == n_dims_1
+        
         est = HonestForestClassifier(seed=seed, **might_kwargs)
 
         est, posterior_arr = build_hyppo_oob_forest(
@@ -295,6 +299,7 @@ if __name__ == "__main__":
     model_name = "might_viewoneandtwo"
     n_samples_list = [2**x for x in range(8, 13)]
     print(n_samples_list)
+    n_dims_1 = 4090
     results = Parallel(n_jobs=n_jobs)(
         delayed(_run_simulation)(
             n_samples,
