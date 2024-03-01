@@ -220,12 +220,21 @@ def make_multi_modal(
     mu_0_vec = np.array([0 / np.sqrt(i) for i in range(1, 3)])
     cov = np.array([[1., 0.5], [0.5, 1.]])
 
+    mixture_idx = rng.choice(2, n_samples // 2, replace=True, shuffle=True, p=[mix, 1 - mix])  # type: ignore
+
+    norm_params = [[mu_0_vec, cov], [mu_1_vec, cov]]
+    X_mixture = np.fromiter(
+        (rng.multivariate_normal(*(norm_params[i]), size=1, method=method) for i in mixture_idx),
+        dtype=np.dtype((float, 2)),
+    )
+
     X = np.vstack(
         (
-            rng.multivariate_normal(mu_1_vec, cov, n_samples // 2, method=method),
-            rng.multivariate_normal(mu_0_vec, cov, n_samples // 2, method=method),
+            rng.multivariate_normal(np.zeros(2), cov, n_samples // 2, method=method),
+            X_mixture.reshape(n_samples // 2, 2),
         )
     )
+
     assert X.shape[1] == 2
     view_1 = X[:, (0,)]
     view_1 = np.hstack((view_1, rng.normal(loc=0, scale=1, size=(X.shape[0], n_dim_1 - 1))))
@@ -542,7 +551,7 @@ if __name__ == "__main__":
     # Section: Make data
     root_dir = Path("/Volumes/Extreme Pro/cancer")
     root_dir = Path('/data/adam/')
-    
+
     n_repeats = 100
     Parallel(n_jobs=-1)(
         delayed(func)(
@@ -551,7 +560,7 @@ if __name__ == "__main__":
         )
         for seed in range(n_repeats)
         for func in [
-            make_mean_shift, 
+            # make_mean_shift, 
             make_multi_modal
             ]
     )

@@ -529,7 +529,7 @@ MODEL_NAMES = {
     "might": {
         "n_estimators": n_estimators,
         "honest_fraction": 0.5,
-        "n_jobs": 1,
+        "n_jobs": 4,
         "bootstrap": True,
         "stratify": True,
         "max_samples": 1.6,
@@ -550,7 +550,7 @@ if __name__ == "__main__":
     overwrite = False
 
     n_repeats = 100
-    n_jobs = -2
+    n_jobs = 2
 
     # Section: varying over sample-sizes
     n_samples_list = [2**x for x in range(8, 13)]
