@@ -420,7 +420,7 @@ def _run_simulation(
         except Exception as e:
             print(e, "Error with: ", fname)
             return
-        
+
     print(X.shape, y.shape)
     if n_samples < X.shape[0]:
         _cv = StratifiedShuffleSplit(n_splits=1, train_size=n_samples)
@@ -529,7 +529,7 @@ MODEL_NAMES = {
     "might": {
         "n_estimators": n_estimators,
         "honest_fraction": 0.5,
-        "n_jobs": 4,
+        "n_jobs": 1,
         "bootstrap": True,
         "stratify": True,
         "max_samples": 1.6,
@@ -550,7 +550,7 @@ if __name__ == "__main__":
     overwrite = False
 
     n_repeats = 100
-    n_jobs = 2
+    n_jobs = -2
 
     # Section: varying over sample-sizes
     n_samples_list = [2**x for x in range(8, 13)]

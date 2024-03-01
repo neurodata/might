@@ -31,7 +31,7 @@ def make_mean_shift(
     seed=None,
     n_dim_2=6,
     return_params=False,
-    overwrite=False
+    overwrite=False,
 ):
     """Make mean shifted binary classification data.
 
@@ -97,10 +97,10 @@ def make_mean_shift(
     #     seed=seed,
     # )
 
-    method = 'svd'
+    method = "svd"
     mu_1_vec = np.array([-0.5, 0.5])
     mu_0_vec = np.array([0 / np.sqrt(i) for i in range(1, 3)])
-    cov = np.array([[1., 0.5], [0.5, 1.]])
+    cov = np.array([[1.0, 0.5], [0.5, 1.0]])
 
     X = np.vstack(
         (
@@ -110,7 +110,9 @@ def make_mean_shift(
     )
     assert X.shape[1] == 2
     view_1 = X[:, (0,)]
-    view_1 = np.hstack((view_1, rng.normal(loc=0, scale=1, size=(X.shape[0], n_dim_1 - 1))))
+    view_1 = np.hstack(
+        (view_1, rng.normal(loc=0, scale=1, size=(X.shape[0], n_dim_1 - 1)))
+    )
     view_2 = X[:, 1:]
 
     # # get the second informative dimension
@@ -132,7 +134,7 @@ def make_mean_shift(
 
 
 def make_multi_modal(
-        root_dir,
+    root_dir,
     n_samples=4096,
     n_dim_1=4090,
     mu_0=0,
@@ -141,7 +143,7 @@ def make_multi_modal(
     seed=None,
     n_dim_2=6,
     return_params=False,
-    overwrite=False
+    overwrite=False,
 ):
     """Make multi-modal binary classification data.
 
@@ -193,7 +195,7 @@ def make_multi_modal(
     output_fname.parent.mkdir(exist_ok=True, parents=True)
     if not overwrite and output_fname.exists():
         return
-    
+
     rng = np.random.default_rng(seed)
     default_n_informative = 2
 
@@ -215,16 +217,19 @@ def make_multi_modal(
     # # only take one informative dimension
     # view_2 = X[:, (0,)]
 
-    method = 'svd'
+    method = "svd"
     mu_1_vec = np.array([-1, 2])
     mu_0_vec = np.array([0 / np.sqrt(i) for i in range(1, 3)])
-    cov = np.array([[1., 0.5], [0.5, 1.]])
+    cov = np.array([[1.0, 0.5], [0.5, 1.0]])
 
     mixture_idx = rng.choice(2, n_samples // 2, replace=True, shuffle=True, p=[mix, 1 - mix])  # type: ignore
 
     norm_params = [[mu_0_vec, cov], [mu_1_vec, cov]]
     X_mixture = np.fromiter(
-        (rng.multivariate_normal(*(norm_params[i]), size=1, method=method) for i in mixture_idx),
+        (
+            rng.multivariate_normal(*(norm_params[i]), size=1, method=method)
+            for i in mixture_idx
+        ),
         dtype=np.dtype((float, 2)),
     )
 
@@ -237,7 +242,9 @@ def make_multi_modal(
 
     assert X.shape[1] == 2
     view_1 = X[:, (0,)]
-    view_1 = np.hstack((view_1, rng.normal(loc=0, scale=1, size=(X.shape[0], n_dim_1 - 1))))
+    view_1 = np.hstack(
+        (view_1, rng.normal(loc=0, scale=1, size=(X.shape[0], n_dim_1 - 1)))
+    )
     view_2 = X[:, 1:]
 
     # add noise to the second view so that view_2 = (n_samples, n_dim_2)
@@ -251,7 +258,7 @@ def make_multi_modal(
 
 
 def make_multi_equal(
-        root_dir,
+    root_dir,
     n_samples=4096,
     n_dim_1=4090,
     mu_0=1,
@@ -379,7 +386,10 @@ def _estimate_threshold(y_true, y_score, target_specificity=0.98, pos_label=1):
 
     return threshold_at_specificity
 
-def sensitivity_at_specificity(y_true, y_score, target_specificity=0.98, pos_label=1, threshold=None):
+
+def sensitivity_at_specificity(
+    y_true, y_score, target_specificity=0.98, pos_label=1, threshold=None
+):
     n_trees, n_samples, n_classes = y_score.shape
 
     # Compute nan-averaged y_score along the trees axis
@@ -398,7 +408,9 @@ def sensitivity_at_specificity(y_true, y_score, target_specificity=0.98, pos_lab
 
     if threshold is None:
         # Find the threshold corresponding to the target specificity
-        threshold_at_specificity = _estimate_threshold(y_true, y_score_binary, target_specificity=0.98, pos_label=1)
+        threshold_at_specificity = _estimate_threshold(
+            y_true, y_score_binary, target_specificity=0.98, pos_label=1
+        )
     else:
         threshold_at_specificity = threshold
 
@@ -430,7 +442,10 @@ def _run_simulation(
     target_specificity = 0.98
 
     fname = (
-        root_dir / "data" / sim_name / f"{sim_name}_{n_samples_}_{n_dims_1_}_{n_dims_2_}_{idx}.npz"
+        root_dir
+        / "data"
+        / sim_name
+        / f"{sim_name}_{n_samples_}_{n_dims_1_}_{n_dims_2_}_{idx}.npz"
     )
     if not fname.exists():
         raise RuntimeError(f"{fname} does not exist")
@@ -459,7 +474,14 @@ def _run_simulation(
     )
     output_fname.parent.mkdir(exist_ok=True, parents=True)
 
-    print("Running analysis for: ", output_fname, overwrite, X.shape, n_samples, n_dims_1 + n_dims_2_)
+    print(
+        "Running analysis for: ",
+        output_fname,
+        overwrite,
+        X.shape,
+        n_samples,
+        n_dims_1 + n_dims_2_,
+    )
     if not output_fname.exists() or overwrite:
         might_kwargs = MODEL_NAMES["might"]
         feature_set_ends = [n_dims_1, n_dims_1 + n_dims_2_]  # [4090, 4096]
@@ -476,7 +498,9 @@ def _run_simulation(
 
         if use_second_split_for_threshold:
             # array-like of shape (n_estimators, n_samples, n_classes)
-            honest_idx_posteriors = est.predict_proba_per_tree(X, indices=est.honest_indices_)
+            honest_idx_posteriors = est.predict_proba_per_tree(
+                X, indices=est.honest_indices_
+            )
 
             # get the threshold for specified highest sensitivity at 0.98 specificity
             # Compute nan-averaged y_score along the trees axis
@@ -507,11 +531,17 @@ def _run_simulation(
             y_score_binary = y_score_binary[~nan_rows]
             y_true = y_true[~nan_rows]
 
-        threshold_at_specificity = _estimate_threshold(y_true, y_score_binary, target_specificity=0.98, pos_label=1)
+        threshold_at_specificity = _estimate_threshold(
+            y_true, y_score_binary, target_specificity=0.98, pos_label=1
+        )
 
         # generate S@S98 from posterior array
-        sas98 = sensitivity_at_specificity(y, posterior_arr, target_specificity=target_specificity,
-                                           threshold=threshold_at_specificity)
+        sas98 = sensitivity_at_specificity(
+            y,
+            posterior_arr,
+            target_specificity=target_specificity,
+            threshold=threshold_at_specificity,
+        )
 
         np.savez_compressed(
             output_fname,
@@ -523,7 +553,7 @@ def _run_simulation(
             sim_type=sim_name,
             y=y,
             posterior_arr=posterior_arr,
-            threshold=threshold_at_specificity
+            threshold=threshold_at_specificity,
         )
 
 
@@ -535,22 +565,22 @@ MODEL_NAMES = {
         "bootstrap": True,
         "stratify": True,
         "max_samples": 1.6,
-        'tree_estimator': MultiViewDecisionTreeClassifier(),
+        "tree_estimator": MultiViewDecisionTreeClassifier(),
     },
 }
 
 if __name__ == "__main__":
-    
-    SIMULATIONS_NAMES = ['mean_shift', 'multi_modal', 'multi_equal']
 
-    model_name = 'comight'
+    SIMULATIONS_NAMES = ["mean_shift", "multi_modal", "multi_equal"]
+
+    model_name = "comight"
     overwrite = False
 
     n_repeats = 100
 
     # Section: Make data
     root_dir = Path("/Volumes/Extreme Pro/cancer")
-    root_dir = Path('/data/adam/')
+    root_dir = Path("/data/adam/")
 
     n_repeats = 100
     Parallel(n_jobs=-1)(
@@ -560,17 +590,17 @@ if __name__ == "__main__":
         )
         for seed in range(n_repeats)
         for func in [
-            # make_mean_shift, 
-            make_multi_modal
-            ]
+            make_mean_shift,
+            make_multi_modal,
+            make_multi_equal,
+        ]
     )
 
     # for seed in range(n_repeats):
     #     make_mean_shift(root_dir, seed=seed)
     #     make_multi_modal(root_dir, seed=seed)
-        # make_multi_equal(root_dir, seed=seed)
+    # make_multi_equal(root_dir, seed=seed)
 
-    
     # Section: varying over sample-sizes
     # n_samples_list = [2**x for x in range(8, 13)]
     # n_dims_1 = 4090
@@ -608,5 +638,3 @@ if __name__ == "__main__":
     #     for n_dims_1 in n_dims_list
     #     for idx in range(n_repeats)
     # )
-
-   
