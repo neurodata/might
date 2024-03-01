@@ -135,6 +135,8 @@ def _run_simulation(
         X = X[:, :n_dims_1]
     elif run_view == "view_two":
         X = X[:, -n_dims_2_:]
+    elif run_view == "view_oneandtwo":
+        X = X
 
     print(
         "Running analysis for: ",
@@ -282,6 +284,26 @@ if __name__ == "__main__":
             sim_name,
             model_name,
             run_view="view_two",
+            overwrite=False,
+        )
+        for sim_name in SIMULATIONS_NAMES
+        for n_samples in n_samples_list
+        for idx in range(n_repeats)
+    )
+
+    # Section: varying over sample-sizes
+    model_name = "might_viewoneandtwo"
+    n_samples_list = [2**x for x in range(8, 13)]
+    print(n_samples_list)
+    results = Parallel(n_jobs=n_jobs)(
+        delayed(_run_simulation)(
+            n_samples,
+            n_dims_1,
+            idx,
+            root_dir,
+            sim_name,
+            model_name,
+            run_view="view_oneandtwo",
             overwrite=False,
         )
         for sim_name in SIMULATIONS_NAMES
