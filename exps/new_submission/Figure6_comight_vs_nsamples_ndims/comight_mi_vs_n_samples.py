@@ -240,7 +240,8 @@ MODEL_NAMES = {
 if __name__ == "__main__":
     root_dir = Path("/Volumes/Extreme Pro/cancer")
 
-    SIMULATIONS_NAMES = ["mean_shift", "multi_modal", "multi_equal"]
+    SIMULATIONS_NAMES = [
+        "mean_shift_compounding", "multi_modal_compounding", "multi_equal"]
 
     overwrite = False
     n_repeats = 100
@@ -248,8 +249,8 @@ if __name__ == "__main__":
 
     # Section: varying over sample-sizes
     model_name = "comight-cmi"
-    n_samples_list = [2**x for x in range(8, 13)]
-    n_dims_1 = 4090
+    n_samples_list = [2**x for x in range(8, 12)]
+    n_dims_1 = 1024-6
     print(n_samples_list)
     results = Parallel(n_jobs=n_jobs)(
         delayed(_run_simulation)(
@@ -267,8 +268,7 @@ if __name__ == "__main__":
     )
 
     # Section: varying over sample-sizes
-    n_samples_list = [2**x for x in range(8, 13)]
-    n_dims_1 = 4090
+    n_samples_list = [2**x for x in range(8, 12)]
     print(n_samples_list)
     model_name = "ksg"
     results = Parallel(n_jobs=n_jobs)(

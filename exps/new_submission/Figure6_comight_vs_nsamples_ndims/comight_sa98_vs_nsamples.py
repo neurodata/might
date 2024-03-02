@@ -550,7 +550,7 @@ if __name__ == "__main__":
     overwrite = False
 
     n_repeats = 100
-    n_jobs = -2
+    n_jobs = -3
 
     # Section: varying over sample-sizes
     n_samples_list = [2**x for x in range(8, 13)]
