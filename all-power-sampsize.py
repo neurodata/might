@@ -22,6 +22,7 @@ from scipy.stats import entropy, norm, mstats
 from sklearn.decomposition import PCA
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import roc_auc_score
+from sklearn.ensemble import RandomForestClassifier
 from sklearn.tree import DecisionTreeClassifier, ExtraTreeClassifier
 
 from hyppo.independence import Dcorr

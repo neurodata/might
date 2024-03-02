@@ -22,6 +22,7 @@ from scipy.stats import entropy, norm, mstats
 from sklearn.decomposition import PCA
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import roc_auc_score
+from sklearn.ensemble import RandomForestClassifier
 from sklearn.tree import DecisionTreeClassifier, ExtraTreeClassifier
 
 from hyppo.independence import Dcorr
@@ -188,7 +189,7 @@ sns.set_palette(PALETTE[2:5] + PALETTE[6:], n_colors=9)
 
 # SAMP_SIZES = [1024]
 DIMENSIONS = [2**i for i in range(2, 13)]
-SAMP_SIZE = 4096
+SAMP_SIZE = 512
 REPS = range(1000)
 
 SAVE_PATH = "n-{}_p-{}_{}".format(int(SAMP_SIZE), int(DIMENSIONS[0]), int(DIMENSIONS[-1]))
@@ -201,8 +202,8 @@ SIMULATIONS = {
 }
 
 TESTS = {
-    # "Dcorr" : Dcorr(),
-    # "Dcorr_PCA" : Dcorr_PCA(),
+    "Dcorr" : Dcorr(),
+    "Dcorr_PCA" : Dcorr_PCA(),
     "hypoRF" : hypoRF(),
 }
 
@@ -215,7 +216,7 @@ def _indep_sim_gen(X, p):
     Generate x, y from each sim
     """
     X_t = X[:, :p]
-    y_t = np.concatenate((np.zeros(4096 // 2), np.ones(4096 // 2)))
+    y_t = np.concatenate((np.zeros(SAMP_SIZE // 2), np.ones(SAMP_SIZE // 2)))
     return X_t, y_t
 
 
