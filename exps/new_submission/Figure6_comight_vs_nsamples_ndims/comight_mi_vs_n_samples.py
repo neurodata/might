@@ -80,7 +80,7 @@ def _run_simulation(
         y = y[train_idx, ...].squeeze()
     if n_dims_1 < n_dims_1_:
         view_one = X[:, :n_dims_1]
-        view_two = X[:, n_dims_1_:]
+        view_two = X[:, -n_dims_2_:]
         assert view_two.shape[1] == n_dims_2_
         X = np.concatenate((view_one, view_two), axis=1)
 
@@ -188,7 +188,7 @@ def _run_ksg_simulation(
         y = y[train_idx, ...].squeeze()
     if n_dims_1 < n_dims_1_:
         view_one = X[:, :n_dims_1]
-        view_two = X[:, n_dims_1_:]
+        view_two = X[:, -n_dims_2_:]
         assert view_two.shape[1] == n_dims_2_
         X = np.concatenate((view_one, view_two), axis=1)
 
@@ -210,7 +210,7 @@ def _run_ksg_simulation(
         # permute the second view
         covariate_index = np.arange(n_dims_1, n_dims_1 + n_dims_2_)
         x = X[:, covariate_index]
-        z = X[:, :n_dims_1]
+        z = X[:, :n_dims_1] 
         cmi = ee.mi(x=x, y=y, z=z, k=3)
 
         np.savez_compressed(
@@ -239,33 +239,34 @@ MODEL_NAMES = {
 
 if __name__ == "__main__":
     root_dir = Path("/Volumes/Extreme Pro/cancer")
+    root_dir = Path("/data/adam/")
 
     SIMULATIONS_NAMES = [
         "mean_shift_compounding", "multi_modal_compounding", "multi_equal"]
 
     overwrite = False
     n_repeats = 100
-    n_jobs = 1
+    n_jobs = -1
+    n_dims_1 = 1024-6
 
     # Section: varying over sample-sizes
-    model_name = "comight-cmi"
-    n_samples_list = [2**x for x in range(8, 12)]
-    n_dims_1 = 1024-6
-    print(n_samples_list)
-    results = Parallel(n_jobs=n_jobs)(
-        delayed(_run_simulation)(
-            n_samples,
-            n_dims_1,
-            idx,
-            root_dir,
-            sim_name,
-            model_name,
-            overwrite=False,
-        )
-        for sim_name in SIMULATIONS_NAMES
-        for n_samples in n_samples_list
-        for idx in range(n_repeats)
-    )
+    # model_name = "comight-cmi"
+    # n_samples_list = [2**x for x in range(8, 12)]
+    # print(n_samples_list)
+    # results = Parallel(n_jobs=n_jobs)(
+    #     delayed(_run_simulation)(
+    #         n_samples,
+    #         n_dims_1,
+    #         idx,
+    #         root_dir,
+    #         sim_name,
+    #         model_name,
+    #         overwrite=False,
+    #     )
+    #     for sim_name in SIMULATIONS_NAMES
+    #     for n_samples in n_samples_list
+    #     for idx in range(n_repeats)
+    # )
 
     # Section: varying over sample-sizes
     n_samples_list = [2**x for x in range(8, 12)]
