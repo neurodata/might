@@ -141,7 +141,6 @@ def _run_simulation(
         X = X
         assert X.shape[1] == n_dims_1 + n_dims_2_
 
-
     print(
         "Running analysis for: ",
         output_fname,
@@ -153,7 +152,7 @@ def _run_simulation(
     )
     if not output_fname.exists() or overwrite:
         might_kwargs = MODEL_NAMES["might"]
-        
+
         est = HonestForestClassifier(seed=seed, **might_kwargs)
 
         est, posterior_arr = build_hyppo_oob_forest(
@@ -240,12 +239,12 @@ MODEL_NAMES = {
 
 if __name__ == "__main__":
     root_dir = Path("/Volumes/Extreme Pro/cancer")
-    # root_dir = Path("/data/adam/")
+    root_dir = Path("/data/adam/")
 
     SIMULATIONS_NAMES = [
         "mean_shift_compounding",
         "multi_modal_compounding",
-        #    "multi_equal"
+        "multi_equal",
     ]
 
     overwrite = False
