@@ -22,59 +22,6 @@ from joblib import delayed, Parallel
 seed = 12345
 rng = np.random.default_rng(seed)
 
-### hard-coded parameters
-n_estimators = 6000
-max_features = 0.3
-
-
-def _estimate_threshold(y_true, y_score, target_specificity=0.98, pos_label=1):
-    # Compute ROC curve
-    fpr, tpr, thresholds = roc_curve(y_true, y_score, pos_label=pos_label)
-
-    # Find the threshold corresponding to the target specificity
-    index = np.argmax(fpr >= (1 - target_specificity))
-    threshold_at_specificity = thresholds[index]
-
-    return threshold_at_specificity
-
-
-def sensitivity_at_specificity(
-    y_true, y_score, target_specificity=0.98, pos_label=1, threshold=None
-):
-    n_trees, n_samples, n_classes = y_score.shape
-
-    # Compute nan-averaged y_score along the trees axis
-    y_score_avg = np.nanmean(y_score, axis=0)
-
-    # Extract true labels and nan-averaged predicted scores for the positive class
-    y_true = y_true.ravel()
-    y_score_binary = y_score_avg[:, 1]
-
-    # Identify rows with NaN values in y_score_binary
-    nan_rows = np.isnan(y_score_binary)
-
-    # Remove NaN rows from y_score_binary and y_true
-    y_score_binary = y_score_binary[~nan_rows]
-    y_true = y_true[~nan_rows]
-
-    if threshold is None:
-        # Find the threshold corresponding to the target specificity
-        threshold_at_specificity = _estimate_threshold(
-            y_true, y_score_binary, target_specificity=0.98, pos_label=1
-        )
-    else:
-        threshold_at_specificity = threshold
-
-    # Use the threshold to classify predictions
-    y_pred_at_specificity = (y_score_binary >= threshold_at_specificity).astype(int)
-
-    # Compute sensitivity at the chosen specificity
-    sensitivity = np.sum((y_pred_at_specificity == 1) & (y_true == 1)) / np.sum(
-        y_true == 1
-    )
-
-    return sensitivity
-
 
 def Calculate_SA98(y_true, y_pred_proba, max_fpr=0.02) -> float:
     if y_true.squeeze().ndim != 1:
@@ -167,7 +114,7 @@ def _run_simulation(
             model = RandomForestClassifier(random_state=seed, **MODEL_NAMES[model_name])
         elif model_name == "knn":
             model = KNeighborsClassifier(
-                n_neighbors=int(np.sqrt(n_samples)+1),
+                n_neighbors=int(np.sqrt(n_samples) + 1),
             )
         elif model_name == "svm":
             model = SVC(random_state=seed, **MODEL_NAMES[model_name])
@@ -189,7 +136,7 @@ def _run_simulation(
             y_test_list.append(y_test)
             stat = Calculate_SA98(y_test, observe_proba, max_fpr=0.02)
             stats.append(stat)
-        
+
         # average the stats
         stat_avg = np.mean(stats)
 
@@ -207,10 +154,11 @@ def _run_simulation(
         )
 
 
+
 MODEL_NAMES = {
     "rf": {
         "n_estimators": 1200,
-        "max_features": max_features,
+        "max_features": 0.3,
     },
     # "knn": {
     #     "n_neighbors": 5,
