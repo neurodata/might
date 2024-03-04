@@ -124,16 +124,17 @@ def _run_simulation(
         # train model in...
         cv = StratifiedKFold(n_splits=5, shuffle=True)
         stats = []
-        y_pred_probas = []
-        y_test_list = []
-        for train_ix, test_ix in cv.split(X, y):
+        y_pred_probas = np.full((5, n_samples), np.nan, dtype=np.float32)
+        y_test_list = np.full((5, n_samples), np.nan, dtype=np.float32)
+
+        for idx, (train_ix, test_ix) in enumerate(cv.split(X, y)):
             X_train, X_test = X[train_ix, :], X[test_ix, :]
             y_train, y_test = y[train_ix], y[test_ix]
             model.fit(X_train, y_train)
             observe_proba = model.predict_proba(X_test)
             # calculate S@98 or whatever the stat is
-            y_pred_probas.append(observe_proba)
-            y_test_list.append(y_test)
+            y_pred_probas[idx, test_ix] = observe_proba
+            y_test_list[idx, test_ix] = y_test
             stat = Calculate_SA98(y_test, observe_proba, max_fpr=0.02)
             stats.append(stat)
 
@@ -147,12 +148,11 @@ def _run_simulation(
             n_dims_1=n_dims_1,
             n_dims_2=n_dims_2_,
             sas98=stat_avg,
-            sa98_list=stats,
             sim_type=sim_name,
+            # sa98_list=stats,
             y_test_list=y_test_list,
             y_pred_probas=y_pred_probas,
         )
-
 
 
 MODEL_NAMES = {
@@ -209,7 +209,7 @@ if __name__ == "__main__":
             overwrite=False,
         )
         for sim_name in SIMULATIONS_NAMES
-        for n_samples in n_samples_list
+        for n_samples in [10]  # n_samples_list
         for idx in range(n_repeats)
         for model_name in model_names
     )

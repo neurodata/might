@@ -227,7 +227,7 @@ if __name__ == "__main__":
     overwrite = False
 
     n_repeats = 100
-    n_jobs = 12
+    n_jobs = -2
 
     # Section: varying over dimensions
     n_samples = 4096
