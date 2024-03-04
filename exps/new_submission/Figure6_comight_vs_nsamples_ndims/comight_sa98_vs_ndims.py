@@ -18,6 +18,7 @@ from sktree import HonestForestClassifier
 from sktree.tree import MultiViewDecisionTreeClassifier
 from sktree.stats import (
     build_hyppo_oob_forest,
+    PermutationHonestForestClassifier,
 )
 from sktree.datasets import make_trunk_classification
 
@@ -457,40 +458,19 @@ def _run_simulation(
             verbose=False,
         )
 
-        if use_second_split_for_threshold:
-            # array-like of shape (n_estimators, n_samples, n_classes)
-            honest_idx_posteriors = est.predict_proba_per_tree(
-                X, indices=est.honest_indices_
-            )
+        # Compute nan-averaged y_score along the trees axis
+        y_score_avg = np.nanmean(posterior_arr, axis=0)
 
-            # get the threshold for specified highest sensitivity at 0.98 specificity
-            # Compute nan-averaged y_score along the trees axis
-            y_score_avg = np.nanmean(honest_idx_posteriors, axis=0)
+        # Extract true labels and nan-averaged predicted scores for the positive class
+        y_true = y.ravel()
+        y_score_binary = y_score_avg[:, 1]
 
-            # Extract true labels and nan-averaged predicted scores for the positive class
-            y_true = y.ravel()
-            y_score_binary = y_score_avg[:, 1]
+        # Identify rows with NaN values in y_score_binary
+        nan_rows = np.isnan(y_score_binary)
 
-            # Identify rows with NaN values in y_score_binary
-            nan_rows = np.isnan(y_score_binary)
-
-            # Remove NaN rows from y_score_binary and y_true
-            y_score_binary = y_score_binary[~nan_rows]
-            y_true = y_true[~nan_rows]
-        else:
-            # Compute nan-averaged y_score along the trees axis
-            y_score_avg = np.nanmean(posterior_arr, axis=0)
-
-            # Extract true labels and nan-averaged predicted scores for the positive class
-            y_true = y.ravel()
-            y_score_binary = y_score_avg[:, 1]
-
-            # Identify rows with NaN values in y_score_binary
-            nan_rows = np.isnan(y_score_binary)
-
-            # Remove NaN rows from y_score_binary and y_true
-            y_score_binary = y_score_binary[~nan_rows]
-            y_true = y_true[~nan_rows]
+        # Remove NaN rows from y_score_binary and y_true
+        y_score_binary = y_score_binary[~nan_rows]
+        y_true = y_true[~nan_rows]
 
         threshold_at_specificity = _estimate_threshold(
             y_true, y_score_binary, target_specificity=0.98, pos_label=1
@@ -537,7 +517,7 @@ if __name__ == "__main__":
     SIMULATIONS_NAMES = [
         "mean_shift_compounding",
         "multi_modal_compounding",
-        #    "multi_equal"
+        "multi_equal"
     ]
     model_name = "comight"
     overwrite = False

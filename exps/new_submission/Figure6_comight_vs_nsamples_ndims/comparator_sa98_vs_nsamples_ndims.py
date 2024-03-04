@@ -6,16 +6,16 @@
 from pathlib import Path
 import numpy as np
 from pathlib import Path
-from collections import defaultdict
 import numpy as np
 from sklearn.model_selection import (
     StratifiedShuffleSplit,
 )
+from sklearn.linear_model import LogisticRegression
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.svm import SVC
+from sklearn.neighbors import KNeighborsClassifier
 from sklearn.metrics import roc_curve
 from joblib import delayed, Parallel
-from sktree import HonestForestClassifier
-from sktree.tree import MultiViewDecisionTreeClassifier
-from sktree.stats import build_hyppo_oob_forest
 
 
 seed = 12345
@@ -83,6 +83,7 @@ def _run_simulation(
     sim_name,
     model_name,
     overwrite=False,
+    use_second_split_for_threshold=False,
     generate_data=False,
 ):
     n_samples_ = 4096
@@ -108,6 +109,7 @@ def _run_simulation(
     print(f"Output file: {output_fname} {output_fname.exists()}")
     if not overwrite and output_fname.exists():
         return
+
     if not fname.exists():
         raise RuntimeError(f"{fname} does not exist")
     print(f"Reading {fname}")
@@ -148,18 +150,17 @@ def _run_simulation(
             n_dims_1 + n_dims_2_,
         ]  # [4090, 4096] for varying samples
         assert X.shape[1] == feature_set_ends[1]
-        est = HonestForestClassifier(
-            seed=seed, feature_set_ends=feature_set_ends, **might_kwargs
-        )
 
-        est, posterior_arr = build_hyppo_oob_forest(
-            est,
-            X,
-            y,
-            verbose=False,
-        )
-        print(feature_set_ends, X.shape, n_samples, n_dims_1, n_dims_2_)
-        print(max([tree.get_depth() for tree in est.estimators_]))
+        if model_name == "rf":
+            model = RandomForestClassifier(random_state=seed, **MODEL_NAMES[model_name])
+        elif model_name == "knn":
+            model = KNeighborsClassifier(**MODEL_NAMES[model_name])
+        elif model_name == "svm":
+            model = SVC(random_state=seed, **MODEL_NAMES[model_name])
+        elif model_name == "lr":
+            model = LogisticRegression(random_state=seed, **MODEL_NAMES[model_name])
+
+        # train model in...
 
         # Compute nan-averaged y_score along the trees axis
         y_score_avg = np.nanmean(posterior_arr, axis=0)
@@ -202,20 +203,26 @@ def _run_simulation(
 
 
 MODEL_NAMES = {
-    "might": {
-        "n_estimators": n_estimators,
-        "honest_fraction": 0.5,
-        "n_jobs": 1,
-        "bootstrap": True,
-        "stratify": True,
-        "max_samples": 1.6,
-        "tree_estimator": MultiViewDecisionTreeClassifier(),
+    "rf": {
+        "n_estimators": 1200,
+        "max_features": max_features,
+    },
+    "knn": {
+        "n_neighbors": 5,
+    },
+    "svm": {
+        "probability": True,
+    },
+    "lr": {
+        "max_iter": 1000,
+        "penalty": "l1",
+        "solver": "liblinear",
     },
 }
 
 if __name__ == "__main__":
     root_dir = Path("/Volumes/Extreme Pro/cancer")
-    # root_dir = Path('/data/adam/')
+    root_dir = Path("/data/adam/")
 
     SIMULATIONS_NAMES = [
         "mean_shift_compounding",
@@ -223,11 +230,11 @@ if __name__ == "__main__":
         "multi_equal",
     ]
 
-    model_name = "comight"
+    model_names = ["rf", "knn", "svm", "lr"]
     overwrite = False
 
     n_repeats = 100
-    n_jobs = -3
+    n_jobs = -1
 
     # Section: varying over sample-sizes
     n_samples_list = [2**x for x in range(8, 13)]
@@ -247,4 +254,26 @@ if __name__ == "__main__":
         for sim_name in SIMULATIONS_NAMES
         for n_samples in n_samples_list
         for idx in range(n_repeats)
+        for model_name in model_names
     )
+
+    # Section: varying over dimensions of the first view
+    # n_samples = 4096
+    # n_dims_list = [2**i - 6 for i in range(3, 13)]
+    # print(n_dims_list)
+    # results = Parallel(n_jobs=n_jobs)(
+    #     delayed(_run_simulation)(
+    #         n_samples,
+    #         n_dims_1,
+    #         idx,
+    #         root_dir,
+    #         sim_name,
+    #         model_name,
+    #         overwrite=False,
+    #         generate_data=False,
+    #     )
+    #     for sim_name in SIMULATIONS_NAMES
+    #     for n_dims_1 in n_dims_list
+    #     for idx in range(n_repeats)
+    #     for model_name in model_names
+    # )

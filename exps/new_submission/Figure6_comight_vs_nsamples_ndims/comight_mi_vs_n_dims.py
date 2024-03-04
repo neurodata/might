@@ -253,12 +253,11 @@ if __name__ == "__main__":
     overwrite = False
     n_repeats = 100
     n_jobs = 1
-    n_samples = 256
+    n_samples = 4096
 
     # Section: varying over sample-sizes
     model_name = "comight-cmi"
-    n_dims_1_list = [2**x for x in range(8, 12)]
-    n_dims_1_list = [2**i - 6 for i in range(3, 13)[::2]]
+    n_dims_1_list = [2**i - 6 for i in range(3, 12)[::2]] + [2**12-6]
     print('Analyzing for the following dims: ', n_dims_1_list)
     results = Parallel(n_jobs=n_jobs)(
         delayed(_run_simulation)(
@@ -276,8 +275,7 @@ if __name__ == "__main__":
     )
 
     # Section: varying over sample-sizes
-    n_dims_1_list = [2**x for x in range(8, 12)]
-    n_dims_1_list = [2**i - 6 for i in range(3, 13)[::2]]
+    n_dims_1_list = [2**i - 6 for i in range(3, 12)[::2]] + [2**12-6]
     print(n_dims_1_list)
 
     model_name = "ksg"
