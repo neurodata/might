@@ -9,6 +9,7 @@ from pathlib import Path
 import numpy as np
 from sklearn.model_selection import (
     StratifiedShuffleSplit,
+    StratifiedKFold,
 )
 from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier
@@ -75,6 +76,21 @@ def sensitivity_at_specificity(
     return sensitivity
 
 
+def Calculate_SA98(y_true, y_pred_proba, max_fpr=0.02) -> float:
+    if y_true.squeeze().ndim != 1:
+        raise ValueError(f"y_true must be 1d, not {y_true.shape}")
+    if 0 in y_true or -1 in y_true:
+        fpr, tpr, thresholds = roc_curve(
+            y_true, y_pred_proba[:, 1], pos_label=1, drop_intermediate=False
+        )
+    else:
+        fpr, tpr, thresholds = roc_curve(
+            y_true, y_pred_proba[:, 1], pos_label=2, drop_intermediate=False
+        )
+    s98 = max([tpr for (fpr, tpr) in zip(fpr, tpr) if fpr <= max_fpr])
+    return s98
+
+
 def _run_simulation(
     n_samples,
     n_dims_1,
@@ -83,13 +99,10 @@ def _run_simulation(
     sim_name,
     model_name,
     overwrite=False,
-    use_second_split_for_threshold=False,
-    generate_data=False,
 ):
     n_samples_ = 4096
     n_dims_2_ = 6
     n_dims_1_ = 4090
-    target_specificity = 0.98
 
     fname = (
         root_dir
@@ -144,7 +157,6 @@ def _run_simulation(
         n_dims_1 + n_dims_2_,
     )
     if not output_fname.exists() or overwrite:
-        might_kwargs = MODEL_NAMES["might"]
         feature_set_ends = [
             n_dims_1,
             n_dims_1 + n_dims_2_,
@@ -154,39 +166,32 @@ def _run_simulation(
         if model_name == "rf":
             model = RandomForestClassifier(random_state=seed, **MODEL_NAMES[model_name])
         elif model_name == "knn":
-            model = KNeighborsClassifier(**MODEL_NAMES[model_name])
+            model = KNeighborsClassifier(
+                n_neighbors=int(np.sqrt(n_samples)+1),
+            )
         elif model_name == "svm":
             model = SVC(random_state=seed, **MODEL_NAMES[model_name])
         elif model_name == "lr":
             model = LogisticRegression(random_state=seed, **MODEL_NAMES[model_name])
 
         # train model in...
-
-        # Compute nan-averaged y_score along the trees axis
-        y_score_avg = np.nanmean(posterior_arr, axis=0)
-
-        # Extract true labels and nan-averaged predicted scores for the positive class
-        y_true = y.ravel()
-        y_score_binary = y_score_avg[:, 1]
-
-        # Identify rows with NaN values in y_score_binary
-        nan_rows = np.isnan(y_score_binary)
-
-        # Remove NaN rows from y_score_binary and y_true
-        y_score_binary = y_score_binary[~nan_rows]
-        y_true = y_true[~nan_rows]
-
-        threshold_at_specificity = _estimate_threshold(
-            y_true, y_score_binary, target_specificity=0.98, pos_label=1
-        )
-
-        # generate S@S98 from posterior array
-        sas98 = sensitivity_at_specificity(
-            y,
-            posterior_arr,
-            target_specificity=target_specificity,
-            threshold=threshold_at_specificity,
-        )
+        cv = StratifiedKFold(n_splits=5, shuffle=True)
+        stats = []
+        y_pred_probas = []
+        y_test_list = []
+        for train_ix, test_ix in cv.split(X, y):
+            X_train, X_test = X[train_ix, :], X[test_ix, :]
+            y_train, y_test = y[train_ix], y[test_ix]
+            model.fit(X_train, y_train)
+            observe_proba = model.predict_proba(X_test)
+            # calculate S@98 or whatever the stat is
+            y_pred_probas.append(observe_proba)
+            y_test_list.append(y_test)
+            stat = Calculate_SA98(y_test, observe_proba, max_fpr=0.02)
+            stats.append(stat)
+        
+        # average the stats
+        stat_avg = np.mean(stats)
 
         np.savez_compressed(
             output_fname,
@@ -194,11 +199,11 @@ def _run_simulation(
             n_samples=n_samples,
             n_dims_1=n_dims_1,
             n_dims_2=n_dims_2_,
-            sas98=sas98,
+            sas98=stat_avg,
+            sa98_list=stats,
             sim_type=sim_name,
-            y=y,
-            posterior_arr=posterior_arr,
-            threshold=threshold_at_specificity,
+            y_test_list=y_test_list,
+            y_pred_probas=y_pred_probas,
         )
 
 
@@ -207,9 +212,9 @@ MODEL_NAMES = {
         "n_estimators": 1200,
         "max_features": max_features,
     },
-    "knn": {
-        "n_neighbors": 5,
-    },
+    # "knn": {
+    #     "n_neighbors": 5,
+    # },
     "svm": {
         "probability": True,
     },
@@ -230,7 +235,12 @@ if __name__ == "__main__":
         "multi_equal",
     ]
 
-    model_names = ["rf", "knn", "svm", "lr"]
+    model_names = [
+        # "rf",
+        "knn",
+        # "svm",
+        # "lr",
+    ]
     overwrite = False
 
     n_repeats = 100
@@ -249,7 +259,6 @@ if __name__ == "__main__":
             sim_name,
             model_name,
             overwrite=False,
-            generate_data=False,
         )
         for sim_name in SIMULATIONS_NAMES
         for n_samples in n_samples_list
@@ -258,22 +267,21 @@ if __name__ == "__main__":
     )
 
     # Section: varying over dimensions of the first view
-    # n_samples = 4096
-    # n_dims_list = [2**i - 6 for i in range(3, 13)]
-    # print(n_dims_list)
-    # results = Parallel(n_jobs=n_jobs)(
-    #     delayed(_run_simulation)(
-    #         n_samples,
-    #         n_dims_1,
-    #         idx,
-    #         root_dir,
-    #         sim_name,
-    #         model_name,
-    #         overwrite=False,
-    #         generate_data=False,
-    #     )
-    #     for sim_name in SIMULATIONS_NAMES
-    #     for n_dims_1 in n_dims_list
-    #     for idx in range(n_repeats)
-    #     for model_name in model_names
-    # )
+    n_samples = 4096
+    n_dims_list = [2**i - 6 for i in range(3, 13)]
+    print(n_dims_list)
+    results = Parallel(n_jobs=n_jobs)(
+        delayed(_run_simulation)(
+            n_samples,
+            n_dims_1,
+            idx,
+            root_dir,
+            sim_name,
+            model_name,
+            overwrite=False,
+        )
+        for sim_name in SIMULATIONS_NAMES
+        for n_dims_1 in n_dims_list
+        for idx in range(n_repeats)
+        for model_name in model_names
+    )
