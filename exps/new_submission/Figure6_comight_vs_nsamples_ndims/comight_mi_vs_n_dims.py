@@ -259,31 +259,11 @@ if __name__ == "__main__":
     n_samples = 4096
 
     # Section: varying over dims
-    # model_name = "comight-cmi"
-    # n_dims_1_list = [2**i - 6 for i in range(3, 12)[::2]] + [2**12-6]
-    # print('Analyzing for the following dims: ', n_dims_1_list)
-    # results = Parallel(n_jobs=n_jobs)(
-    #     delayed(_run_simulation)(
-    #         n_samples,
-    #         n_dims_1,
-    #         idx,
-    #         root_dir,
-    #         sim_name,
-    #         model_name,
-    #         overwrite=False,
-    #     )
-    #     for sim_name in SIMULATIONS_NAMES
-    #     for n_dims_1 in n_dims_1_list
-    #     for idx in range(n_repeats)
-    # )
-
-    # Section: varying over dims
-    n_dims_1_list = [2**i - 6 for i in range(3, 12)[::2]] + [2**12 - 6]
-    print(n_dims_1_list)
-
-    model_name = "ksg"
+    model_name = "comight-cmi"
+    n_dims_1_list = [2**i - 6 for i in range(3, 12)[::2]] + [2**12-6]
+    print('Analyzing for the following dims: ', n_dims_1_list)
     results = Parallel(n_jobs=n_jobs)(
-        delayed(_run_ksg_simulation)(
+        delayed(_run_simulation)(
             n_samples,
             n_dims_1,
             idx,
@@ -296,3 +276,23 @@ if __name__ == "__main__":
         for n_dims_1 in n_dims_1_list
         for idx in range(n_repeats)
     )
+
+    # Section: varying over dims
+    # n_dims_1_list = [2**i - 6 for i in range(3, 12)[::2]] + [2**12 - 6]
+    # print(n_dims_1_list)
+
+    # model_name = "ksg"
+    # results = Parallel(n_jobs=n_jobs)(
+    #     delayed(_run_ksg_simulation)(
+    #         n_samples,
+    #         n_dims_1,
+    #         idx,
+    #         root_dir,
+    #         sim_name,
+    #         model_name,
+    #         overwrite=False,
+    #     )
+    #     for sim_name in SIMULATIONS_NAMES
+    #     for n_dims_1 in n_dims_1_list
+    #     for idx in range(n_repeats)
+    # )
