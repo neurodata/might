@@ -4,6 +4,7 @@ with open("parameters.txt", "w") as file:
     for n_dims_1 in [2**i - 6 for i in range(3, 13)]:
         for sim_name in ["mean_shift_compounding", "multi_modal_compounding", "multi_equal"]:
             for idx in range(n_repeats):
+                # seed, n_samples, n_dims_1, sim_name
                 params = [idx, 4096, n_dims_1, sim_name]
                 file.write(' '.join(map(str, params)) + '\n')
 
