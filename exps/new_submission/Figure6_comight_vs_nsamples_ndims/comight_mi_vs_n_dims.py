@@ -255,7 +255,7 @@ if __name__ == "__main__":
 
     overwrite = False
     n_repeats = 100
-    n_jobs = -1
+    n_jobs = 20
     n_samples = 4096
 
     # Section: varying over dims
