@@ -590,8 +590,8 @@ if __name__ == "__main__":
         )
         for seed in range(n_repeats)
         for func in [
-            # make_mean_shift,
-            # make_multi_modal,
+            make_mean_shift,
+            make_multi_modal,
             make_multi_equal,
         ]
     )
