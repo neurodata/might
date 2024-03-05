@@ -96,57 +96,84 @@ def _run_simulation(
 
 if __name__ == "__main__":
     # Extract arguments from terminal input
+    # SIMULATIONS_NAMES = [
+    #     "mean_shift_compounding",
+    #     "multi_modal_compounding",
+    #     "multi_equal",
+    # ]
+    # n_repeats = 100
+    # for n_dims_1 in [2**i - 6 for i in range(3, 13)]:
+    #     for sim_name in ["mean_shift_compounding", "multi_modal_compounding", "multi_equal"]:
+    #         for idx in range(n_repeats):
+    #             params = [idx, 4096, n_dims_1, sim_name]
+
+    # for n_samples in [2**x for x in range(8, 13)]:
+    #     for sim_name in ["mean_shift_compounding", "multi_modal_compounding", "multi_equal"]:
+    #         for idx in range(n_repeats):
+    #             params = [idx, n_samples, 4090, sim_name]
+
     idx = int(sys.argv[1])
     n_samples = int(sys.argv[2])
-    n_features_2 = int(sys.argv[3])
-    sim_type = sys.argv[4]
+    n_dims_1 = int(sys.argv[3])
+    sim_name = sys.argv[4]
     root_dir = sys.argv[5]
 
-    SIMULATIONS_NAMES = [
-        "mean_shift_compounding",
-        "multi_modal_compounding",
-        "multi_equal",
-    ]
-    n_jobs = 1
-
-    overwrite = False
-    n_repeats = 100
     model_name = "cdcorr"
-
-    # Section: varying over dimensions
-    n_samples = 4096
-    n_dims_list = [2**i - 6 for i in range(3, 13)]
-    print(n_dims_list)
-    results = Parallel(n_jobs=n_jobs, verbose=True)(
-        delayed(_run_simulation)(
-            n_samples,
-            n_dims_1,
-            idx,
-            root_dir,
-            sim_name,
-            model_name,
-            overwrite=False,
-        )
-        for sim_name in SIMULATIONS_NAMES
-        for n_dims_1 in n_dims_list
-        for idx in range(n_repeats)
+    _run_simulation(
+        n_samples,
+        n_dims_1,
+        idx,
+        root_dir,
+        sim_name,
+        model_name,
+        overwrite=False,
     )
 
-    # Section: varying over sample-sizes
-    n_samples_list = [2**x for x in range(8, 13)]
-    n_dims_1 = 4090
-    print(n_samples_list)
-    results = Parallel(n_jobs=n_jobs)(
-        delayed(_run_simulation)(
-            n_samples,
-            n_dims_1,
-            idx,
-            root_dir,
-            sim_name,
-            model_name,
-            overwrite=False,
-        )
-        for sim_name in SIMULATIONS_NAMES
-        for n_samples in n_samples_list
-        for idx in range(n_repeats)
-    )
+    # SIMULATIONS_NAMES = [
+    #     "mean_shift_compounding",
+    #     "multi_modal_compounding",
+    #     "multi_equal",
+    # ]
+    # n_jobs = 1
+
+    # overwrite = False
+    # n_repeats = 100
+    # model_name = "cdcorr"
+
+    # # Section: varying over dimensions
+    # n_samples = 4096
+    # n_dims_list = [2**i - 6 for i in range(3, 13)]
+    # print(n_dims_list)
+    # results = Parallel(n_jobs=n_jobs, verbose=True)(
+    #     delayed(_run_simulation)(
+    #         n_samples,
+    #         n_dims_1,
+    #         idx,
+    #         root_dir,
+    #         sim_name,
+    #         model_name,
+    #         overwrite=False,
+    #     )
+    #     for sim_name in SIMULATIONS_NAMES
+    #     for n_dims_1 in n_dims_list
+    #     for idx in range(n_repeats)
+    # )
+
+    # # Section: varying over sample-sizes
+    # n_samples_list = [2**x for x in range(8, 13)]
+    # n_dims_1 = 4090
+    # print(n_samples_list)
+    # results = Parallel(n_jobs=n_jobs)(
+    #     delayed(_run_simulation)(
+    #         n_samples,
+    #         n_dims_1,
+    #         idx,
+    #         root_dir,
+    #         sim_name,
+    #         model_name,
+    #         overwrite=False,
+    #     )
+    #     for sim_name in SIMULATIONS_NAMES
+    #     for n_samples in n_samples_list
+    #     for idx in range(n_repeats)
+    # )
