@@ -209,7 +209,7 @@ if __name__ == "__main__":
             overwrite=False,
         )
         for sim_name in SIMULATIONS_NAMES
-        for n_samples in [10]  # n_samples_list
+        for n_samples in n_samples_list
         for idx in range(n_repeats)
         for model_name in model_names
     )
