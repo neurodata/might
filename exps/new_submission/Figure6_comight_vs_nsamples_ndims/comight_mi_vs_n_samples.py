@@ -260,23 +260,23 @@ if __name__ == "__main__":
     n_dims_1 = 4096 - 6
 
     # Section: varying over sample-sizes
-    model_name = "comight-cmi"
-    n_samples_list = [2**x for x in range(8, 13)]
-    print(n_samples_list)
-    results = Parallel(n_jobs=n_jobs)(
-        delayed(_run_simulation)(
-            n_samples,
-            n_dims_1,
-            idx,
-            root_dir,
-            sim_name,
-            model_name,
-            overwrite=False,
-        )
-        for sim_name in SIMULATIONS_NAMES
-        for n_samples in n_samples_list
-        for idx in range(n_repeats)
-    )
+    # model_name = "comight-cmi"
+    # n_samples_list = [2**x for x in range(8, 13)]
+    # print(n_samples_list)
+    # results = Parallel(n_jobs=n_jobs)(
+    #     delayed(_run_simulation)(
+    #         n_samples,
+    #         n_dims_1,
+    #         idx,
+    #         root_dir,
+    #         sim_name,
+    #         model_name,
+    #         overwrite=False,
+    #     )
+    #     for sim_name in SIMULATIONS_NAMES
+    #     for n_samples in n_samples_list
+    #     for idx in range(n_repeats)
+    # )
 
     # Section: varying over sample-sizes
     n_samples_list = [2**x for x in range(8, 13)]

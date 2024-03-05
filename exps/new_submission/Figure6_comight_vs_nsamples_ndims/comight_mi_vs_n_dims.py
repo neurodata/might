@@ -124,7 +124,7 @@ def _run_simulation(
 
         y_pred_proba = np.nanmean(perm_posterior_arr, axis=0)
         I_X1_Y = _mutual_information(y, y_pred_proba)
-        
+
         if np.isnan(I_X1_Y) or np.isnan(I_X1X2_Y):
             raise RuntimeError(f"NaN values for {output_fname}")
         np.savez_compressed(
@@ -212,7 +212,7 @@ def _run_ksg_simulation(
         # permute the second view
         covariate_index = np.arange(n_dims_1, n_dims_1 + n_dims_2_)
         x = X[:, covariate_index]
-        z = X[:, :n_dims_1] 
+        z = X[:, :n_dims_1]
         cmi = ee.mi(x=x, y=y, z=z, k=3)
 
         print(x.shape, y.shape, z.shape, cmi)
@@ -248,34 +248,37 @@ if __name__ == "__main__":
     # root_dir = Path("/data/adam/")
 
     SIMULATIONS_NAMES = [
-        "mean_shift_compounding", "multi_modal_compounding", "multi_equal"]
+        "mean_shift_compounding",
+        "multi_modal_compounding",
+        "multi_equal",
+    ]
 
     overwrite = False
     n_repeats = 100
     n_jobs = 1
     n_samples = 4096
 
-    # Section: varying over sample-sizes
-    model_name = "comight-cmi"
-    n_dims_1_list = [2**i - 6 for i in range(3, 12)[::2]] + [2**12-6]
-    print('Analyzing for the following dims: ', n_dims_1_list)
-    results = Parallel(n_jobs=n_jobs)(
-        delayed(_run_simulation)(
-            n_samples,
-            n_dims_1,
-            idx,
-            root_dir,
-            sim_name,
-            model_name,
-            overwrite=False,
-        )
-        for sim_name in SIMULATIONS_NAMES
-        for n_dims_1 in n_dims_1_list
-        for idx in range(n_repeats)
-    )
+    # Section: varying over dims
+    # model_name = "comight-cmi"
+    # n_dims_1_list = [2**i - 6 for i in range(3, 12)[::2]] + [2**12-6]
+    # print('Analyzing for the following dims: ', n_dims_1_list)
+    # results = Parallel(n_jobs=n_jobs)(
+    #     delayed(_run_simulation)(
+    #         n_samples,
+    #         n_dims_1,
+    #         idx,
+    #         root_dir,
+    #         sim_name,
+    #         model_name,
+    #         overwrite=False,
+    #     )
+    #     for sim_name in SIMULATIONS_NAMES
+    #     for n_dims_1 in n_dims_1_list
+    #     for idx in range(n_repeats)
+    # )
 
-    # Section: varying over sample-sizes
-    n_dims_1_list = [2**i - 6 for i in range(3, 12)[::2]] + [2**12-6]
+    # Section: varying over dims
+    n_dims_1_list = [2**i - 6 for i in range(3, 12)[::2]] + [2**12 - 6]
     print(n_dims_1_list)
 
     model_name = "ksg"
