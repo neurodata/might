@@ -3,6 +3,7 @@
 # A : Control ~ N(0, 1), Cancer ~ N(1, 1)
 # B:  Control ~ N(0, 1), Cancer ~ 0.75*N(1, 1) + 0.25*N(5, 1)
 # C:  Control~ 0.75*N(1, 1) + 0.25*N(5, 1), Cancer ~ 0.75*N(1, 1) + 0.25*N(5, 1)
+import sys
 from pathlib import Path
 import numpy as np
 from sktree.datasets import make_trunk_classification, make_trunk_mixture_classification
@@ -570,17 +571,17 @@ MODEL_NAMES = {
 }
 
 if __name__ == "__main__":
+    root_dir = sys.argv[1]
 
     SIMULATIONS_NAMES = ["mean_shift", "multi_modal", "multi_equal"]
-
     model_name = "comight"
     overwrite = False
 
     n_repeats = 100
 
     # Section: Make data
-    root_dir = Path("/Volumes/Extreme Pro/cancer")
-    root_dir = Path("/data/adam/")
+    # root_dir = Path("/Volumes/Extreme Pro/cancer")
+    # root_dir = Path("/data/adam/")
 
     n_repeats = 100
     Parallel(n_jobs=-1)(
