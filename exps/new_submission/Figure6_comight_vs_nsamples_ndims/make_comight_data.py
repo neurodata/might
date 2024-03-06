@@ -586,7 +586,7 @@ if __name__ == "__main__":
     n_repeats = 100
     Parallel(n_jobs=-1)(
         delayed(func)(
-            root_dir,
+            Path(root_dir),
             seed=seed,
         )
         for seed in range(n_repeats)
