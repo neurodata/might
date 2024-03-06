@@ -123,7 +123,7 @@ if __name__ == "__main__":
         n_samples,
         n_dims_1,
         idx,
-        root_dir,
+        Path(root_dir),
         sim_name,
         model_name,
         overwrite=False,
