@@ -73,7 +73,7 @@ def _run_simulation(
         X_minus_Z = X[:, mask_array]
         if np.var(y) < 0.001:
             raise RuntimeError(
-                f"{n_samples}_{n_features_2}_{idx} errored out with no variance in y"
+                f"{n_samples}_{n_dims_1}_{idx} errored out with no variance in y"
             )
         cdcorr_stat, cdcorr_pvalue = cdcorr.test(
             X_minus_Z.copy(), y.copy(), Z.copy(), random_state=idx
