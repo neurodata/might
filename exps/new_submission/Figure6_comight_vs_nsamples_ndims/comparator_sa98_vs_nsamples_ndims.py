@@ -178,9 +178,9 @@ if __name__ == "__main__":
     root_dir = Path("/data/adam/")
 
     SIMULATIONS_NAMES = [
-        "mean_shift_compounding",
-        "multi_modal_compounding",
-        "multi_equal",
+        "mean_shiftv2",
+        # "multi_modal_compounding",
+        # "multi_equal",
     ]
 
     model_names = [
