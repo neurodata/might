@@ -214,12 +214,12 @@ MODEL_NAMES = {
 }
 
 if __name__ == "__main__":
-    root_dir = Path("/Volumes/Extreme Pro/cancer")
-    # root_dir = Path('/data/adam/')
+    # root_dir = Path("/Volumes/Extreme Pro/cancer")
+    root_dir = Path('/data/adam/')
 
     SIMULATIONS_NAMES = [
-        # "mean_shift_compounding",
-        "multi_modal_compounding",
+        "mean_shiftv2",
+        # "multi_modal_compounding",
         # "multi_equal",
     ]
 
@@ -231,8 +231,8 @@ if __name__ == "__main__":
 
     # Section: varying over sample-sizes
     n_samples_list = [2**x for x in range(8, 13)]
-    # n_dims_1 = 4090
-    n_dims_1 = 2048-6
+    n_dims_1 = 4090
+    # n_dims_1 = 2048-6
     print(n_samples_list)
     results = Parallel(n_jobs=n_jobs)(
         delayed(_run_simulation)(
