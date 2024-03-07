@@ -108,7 +108,7 @@ def _run_simulation_oneview(
     if not output_fname.exists() or overwrite:
         if model_name == "rf":
             model = RandomForestClassifier(random_state=seed, **MODEL_NAMES[model_name])
-        elif model_name == "knn":
+        elif 'knn' in model_name:
             model = KNeighborsClassifier(
                 n_neighbors=int(np.sqrt(n_samples) + 1),
             )
@@ -219,7 +219,7 @@ def _run_simulation(
     if not output_fname.exists() or overwrite:
         if model_name == "rf":
             model = RandomForestClassifier(random_state=seed, **MODEL_NAMES[model_name])
-        elif model_name == "knn":
+        elif "knn" in model_name:
             model = KNeighborsClassifier(
                 n_neighbors=int(np.sqrt(n_samples) + 1),
             )
@@ -302,24 +302,24 @@ if __name__ == "__main__":
     n_jobs = -1
 
     # Section: varying over sample-sizes
-    n_samples_list = [2**x for x in range(8, 13)]
-    n_dims_1 = 4090
-    print(n_samples_list)
-    results = Parallel(n_jobs=n_jobs)(
-        delayed(_run_simulation)(
-            n_samples,
-            n_dims_1,
-            idx,
-            root_dir,
-            sim_name,
-            model_name,
-            overwrite=False,
-        )
-        for sim_name in SIMULATIONS_NAMES
-        for n_samples in n_samples_list
-        for idx in range(n_repeats)
-        for model_name in model_names
-    )
+    # n_samples_list = [2**x for x in range(8, 13)]
+    # n_dims_1 = 4090
+    # print(n_samples_list)
+    # results = Parallel(n_jobs=n_jobs)(
+    #     delayed(_run_simulation)(
+    #         n_samples,
+    #         n_dims_1,
+    #         idx,
+    #         root_dir,
+    #         sim_name,
+    #         model_name,
+    #         overwrite=False,
+    #     )
+    #     for sim_name in SIMULATIONS_NAMES
+    #     for n_samples in n_samples_list
+    #     for idx in range(n_repeats)
+    #     for model_name in model_names
+    # )
 
     # Section: varying over sample-sizes
     model_name = "knn_viewone"
