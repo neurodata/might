@@ -81,14 +81,14 @@ def make_mean_shift(
 
 
 if __name__ == "__main__":
-    # root_dir = sys.argv[1]
+    root_dir = sys.argv[1]
 
     overwrite = False
     n_repeats = 100
 
     # Section: Make data
-    root_dir = Path("/Volumes/Extreme Pro/cancer")
-    root_dir = Path("/data/adam/")
+    # root_dir = Path("/Volumes/Extreme Pro/cancer")
+    # root_dir = Path("/data/adam/")
 
     n_repeats = 100
     Parallel(n_jobs=-1)(
