@@ -106,12 +106,6 @@ def _run_simulation_oneview(
         n_dims_1 + n_dims_2_,
     )
     if not output_fname.exists() or overwrite:
-        feature_set_ends = [
-            n_dims_1,
-            n_dims_1 + n_dims_2_,
-        ]  # [4090, 4096] for varying samples
-        assert X.shape[1] == feature_set_ends[1]
-
         if model_name == "rf":
             model = RandomForestClassifier(random_state=seed, **MODEL_NAMES[model_name])
         elif model_name == "knn":
@@ -223,12 +217,6 @@ def _run_simulation(
         n_dims_1 + n_dims_2_,
     )
     if not output_fname.exists() or overwrite:
-        feature_set_ends = [
-            n_dims_1,
-            n_dims_1 + n_dims_2_,
-        ]  # [4090, 4096] for varying samples
-        assert X.shape[1] == feature_set_ends[1]
-
         if model_name == "rf":
             model = RandomForestClassifier(random_state=seed, **MODEL_NAMES[model_name])
         elif model_name == "knn":

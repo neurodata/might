@@ -106,7 +106,8 @@ def _run_simulation(
             seed=seed, feature_set_ends=feature_set_ends, **might_kwargs
         )
         # permute the second view
-        covariate_index = np.arange(n_dims_1, n_dims_1 + n_dims_2_)
+        covariate_index = np.arange(n_dims_1)
+        assert len(covariate_index) + n_dims_2_ == X.shape[1]
 
         est, posterior_arr = build_hyppo_oob_forest(
             est,
@@ -120,12 +121,12 @@ def _run_simulation(
 
         # mutual information for both
         y_pred_proba = np.nanmean(posterior_arr, axis=0)
-        I_X1X2_Y = _mutual_information(y, y_pred_proba)
+        I_XZ_Y = _mutual_information(y, y_pred_proba)
 
         y_pred_proba = np.nanmean(perm_posterior_arr, axis=0)
-        I_X1_Y = _mutual_information(y, y_pred_proba)
+        I_Z_Y = _mutual_information(y, y_pred_proba)
 
-        if np.isnan(I_X1_Y) or np.isnan(I_X1X2_Y):
+        if np.isnan(I_XZ_Y) or np.isnan(I_Z_Y):
             raise RuntimeError(f"NaN values for {output_fname}")
 
         np.savez_compressed(
@@ -134,9 +135,9 @@ def _run_simulation(
             n_samples=n_samples,
             n_dims_1=n_dims_1,
             n_dims_2=n_dims_2_,
-            cmi=I_X1X2_Y - I_X1_Y,
-            I_X1X2_Y=I_X1X2_Y,
-            I_X1_Y=I_X1_Y,
+            cmi=I_XZ_Y - I_Z_Y,
+            I_XZ_Y=I_XZ_Y,
+            I_Z_Y=I_Z_Y,
             sim_type=sim_name,
             y=y,
             posterior_arr=posterior_arr,
@@ -211,9 +212,10 @@ def _run_ksg_simulation(
         assert X.shape[1] == feature_set_ends[1]
 
         # permute the second view
-        covariate_index = np.arange(n_dims_1, n_dims_1 + n_dims_2_)
+        covariate_index = np.arange(n_dims_1)
         x = X[:, covariate_index]
-        z = X[:, :n_dims_1]
+        z = X[:, -n_dims_2_:]
+        assert len(covariate_index) + n_dims_2_ == X.shape[1]
         cmi = ee.mi(x=x, y=y, z=z, k=3)
 
         print(x.shape, y.shape, z.shape, cmi)
@@ -246,44 +248,25 @@ MODEL_NAMES = {
 
 if __name__ == "__main__":
     root_dir = Path("/Volumes/Extreme Pro/cancer")
-    root_dir = Path("/data/adam/")
+    # root_dir = Path("/data/adam/")
 
     SIMULATIONS_NAMES = [
-        "mean_shift_compounding",
-        "multi_modal_compounding",
-        "multi_equal",
+        "mean_shiftv2",
+        # "multi_modal_compounding",
+        # "multi_equal",
     ]
 
     overwrite = False
     n_repeats = 100
-    n_jobs = -1
+    n_jobs = -2
     n_dims_1 = 4096 - 6
 
     # Section: varying over sample-sizes
-    # model_name = "comight-cmi"
-    # n_samples_list = [2**x for x in range(8, 13)]
-    # print(n_samples_list)
-    # results = Parallel(n_jobs=n_jobs)(
-    #     delayed(_run_simulation)(
-    #         n_samples,
-    #         n_dims_1,
-    #         idx,
-    #         root_dir,
-    #         sim_name,
-    #         model_name,
-    #         overwrite=False,
-    #     )
-    #     for sim_name in SIMULATIONS_NAMES
-    #     for n_samples in n_samples_list
-    #     for idx in range(n_repeats)
-    # )
-
-    # Section: varying over sample-sizes
+    model_name = "comight-cmi"
     n_samples_list = [2**x for x in range(8, 13)]
     print(n_samples_list)
-    model_name = "ksg"
     results = Parallel(n_jobs=n_jobs)(
-        delayed(_run_ksg_simulation)(
+        delayed(_run_simulation)(
             n_samples,
             n_dims_1,
             idx,
@@ -296,3 +279,22 @@ if __name__ == "__main__":
         for n_samples in n_samples_list
         for idx in range(n_repeats)
     )
+
+    # Section: varying over sample-sizes
+    # n_samples_list = [2**x for x in range(8, 13)]
+    # print(n_samples_list)
+    # model_name = "ksg"
+    # results = Parallel(n_jobs=n_jobs)(
+    #     delayed(_run_ksg_simulation)(
+    #         n_samples,
+    #         n_dims_1,
+    #         idx,
+    #         root_dir,
+    #         sim_name,
+    #         model_name,
+    #         overwrite=False,
+    #     )
+    #     for sim_name in SIMULATIONS_NAMES
+    #     for n_samples in n_samples_list
+    #     for idx in range(n_repeats)
+    # )
