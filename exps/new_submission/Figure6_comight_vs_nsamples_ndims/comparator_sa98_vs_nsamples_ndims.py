@@ -108,7 +108,7 @@ def _run_simulation_oneview(
     if not output_fname.exists() or overwrite:
         if model_name == "rf":
             model = RandomForestClassifier(random_state=seed, **MODEL_NAMES[model_name])
-        elif 'knn' in model_name:
+        elif "knn" in model_name:
             model = KNeighborsClassifier(
                 n_neighbors=int(np.sqrt(n_samples) + 1),
             )
@@ -129,7 +129,7 @@ def _run_simulation_oneview(
             model.fit(X_train, y_train)
             observe_proba = model.predict_proba(X_test)
             # calculate S@98 or whatever the stat is
-            y_pred_probas[idx, test_ix] = observe_proba
+            y_pred_probas[idx, test_ix] = observe_proba[:, -1]
             y_test_list[idx, test_ix] = y_test
             stat = Calculate_SA98(y_test, observe_proba, max_fpr=0.02)
             stats.append(stat)
