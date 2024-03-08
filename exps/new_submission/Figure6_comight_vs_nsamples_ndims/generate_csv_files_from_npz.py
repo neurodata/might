@@ -70,7 +70,7 @@ def make_csv_over_nsamples(
     df_melted = pd.melt(
         df,
         id_vars=["n_samples", "sim_type", "model"],
-        value_vars=[param_name, 'I_XZ_Y', 'I_Z_Y'],
+        value_vars=[param_name] if param_name == "sas98" else [param_name, 'I_XZ_Y', 'I_Z_Y'],
         var_name="metric",
         value_name="metric_value",
     )
