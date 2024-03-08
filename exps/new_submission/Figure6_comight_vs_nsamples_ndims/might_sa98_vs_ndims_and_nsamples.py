@@ -239,11 +239,40 @@ MODEL_NAMES = {
 }
 
 if __name__ == "__main__":
-    idx = int(sys.argv[1])
-    n_samples = int(sys.argv[2])
-    n_dims_1 = int(sys.argv[3])
-    sim_name = sys.argv[4]
-    root_dir = sys.argv[5]
+    # idx = int(sys.argv[1])
+    # n_samples = int(sys.argv[2])
+    # n_dims_1 = int(sys.argv[3])
+    # sim_name = sys.argv[4]
+    # root_dir = sys.argv[5]
+    # overwrite = False
+    # # fixed number of dimensions in first view
+    # # n_dims_1 = 2048 - 6
+    # n_dims_1 = 4096 - 6
+
+    # # Section: varying over sample-sizes
+    # model_name = "might_viewone"
+    # _run_simulation(
+    #     n_samples,
+    #     n_dims_1,
+    #     idx,
+    #     Path(root_dir),
+    #     sim_name,
+    #     model_name,
+    #     run_view="view_one",
+    #     overwrite=False,
+    # )
+
+    root_dir = Path("/Volumes/Extreme Pro/cancer")
+    root_dir = Path("/data/adam/")
+
+    n_repeats = 100
+    n_jobs = -2
+    SIMULATIONS_NAMES = [
+        "mean_shiftv2",
+        # "mean_shift_compounding",
+        # "multi_modal_compounding",
+        # "multi_equal",
+    ]
 
     overwrite = False
 
@@ -252,61 +281,7 @@ if __name__ == "__main__":
     n_dims_1 = 4096 - 6
 
     # Section: varying over sample-sizes
-    model_name = "might_viewone"
-    _run_simulation(
-        n_samples,
-        n_dims_1,
-        idx,
-        Path(root_dir),
-        sim_name,
-        model_name,
-        run_view="view_one",
-        overwrite=False,
-    )
-
-    # root_dir = Path("/Volumes/Extreme Pro/cancer")
-    # root_dir = Path("/data/adam/")
-
-    # n_repeats = 100
-    # n_jobs = -2
-    # SIMULATIONS_NAMES = [
-    #     "mean_shiftv2",
-    #     # "mean_shift_compounding",
-    #     # "multi_modal_compounding",
-    #     # "multi_equal",
-    # ]
-
-    # overwrite = False
-
-    # n_repeats = 100
-    # n_jobs = -2
-
-    # # fixed number of dimensions in first view
-    # # n_dims_1 = 2048 - 6
-    # n_dims_1 = 4096 - 6
-
-    # # Section: varying over sample-sizes
-    # # model_name = "might_viewone"
-    # # n_samples_list = [2**x for x in range(8, 13)]
-    # # print(n_samples_list)
-    # # results = Parallel(n_jobs=n_jobs)(
-    # #     delayed(_run_simulation)(
-    # #         n_samples,
-    # #         n_dims_1,
-    # #         idx,
-    # #         Path(root_dir),
-    # #         sim_name,
-    # #         model_name,
-    # #         run_view="view_one",
-    # #         overwrite=False,
-    # #     )
-    # #     for sim_name in SIMULATIONS_NAMES
-    # #     for n_samples in n_samples_list
-    # #     for idx in range(n_repeats)
-    # # )
-
-    # model_name = "might_viewtwo"
-    # # Section: varying over sample-sizes
+    # model_name = "might_viewone"
     # n_samples_list = [2**x for x in range(8, 13)]
     # print(n_samples_list)
     # results = Parallel(n_jobs=n_jobs)(
@@ -314,10 +289,10 @@ if __name__ == "__main__":
     #         n_samples,
     #         n_dims_1,
     #         idx,
-    #         root_dir,
+    #         Path(root_dir),
     #         sim_name,
     #         model_name,
-    #         run_view="view_two",
+    #         run_view="view_one",
     #         overwrite=False,
     #     )
     #     for sim_name in SIMULATIONS_NAMES
@@ -325,22 +300,22 @@ if __name__ == "__main__":
     #     for idx in range(n_repeats)
     # )
 
+    model_name = "might_viewtwo"
     # Section: varying over sample-sizes
-    # model_name = "might_viewoneandtwo"
-    # n_samples_list = [2**x for x in range(8, 13)]
-    # print(n_samples_list)
-    # results = Parallel(n_jobs=n_jobs)(
-    #     delayed(_run_simulation)(
-    #         n_samples,
-    #         n_dims_1,
-    #         idx,
-    #         root_dir,
-    #         sim_name,
-    #         model_name,
-    #         run_view="view_oneandtwo",
-    #         overwrite=False,
-    #     )
-    #     for sim_name in SIMULATIONS_NAMES
-    #     for n_samples in n_samples_list
-    #     for idx in range(n_repeats)
-    # )
+    n_samples_list = [2**x for x in range(8, 13)]
+    print(n_samples_list)
+    results = Parallel(n_jobs=n_jobs)(
+        delayed(_run_simulation)(
+            n_samples,
+            n_dims_1,
+            idx,
+            root_dir,
+            sim_name,
+            model_name,
+            run_view="view_two",
+            overwrite=False,
+        )
+        for sim_name in SIMULATIONS_NAMES
+        for n_samples in n_samples_list
+        for idx in range(n_repeats)
+    )
