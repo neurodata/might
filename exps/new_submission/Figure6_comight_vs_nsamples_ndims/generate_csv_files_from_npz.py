@@ -14,6 +14,7 @@ def make_csv_over_nsamples(
     n_samples_list,
     n_dims_1,
     n_repeats,
+    param_name,
 ):
     # generate CSV file for varying n-samples models
     results = defaultdict(list)
@@ -43,16 +44,24 @@ def make_csv_over_nsamples(
                     idx = loaded_data["idx"]
                     n_samples = loaded_data["n_samples"]
                     n_dims_1 = loaded_data["n_dims_1"]
-                    sas98 = loaded_data["sas98"]
                     sim_name = loaded_data["sim_type"]
                     # threshold = loaded_data["threshold"]
 
                     results["idx"].append(idx)
                     results["n_samples"].append(n_samples)
                     results["n_dims_1"].append(n_dims_1)
-                    results["sas98"].append(sas98)
                     results["sim_type"].append(sim_name)
                     results["model"].append(model_name)
+                    if param_name == "sas98":
+                        sas98 = loaded_data["sas98"]
+                        results["sas98"].append(sas98)
+                    elif param_name == "cmi":
+                        mi = loaded_data["cmi"]
+                        I_XZ_Y= loaded_data['I_XZ_Y']
+                        I_Z_Y= loaded_data['I_Z_Y']
+                        results["cmi"].append(mi)
+                        results['I_XZ_Y'].append(I_XZ_Y)
+                        results['I_Z_Y'].append(I_Z_Y)
                     # results["threshold"].append(threshold)
 
     df = pd.DataFrame(results)
@@ -61,7 +70,7 @@ def make_csv_over_nsamples(
     df_melted = pd.melt(
         df,
         id_vars=["n_samples", "sim_type", "model"],
-        value_vars=["sas98"],
+        value_vars=[param_name, 'I_XZ_Y', 'I_Z_Y'],
         var_name="metric",
         value_name="metric_value",
     )
@@ -82,6 +91,7 @@ def make_csv_over_ndims1(
     n_dims_list,
     n_samples,
     n_repeats,
+    param_name,
 ):
     # generate CSV file for varying n-samples models
     results = defaultdict(list)
@@ -111,16 +121,21 @@ def make_csv_over_ndims1(
                     idx = loaded_data["idx"]
                     n_samples = loaded_data["n_samples"]
                     n_dims_1 = loaded_data["n_dims_1"]
-                    sas98 = loaded_data["sas98"]
                     sim_name = loaded_data["sim_type"]
                     # threshold = loaded_data["threshold"]
 
                     results["idx"].append(idx)
                     results["n_samples"].append(n_samples)
                     results["n_dims_1"].append(n_dims_1)
-                    results["sas98"].append(sas98)
                     results["sim_type"].append(sim_name)
                     results["model"].append(model_name)
+
+                    if param_name == "sas98":
+                        sas98 = loaded_data["sas98"]
+                        results["sas98"].append(sas98)
+                    elif param_name == "cmi":
+                        mi = loaded_data["cmi"]
+                        results["cmi"].append(mi)
                     # results["threshold"].append(threshold)
 
     df = pd.DataFrame(results)
@@ -129,7 +144,7 @@ def make_csv_over_ndims1(
     df_melted = pd.melt(
         df,
         id_vars=["n_dims_1", "sim_type", "model"],
-        value_vars=["sas98"],
+        value_vars=[param_name],
         var_name="metric",
         value_name="metric_value",
     )
@@ -143,29 +158,41 @@ def make_csv_over_ndims1(
 
 
 if __name__ == "__main__":
-    root_dir = Path("/Volumes/Extreme Pro/cancer")
+    # root_dir = Path("/Volumes/Extreme Pro/cancer")
+    root_dir = Path('/data/sambit/')
     SIMULATIONS_NAMES = ["mean_shiftv2"]
 
     model_names = [
-        # "comight",
+        "comight",
         # "might_viewone",
         # "might_viewtwo",
         # "might_viewoneandtwo",
-        "knn",
-        "knn_viewone",
-        "knn_viewtwo",
+        # "knn",
+        # "knn_viewone",
+        # "knn_viewtwo",
+        # 'comight-cmi',
+        # 'ksg',
     ]
+    param_name = "cmi"
 
     n_samples_list = [2**x for x in range(8, 13)]
     n_dims_1 = 4090
+    # n_dims_1 = 16 - 6
+    # n_repeats = 10
     n_repeats = 100
     print(n_samples_list)
 
     # save the dataframe to a csv file over n-samples
     df = make_csv_over_nsamples(
-        root_dir, model_names, SIMULATIONS_NAMES, n_samples_list, n_dims_1, n_repeats
+        root_dir,
+        model_names,
+        SIMULATIONS_NAMES,
+        n_samples_list,
+        n_dims_1,
+        n_repeats,
+        param_name=param_name,
     )
-    df.to_csv(root_dir / "output" / "results_vs_nsamples.csv", index=False)
+    df.to_csv(root_dir / "output" / f"results_vs_nsamples_{n_dims_1}_{n_repeats}.csv", index=False)
 
     n_dims_list = [2**x - 6 for x in range(3, 13)]
     n_samples = 4096
@@ -173,7 +200,7 @@ if __name__ == "__main__":
     print(n_dims_list)
 
     # save the dataframe to a csv file over n-dims
-    df = make_csv_over_ndims1(
-        root_dir, model_names, SIMULATIONS_NAMES, n_dims_list, n_samples, n_repeats
-    )
-    df.to_csv(root_dir / "output" / "results_vs_ndims.csv", index=False)
+    # df = make_csv_over_ndims1(
+    #     root_dir, model_names, SIMULATIONS_NAMES, n_dims_list, n_samples, n_repeats
+    # )
+    # df.to_csv(root_dir / "output" / "results_vs_ndims.csv", index=False)

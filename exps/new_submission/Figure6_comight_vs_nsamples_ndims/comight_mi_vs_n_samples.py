@@ -238,7 +238,7 @@ MODEL_NAMES = {
     "might": {
         "n_estimators": n_estimators,
         "honest_fraction": 0.5,
-        "n_jobs": 1,
+        "n_jobs": -2,
         "bootstrap": True,
         "stratify": True,
         "max_samples": 1.6,
@@ -257,9 +257,9 @@ if __name__ == "__main__":
     ]
 
     overwrite = False
-    n_repeats = 100
-    n_jobs = -3
-    n_dims_1 = 4096 - 6
+    n_repeats = 10
+    n_jobs = 1
+    n_dims_1 = 16 - 6
 
     # Section: varying over sample-sizes
     model_name = "comight-cmi"
