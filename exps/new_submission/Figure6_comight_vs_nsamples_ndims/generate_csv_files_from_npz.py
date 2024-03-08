@@ -173,7 +173,7 @@ if __name__ == "__main__":
         # 'comight-cmi',
         # 'ksg',
     ]
-    param_name = "cmi"
+    param_name = "sas98"
 
     n_samples_list = [2**x for x in range(8, 13)]
     n_dims_1 = 4090
