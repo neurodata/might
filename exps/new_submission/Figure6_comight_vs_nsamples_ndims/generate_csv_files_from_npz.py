@@ -57,11 +57,12 @@ def make_csv_over_nsamples(
                         results["sas98"].append(sas98)
                     elif param_name == "cmi":
                         mi = loaded_data["cmi"]
-                        I_XZ_Y= loaded_data['I_XZ_Y']
-                        I_Z_Y= loaded_data['I_Z_Y']
                         results["cmi"].append(mi)
-                        results['I_XZ_Y'].append(I_XZ_Y)
-                        results['I_Z_Y'].append(I_Z_Y)
+
+                        # I_XZ_Y= loaded_data['I_XZ_Y']
+                        # I_Z_Y= loaded_data['I_Z_Y']
+                        # results['I_XZ_Y'].append(I_XZ_Y)
+                        # results['I_Z_Y'].append(I_Z_Y)
                     # results["threshold"].append(threshold)
 
     df = pd.DataFrame(results)
@@ -70,7 +71,9 @@ def make_csv_over_nsamples(
     df_melted = pd.melt(
         df,
         id_vars=["n_samples", "sim_type", "model"],
-        value_vars=[param_name] if param_name == "sas98" else [param_name, 'I_XZ_Y', 'I_Z_Y'],
+        value_vars=[
+            param_name
+        ],  # if param_name == "sas98" elif [param_name, 'I_XZ_Y', 'I_Z_Y'],
         var_name="metric",
         value_name="metric_value",
     )
@@ -158,13 +161,13 @@ def make_csv_over_ndims1(
 
 
 if __name__ == "__main__":
-    # root_dir = Path("/Volumes/Extreme Pro/cancer")
-    root_dir = Path('/data/sambit/')
+    root_dir = Path("/Volumes/Extreme Pro/cancer")
+    # root_dir = Path('/data/sambit/')
     SIMULATIONS_NAMES = ["mean_shiftv2"]
 
     model_names = [
-        "comight",
-        # "might_viewone",
+        # "comight",
+        "might_viewone",
         # "might_viewtwo",
         # "might_viewoneandtwo",
         # "knn",
@@ -192,7 +195,12 @@ if __name__ == "__main__":
         n_repeats,
         param_name=param_name,
     )
-    df.to_csv(root_dir / "output" / f"results_vs_nsamples_{n_dims_1}_{n_repeats}.csv", index=False)
+    df.to_csv(
+        root_dir
+        / "output"
+        / f"results_vs_nsamples_{param_name}_{n_dims_1}_{n_repeats}.csv",
+        index=False,
+    )
 
     n_dims_list = [2**x - 6 for x in range(3, 13)]
     n_samples = 4096
