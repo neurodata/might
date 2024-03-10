@@ -1,12 +1,12 @@
 """Generating data for CoMIGHT simulations with S@S98."""
 import sys
-from pathlib import Path
-import numpy as np
-from sktree.datasets import make_trunk_classification, make_trunk_mixture_classification
-from pathlib import Path
 from collections import defaultdict
+from pathlib import Path
+
 import numpy as np
-from joblib import delayed, Parallel
+from joblib import Parallel, delayed
+from sktree.datasets import (make_trunk_classification,
+                             make_trunk_mixture_classification)
 
 
 def make_mean_shift(

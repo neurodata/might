@@ -4,26 +4,18 @@
 # B:  Control ~ N(0, 1), Cancer ~ 0.75*N(1, 1) + 0.25*N(5, 1)
 # C:  Control~ 0.75*N(1, 1) + 0.25*N(5, 1), Cancer ~ 0.75*N(1, 1) + 0.25*N(5, 1)
 from pathlib import Path
-import numpy as np
-from sktree.datasets import make_trunk_classification, make_trunk_mixture_classification
-from pathlib import Path
-import numpy as np
-from sklearn.model_selection import (
-    StratifiedShuffleSplit,
-)
-from joblib import delayed, Parallel
 
+import numpy as np
+from joblib import Parallel, delayed
 from npeet import entropy_estimators as ee
-
+from sklearn.model_selection import StratifiedShuffleSplit
 from sktree import HonestForestClassifier
-from sktree.tree import MultiViewDecisionTreeClassifier
-from sktree.stats import (
-    build_hyppo_oob_forest,
-    PermutationHonestForestClassifier,
-)
+from sktree.datasets import (make_trunk_classification,
+                             make_trunk_mixture_classification)
+from sktree.stats import (PermutationHonestForestClassifier,
+                          build_hyppo_oob_forest)
 from sktree.stats.utils import _mutual_information
-from sktree.datasets import make_trunk_classification
-
+from sktree.tree import MultiViewDecisionTreeClassifier
 
 seed = 12345
 rng = np.random.default_rng(seed)
@@ -100,11 +92,17 @@ def _run_simulation(
         ]  # [4090, 4096] for varying samples
         assert X.shape[1] == feature_set_ends[1]
         est = HonestForestClassifier(
-            seed=seed, feature_set_ends=feature_set_ends, **might_kwargs
+            seed=seed, **might_kwargs
         )
         perm_est = PermutationHonestForestClassifier(
-            seed=seed, feature_set_ends=feature_set_ends, **might_kwargs
+            seed=seed, **might_kwargs
         )
+        # est = HonestForestClassifier(
+        #     seed=seed, feature_set_ends=feature_set_ends, **might_kwargs
+        # )
+        # perm_est = PermutationHonestForestClassifier(
+        #     seed=seed, feature_set_ends=feature_set_ends, **might_kwargs
+        # )
         # permute the second view
         covariate_index = np.arange(n_dims_1)
         assert len(covariate_index) + n_dims_2_ == X.shape[1]
@@ -242,6 +240,7 @@ MODEL_NAMES = {
         "bootstrap": True,
         "stratify": True,
         "max_samples": 1.6,
+        'max_features': 0.9,
         "tree_estimator": MultiViewDecisionTreeClassifier(),
     },
 }
@@ -256,13 +255,13 @@ if __name__ == "__main__":
         # "multi_equal",
     ]
 
-    overwrite = False
-    n_repeats = 10
+    overwrite = True
+    n_repeats = 5
     n_jobs = 1
-    n_dims_1 = 16 - 6
+    n_dims_1 = 4090
 
     # Section: varying over sample-sizes
-    model_name = "comight-cmi"
+    model_name = "comight-cmi-with-max09"
     n_samples_list = [2**x for x in range(8, 13)]
     print(n_samples_list)
     results = Parallel(n_jobs=n_jobs)(

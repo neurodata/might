@@ -3,20 +3,16 @@
 # A : Control ~ N(0, 1), Cancer ~ N(1, 1)
 # B:  Control ~ N(0, 1), Cancer ~ 0.75*N(1, 1) + 0.25*N(5, 1)
 # C:  Control~ 0.75*N(1, 1) + 0.25*N(5, 1), Cancer ~ 0.75*N(1, 1) + 0.25*N(5, 1)
-from pathlib import Path
-import numpy as np
-from pathlib import Path
 from collections import defaultdict
-import numpy as np
-from sklearn.model_selection import (
-    StratifiedShuffleSplit,
-)
-from sklearn.metrics import roc_curve
-from joblib import delayed, Parallel
-from sktree import HonestForestClassifier
-from sktree.tree import MultiViewDecisionTreeClassifier
-from sktree.stats import build_hyppo_oob_forest
+from pathlib import Path
 
+import numpy as np
+from joblib import Parallel, delayed
+from sklearn.metrics import roc_curve
+from sklearn.model_selection import StratifiedShuffleSplit
+from sktree import HonestForestClassifier
+from sktree.stats import build_hyppo_oob_forest
+from sktree.tree import MultiViewDecisionTreeClassifier
 
 seed = 12345
 rng = np.random.default_rng(seed)

@@ -4,20 +4,15 @@
 # B:  Control ~ N(0, 1), Cancer ~ 0.75*N(1, 1) + 0.25*N(5, 1)
 # C:  Control~ 0.75*N(1, 1) + 0.25*N(5, 1), Cancer ~ 0.75*N(1, 1) + 0.25*N(5, 1)
 from pathlib import Path
-import numpy as np
-from pathlib import Path
-import numpy as np
-from sklearn.model_selection import (
-    StratifiedShuffleSplit,
-    StratifiedKFold,
-)
-from sklearn.linear_model import LogisticRegression
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.svm import SVC
-from sklearn.neighbors import KNeighborsClassifier
-from sklearn.metrics import roc_curve
-from joblib import delayed, Parallel
 
+import numpy as np
+from joblib import Parallel, delayed
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import roc_curve
+from sklearn.model_selection import StratifiedKFold, StratifiedShuffleSplit
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.svm import SVC
 
 seed = 12345
 rng = np.random.default_rng(seed)

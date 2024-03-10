@@ -59,7 +59,7 @@ def _run_simulation(
         X = np.concatenate((view_one, view_two), axis=1)
 
     # now compute the pvalue when shuffling X2
-    covariate_index = np.arange(n_dims_1, n_dims_1 + n_dims_2_)
+    covariate_index = np.arange(n_dims_1)
     assert len(covariate_index) == n_dims_2_
 
     cdcorr = ConditionalDcorr(bandwidth="silverman")
@@ -97,22 +97,6 @@ def _run_simulation(
 
 if __name__ == "__main__":
     # Extract arguments from terminal input
-    # SIMULATIONS_NAMES = [
-    #     "mean_shift_compounding",
-    #     "multi_modal_compounding",
-    #     "multi_equal",
-    # ]
-    # n_repeats = 100
-    # for n_dims_1 in [2**i - 6 for i in range(3, 13)]:
-    #     for sim_name in ["mean_shift_compounding", "multi_modal_compounding", "multi_equal"]:
-    #         for idx in range(n_repeats):
-    #             params = [idx, 4096, n_dims_1, sim_name]
-
-    # for n_samples in [2**x for x in range(8, 13)]:
-    #     for sim_name in ["mean_shift_compounding", "multi_modal_compounding", "multi_equal"]:
-    #         for idx in range(n_repeats):
-    #             params = [idx, n_samples, 4090, sim_name]
-
     idx = int(sys.argv[1])
     n_samples = int(sys.argv[2])
     n_dims_1 = int(sys.argv[3])
