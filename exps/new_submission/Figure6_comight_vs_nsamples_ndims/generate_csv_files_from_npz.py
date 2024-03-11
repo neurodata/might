@@ -163,7 +163,9 @@ def make_csv_over_ndims1(
 if __name__ == "__main__":
     root_dir = Path("/Volumes/Extreme Pro/cancer")
     # root_dir = Path('/data/sambit/')
-    SIMULATIONS_NAMES = ["mean_shiftv2"]
+    SIMULATIONS_NAMES = [
+        # "mean_shiftv2", 
+                         "multi_modalv2"]
 
     model_names = [
         # "comight",

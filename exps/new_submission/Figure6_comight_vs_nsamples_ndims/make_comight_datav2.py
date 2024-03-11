@@ -80,14 +80,80 @@ def make_mean_shift(
     np.savez_compressed(output_fname, X=X, y=y)
 
 
+def make_multi_modal(
+    root_dir,
+    n_samples=4096,
+    n_dim_1=4090,
+    mu_viewone=1,
+    mu_viewtwo=-1,
+    mix=0.75,
+    rho=0.8,
+    seed=None,
+    n_dim_2=6,
+    return_params=False,
+    overwrite=False,
+):
+    """Make multi-modal binary classification data."""
+    output_fname = (
+        root_dir
+        / "data"
+        / "multi_modalv3"
+        / f"multi_modalv3_{n_samples}_{n_dim_1}_{n_dim_2}_{seed}.npz"
+    )
+    output_fname.parent.mkdir(exist_ok=True, parents=True)
+    if not overwrite and output_fname.exists():
+        return
+    
+    rng = np.random.default_rng(seed)
+
+    method = "svd"
+    mu_1_vec = np.array([mu_viewone, mu_viewtwo])
+    mu_0_vec = np.array([0, 0])
+    cov = np.array([[1.0, rho], [rho, 1.0]])
+
+    mixture_idx = rng.choice(2, n_samples // 2, replace=True, shuffle=True, p=[mix, 1 - mix])  # type: ignore
+    norm_params = [[mu_0_vec, np.eye(2)], [mu_1_vec, cov]]
+    X_mixture = np.fromiter(
+        (
+            rng.multivariate_normal(*(norm_params[i]), size=1, method=method)
+            for i in mixture_idx
+        ),
+        dtype=np.dtype((float, 2)),
+    )
+
+    X = np.vstack(
+        (
+            rng.multivariate_normal(np.zeros(2), cov, n_samples // 2, method=method),
+            X_mixture.reshape(n_samples // 2, 2),
+        )
+    )
+
+    assert X.shape[1] == 2
+    view_1 = X[:, (0,)]
+    view_1 = np.hstack(
+        (view_1, rng.normal(loc=0, scale=1, size=(X.shape[0], n_dim_1 - 1)))
+    )
+    view_2 = X[:, 1:]
+    # add noise to the second view so that view_2 = (n_samples, n_dim_2)
+    view_2 = np.concatenate(
+        (view_2, rng.standard_normal(size=(n_samples, n_dim_2 - view_2.shape[1]))),
+        axis=1,
+    )
+
+    X = np.concatenate((view_1, view_2), axis=1)
+    y = np.concatenate((np.zeros(n_samples // 2), np.ones(n_samples // 2)))
+    np.savez_compressed(output_fname, X=X, y=y)
+    # return X, y
+
+
 if __name__ == "__main__":
-    root_dir = sys.argv[1]
+    # root_dir = sys.argv[1]
 
     overwrite = False
     n_repeats = 100
 
     # Section: Make data
-    # root_dir = Path("/Volumes/Extreme Pro/cancer")
+    root_dir = Path("/Volumes/Extreme Pro/cancer")
     # root_dir = Path("/data/adam/")
 
     n_repeats = 100
@@ -98,8 +164,8 @@ if __name__ == "__main__":
         )
         for seed in range(n_repeats)
         for func in [
-            make_mean_shift,
-            # make_multi_modal,
+            # make_mean_shift,
+            make_multi_modal,
             # make_multi_equal,
         ]
     )

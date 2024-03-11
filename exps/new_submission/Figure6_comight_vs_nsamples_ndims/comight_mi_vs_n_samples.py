@@ -240,7 +240,7 @@ MODEL_NAMES = {
         "bootstrap": True,
         "stratify": True,
         "max_samples": 1.6,
-        'max_features': 0.9,
+        'max_features': [0.9, 0.3],
         "tree_estimator": MultiViewDecisionTreeClassifier(),
     },
 }
@@ -251,6 +251,7 @@ if __name__ == "__main__":
 
     SIMULATIONS_NAMES = [
         "mean_shiftv2",
+        # "multi_modalv2",
         # "multi_modal_compounding",
         # "multi_equal",
     ]
@@ -258,11 +259,11 @@ if __name__ == "__main__":
     overwrite = True
     n_repeats = 5
     n_jobs = 1
-    n_dims_1 = 4090
+    n_dims_1 =  4096-6
 
     # Section: varying over sample-sizes
-    model_name = "comight-cmi-with-max09"
-    n_samples_list = [2**x for x in range(8, 13)]
+    model_name = "comight-cmi"
+    n_samples_list = [2**x for x in range(12, 13)]
     print(n_samples_list)
     results = Parallel(n_jobs=n_jobs)(
         delayed(_run_simulation)(
