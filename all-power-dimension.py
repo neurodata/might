@@ -161,7 +161,7 @@ def make_trunk_classification(
 
 class Dcorr_PCA:
     def test(self, x, y):
-        n_components = 'mle'
+        n_components = 0.95
         x_pca = PCA(n_components=n_components).fit_transform(x)
         return Dcorr().test(x_pca, y)
 
@@ -189,7 +189,7 @@ sns.set_palette(PALETTE[2:5] + PALETTE[6:], n_colors=9)
 
 # SAMP_SIZES = [1024]
 DIMENSIONS = [2**i for i in range(2, 13)]
-SAMP_SIZE = 512
+SAMP_SIZE = 256
 REPS = range(1000)
 
 SAVE_PATH = "n-{}_p-{}_{}".format(int(SAMP_SIZE), int(DIMENSIONS[0]), int(DIMENSIONS[-1]))
@@ -268,7 +268,7 @@ def compute_null(rep, est, est_name, sim, n=100, p=1, **sim_kwargs):
 
 # Run this block to regenerate power curves. Note that this takes a very long time!
 
-_ = Parallel(n_jobs=24, verbose=100)(
+_ = Parallel(n_jobs=-1, verbose=100)(
     [
         delayed(compute_null)(rep, est, est_name, sim, p=dim, **sim_kwargs)
         for rep in REPS
