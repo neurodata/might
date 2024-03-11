@@ -84,8 +84,8 @@ def make_multi_modal(
     root_dir,
     n_samples=4096,
     n_dim_1=4090,
-    mu_viewone=1,
-    mu_viewtwo=-1,
+    mu_viewone=2,
+    mu_viewtwo=2,
     mix=0.75,
     rho=0.8,
     seed=None,
@@ -97,8 +97,8 @@ def make_multi_modal(
     output_fname = (
         root_dir
         / "data"
-        / "multi_modalv3"
-        / f"multi_modalv3_{n_samples}_{n_dim_1}_{n_dim_2}_{seed}.npz"
+        / "multi_modalv2"
+        / f"multi_modalv2_{n_samples}_{n_dim_1}_{n_dim_2}_{seed}.npz"
     )
     output_fname.parent.mkdir(exist_ok=True, parents=True)
     if not overwrite and output_fname.exists():
