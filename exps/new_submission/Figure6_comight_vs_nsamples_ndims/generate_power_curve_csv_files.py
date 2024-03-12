@@ -173,6 +173,7 @@ def make_csv_over_ndims1(
 if __name__ == "__main__":
     root_dir = Path("/Volumes/Extreme Pro/cancer")
     root_dir = Path('/home/hao/')
+    output_dir = Path('/data/adam/output/')
 
     # sim_name = "multi_modal-5-102"
     sim_name = "mean_shiftv2"
@@ -204,7 +205,7 @@ if __name__ == "__main__":
         model_name=model_name,
     )
     df.to_csv(
-        root_dir
+        output_dir
         / "output"
         / f"results_vs_nsamples_{figname}_{sim_name}_{model_name}_{param_name}_{n_dims_1}_{n_repeats}.csv",
         index=False,
@@ -227,7 +228,7 @@ if __name__ == "__main__":
         model_name=model_name,
     )
     df.to_csv(
-        root_dir
+        output_dir
         / "output"
         / f"results_vs_ndims_{figname}_{sim_name}_{model_name}_{param_name}_{n_dims_1}_{n_repeats}.csv",
         index=False,
