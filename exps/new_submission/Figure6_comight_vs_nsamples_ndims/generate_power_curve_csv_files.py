@@ -173,7 +173,7 @@ def make_csv_over_ndims1(
 if __name__ == "__main__":
     root_dir = Path("/Volumes/Extreme Pro/cancer")
     root_dir = Path('/home/hao/')
-    output_dir = Path('/data/adam/output/')
+    output_dir = Path('/data/adam/')
 
     # sim_name = "multi_modal-5-102"
     sim_name = "mean_shiftv2"
