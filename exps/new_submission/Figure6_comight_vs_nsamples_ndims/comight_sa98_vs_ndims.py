@@ -509,9 +509,10 @@ if __name__ == "__main__":
     root_dir = Path("/data/adam/")
 
     SIMULATIONS_NAMES = [
-        "mean_shift_compounding",
-        "multi_modal_compounding",
-        "multi_equal",
+        # "mean_shift_compounding",
+        # "multi_modal_compounding",
+        # "multi_equal",
+        'multi_modalv2',
     ]
     model_name = "comight"
     overwrite = False
