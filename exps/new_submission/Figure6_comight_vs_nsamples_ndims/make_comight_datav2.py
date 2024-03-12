@@ -84,8 +84,8 @@ def make_multi_modal(
     root_dir,
     n_samples=4096,
     n_dim_1=4090,
-    mu_viewone=3,
-    mu_viewtwo=-3,
+    mu_viewone=5,
+    mu_viewtwo=1,
     mix=0.75,
     rho=0.8,
     seed=None,
@@ -109,7 +109,7 @@ def make_multi_modal(
     method = "svd"
     mu_1_vec = np.array([mu_viewone, mu_viewtwo])
     mu_0_vec = np.array([0, 0])
-    cov = np.array([[1.0, rho], [rho, 1.0]])
+    cov = np.array([[1.5, rho], [rho, 1.5]])
 
     mixture_idx = rng.choice(2, n_samples // 2, replace=True, shuffle=True, p=[mix, 1 - mix])  # type: ignore
     norm_params = [[mu_0_vec, np.eye(2)], [mu_1_vec, cov]]
@@ -258,7 +258,7 @@ def make_multi_equal(
 if __name__ == "__main__":
     # root_dir = sys.argv[1]
 
-    overwrite = True
+    overwrite = False
     n_repeats = 100
 
     # Section: Make data

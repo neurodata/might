@@ -236,7 +236,7 @@ MODEL_NAMES = {
     "might": {
         "n_estimators": n_estimators,
         "honest_fraction": 0.5,
-        "n_jobs": -1,
+        "n_jobs": -2,
         "bootstrap": True,
         "stratify": True,
         "max_samples": 1.6,
@@ -277,7 +277,7 @@ if __name__ == "__main__":
         )
         for sim_name in SIMULATIONS_NAMES
         for n_samples in n_samples_list
-        for idx in range(2, n_repeats)
+        for idx in range(n_repeats)
     )
 
     # Section: varying over sample-sizes

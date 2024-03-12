@@ -235,7 +235,7 @@ def _run_simulation(
             model.fit(X_train, y_train)
             observe_proba = model.predict_proba(X_test)
             # calculate S@98 or whatever the stat is
-            y_pred_probas[idx, test_ix] = observe_proba
+            y_pred_probas[idx, test_ix] = observe_proba[:, -1]
             y_test_list[idx, test_ix] = y_test
             stat = Calculate_SA98(y_test, observe_proba, max_fpr=0.02)
             stats.append(stat)
@@ -277,7 +277,7 @@ MODEL_NAMES = {
 
 if __name__ == "__main__":
     root_dir = Path("/Volumes/Extreme Pro/cancer")
-    root_dir = Path("/data/adam/")
+    # root_dir = Path("/data/adam/")
 
     SIMULATIONS_NAMES = [
         "mean_shiftv2",
@@ -285,14 +285,7 @@ if __name__ == "__main__":
         # "multi_equal",
     ]
 
-    model_names = [
-        # "rf",
-        "knn",
-        # "svm",
-        # "lr",
-    ]
     overwrite = False
-
     n_repeats = 100
     n_jobs = -1
 
@@ -317,10 +310,72 @@ if __name__ == "__main__":
     # )
 
     # Section: varying over sample-sizes
+    # model_name = "knn_viewone"
+    # n_samples_list = [2**x for x in range(8, 13)]
+    # n_dims_1 = 4090
+    # print(n_samples_list)
+    # results = Parallel(n_jobs=n_jobs)(
+    #     delayed(_run_simulation_oneview)(
+    #         n_samples,
+    #         n_dims_1,
+    #         idx,
+    #         root_dir,
+    #         sim_name,
+    #         model_name,
+    #         run_view="view_one",
+    #         overwrite=False,
+    #     )
+    #     for sim_name in SIMULATIONS_NAMES
+    #     for n_samples in n_samples_list
+    #     for idx in range(n_repeats)
+    # )
+
+    # # Section: varying over sample-sizes
+    # model_name = "knn_viewtwo"
+    # n_samples_list = [2**x for x in range(8, 13)]
+    # n_dims_1 = 4090
+    # print(n_samples_list)
+    # results = Parallel(n_jobs=n_jobs)(
+    #     delayed(_run_simulation_oneview)(
+    #         n_samples,
+    #         n_dims_1,
+    #         idx,
+    #         root_dir,
+    #         sim_name,
+    #         model_name,
+    #         run_view="view_two",
+    #         overwrite=False,
+    #     )
+    #     for sim_name in SIMULATIONS_NAMES
+    #     for n_samples in n_samples_list
+    #     for idx in range(n_repeats)
+    # )
+
+    # Section: varying over dimensions of the first view
+    model_name = "knn"
+    n_dims_list = [2**i - 6 for i in range(3, 13)]
+    n_samples = 4096
+    print(n_dims_list)
+    results = Parallel(n_jobs=n_jobs)(
+        delayed(_run_simulation)(
+            n_samples,
+            n_dims_1,
+            idx,
+            root_dir,
+            sim_name,
+            model_name,
+            overwrite=False,
+        )
+        for sim_name in SIMULATIONS_NAMES
+        for n_dims_1 in n_dims_list
+        for idx in range(n_repeats)
+    )
+
+    # Section: varying over dimensions of the first view
     model_name = "knn_viewone"
-    n_samples_list = [2**x for x in range(8, 13)]
-    n_dims_1 = 4090
-    print(n_samples_list)
+    # n_dims_list = [2**i - 6 for i in range(3, 13)]
+    n_samples = 4096
+    print(n_dims_list)
     results = Parallel(n_jobs=n_jobs)(
         delayed(_run_simulation_oneview)(
             n_samples,
@@ -333,15 +388,14 @@ if __name__ == "__main__":
             overwrite=False,
         )
         for sim_name in SIMULATIONS_NAMES
-        for n_samples in n_samples_list
+        for n_dims_1 in n_dims_list
         for idx in range(n_repeats)
     )
 
-    # Section: varying over sample-sizes
     model_name = "knn_viewtwo"
-    n_samples_list = [2**x for x in range(8, 13)]
-    n_dims_1 = 4090
-    print(n_samples_list)
+    # n_dims_list = [2**i - 6 for i in range(3, 13)]
+    n_samples = 4096
+    print(n_dims_list)
     results = Parallel(n_jobs=n_jobs)(
         delayed(_run_simulation_oneview)(
             n_samples,
@@ -354,26 +408,6 @@ if __name__ == "__main__":
             overwrite=False,
         )
         for sim_name in SIMULATIONS_NAMES
-        for n_samples in n_samples_list
+        for n_dims_1 in n_dims_list
         for idx in range(n_repeats)
     )
-
-    # Section: varying over dimensions of the first view
-    # n_samples = 4096
-    # n_dims_list = [2**i - 6 for i in range(3, 13)]
-    # print(n_dims_list)
-    # results = Parallel(n_jobs=n_jobs)(
-    #     delayed(_run_simulation)(
-    #         n_samples,
-    #         n_dims_1,
-    #         idx,
-    #         root_dir,
-    #         sim_name,
-    #         model_name,
-    #         overwrite=False,
-    #     )
-    #     for sim_name in SIMULATIONS_NAMES
-    #     for n_dims_1 in n_dims_list
-    #     for idx in range(n_repeats)
-    #     for model_name in model_names
-    # )

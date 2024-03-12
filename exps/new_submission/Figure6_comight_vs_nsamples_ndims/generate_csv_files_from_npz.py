@@ -168,7 +168,7 @@ if __name__ == "__main__":
                          "multi_modalv2"]
 
     model_names = [
-        # "comight",
+        "comight-cmi",
         # "comight-cmi-with-max09",
         # "might_viewone",
         # "might_viewtwo",
@@ -176,7 +176,7 @@ if __name__ == "__main__":
         # "knn",
         # "knn_viewone",
         # "knn_viewtwo",
-        'comight-cmi',
+        # 'comight-cmi',
         # 'ksg',
     ]
     param_name = "cmi"
