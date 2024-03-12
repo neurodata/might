@@ -176,8 +176,8 @@ if __name__ == "__main__":
 
     # sim_name = "multi_modal-5-102"
     sim_name = "mean_shiftv2"
-    model_name = "might_viewone",
-    model_name = "might_viewtwo",
+    model_name = "might_viewone"
+    model_name = "might_viewtwo"
     # model_name = "ksg"
     # model_name = 'knn_viewtwo'
     # model_name = 'knn'
