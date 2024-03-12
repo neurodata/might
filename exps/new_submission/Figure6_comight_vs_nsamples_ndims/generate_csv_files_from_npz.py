@@ -169,21 +169,21 @@ if __name__ == "__main__":
 
     model_names = [
         # "comight",
-        "comight-cmi-with-max09",
+        # "comight-cmi-with-max09",
         # "might_viewone",
         # "might_viewtwo",
         # "might_viewoneandtwo",
         # "knn",
         # "knn_viewone",
         # "knn_viewtwo",
-        # 'comight-cmi',
+        'comight-cmi',
         # 'ksg',
     ]
     param_name = "cmi"
 
     n_samples_list = [2**x for x in range(8, 13)]
     n_dims_1 = 4090
-    # n_dims_1 = 1024 - 6
+    n_dims_1 = 1024 - 6
     # n_dims_1 = 16 - 6
     n_repeats = 10
     # n_repeats = 100

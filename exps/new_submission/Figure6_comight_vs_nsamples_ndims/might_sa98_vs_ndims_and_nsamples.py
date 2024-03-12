@@ -241,20 +241,20 @@ if __name__ == "__main__":
     overwrite = False
     # fixed number of dimensions in first view
     # n_dims_1 = 2048 - 6
-    n_dims_1 = 4096 - 6
+    # n_dims_1 = 4096 - 6
 
     # # Section: varying over sample-sizes
-    # model_name = "might_viewone"
-    # _run_simulation(
-    #     n_samples,
-    #     n_dims_1,
-    #     idx,
-    #     Path(root_dir),
-    #     sim_name,
-    #     model_name,
-    #     run_view="view_one",
-    #     overwrite=False,
-    # )
+    model_name = "might_viewone"
+    _run_simulation(
+        n_samples,
+        n_dims_1,
+        idx,
+        Path(root_dir),
+        sim_name,
+        model_name,
+        run_view="view_one",
+        overwrite=False,
+    )
 
     # Section: varying over sample-sizes
     model_name = "might_viewtwo"

@@ -3,6 +3,7 @@
 # A : Control ~ N(0, 1), Cancer ~ N(1, 1)
 # B:  Control ~ N(0, 1), Cancer ~ 0.75*N(1, 1) + 0.25*N(5, 1)
 # C:  Control~ 0.75*N(1, 1) + 0.25*N(5, 1), Cancer ~ 0.75*N(1, 1) + 0.25*N(5, 1)
+import sys
 from collections import defaultdict
 from pathlib import Path
 
@@ -10,11 +11,7 @@ import numpy as np
 from joblib import Parallel, delayed
 from sklearn.metrics import roc_curve
 from sklearn.model_selection import StratifiedShuffleSplit
-from sktree import HonestForestClassifier
-from sktree.datasets import (make_trunk_classification,
-                             make_trunk_mixture_classification)
-from sktree.stats import (PermutationHonestForestClassifier,
-                          build_hyppo_oob_forest)
+from sktree.stats import PermutationHonestForestClassifier, build_hyppo_oob_forest
 from sktree.tree import MultiViewDecisionTreeClassifier
 
 seed = 12345
@@ -84,8 +81,6 @@ def _run_simulation(
     sim_name,
     model_name,
     overwrite=False,
-    use_second_split_for_threshold=False,
-    generate_data=False,
 ):
     n_samples_ = 4096
     n_dims_2_ = 6
@@ -146,14 +141,13 @@ def _run_simulation(
         est = PermutationHonestForestClassifier(
             seed=seed, feature_set_ends=feature_set_ends, **might_kwargs
         )
+        covariate_index = np.arange(n_dims_1)  # permute the first view (i.e. X)
 
         est, posterior_arr = build_hyppo_oob_forest(
             est,
             X,
             y,
-            covariate_index=np.arange(
-                n_dims_1, n_dims_1 + n_dims_2_
-            ),  # permute the second view
+            covariate_index=covariate_index,
             verbose=False,
         )
 
@@ -204,61 +198,79 @@ MODEL_NAMES = {
         "n_jobs": 1,
         "bootstrap": True,
         "stratify": True,
+        "max_features": max_features,
         "max_samples": 1.6,
         "tree_estimator": MultiViewDecisionTreeClassifier(),
     },
 }
 
 if __name__ == "__main__":
-    root_dir = Path("/Volumes/Extreme Pro/cancer")
+    idx = int(sys.argv[1])
+    n_samples = int(sys.argv[2])
+    n_dims_1 = int(sys.argv[3])
+    sim_name = sys.argv[4]
+    root_dir = sys.argv[5]
 
-    SIMULATIONS_NAMES = [
-        "mean_shift_compounding",
-        "multi_modal_compounding",
-        "multi_equal",
-    ]
     model_name = "comight-perm"
-    overwrite = False
-
-    n_repeats = 100
-    n_jobs = -2
-
-    # Section: varying over dimensions
-    n_samples = 4096
-    n_dims_list = [2**i - 6 for i in range(3, 13)]
-    print(n_dims_list)
-    results = Parallel(n_jobs=n_jobs, verbose=True)(
-        delayed(_run_simulation)(
-            n_samples,
-            n_dims_1,
-            idx,
-            root_dir,
-            sim_name,
-            model_name,
-            overwrite=False,
-            generate_data=False,
-        )
-        for sim_name in SIMULATIONS_NAMES
-        for n_dims_1 in n_dims_list
-        for idx in range(n_repeats)
+    _run_simulation(
+        n_samples,
+        n_dims_1,
+        idx,
+        Path(root_dir),
+        sim_name,
+        model_name,
+        overwrite=False,
     )
 
-    # Section: varying over sample-sizes
-    n_samples_list = [2**x for x in range(8, 13)]
-    n_dims_1 = 4090
-    print(n_samples_list)
-    results = Parallel(n_jobs=n_jobs)(
-        delayed(_run_simulation)(
-            n_samples,
-            n_dims_1,
-            idx,
-            root_dir,
-            sim_name,
-            model_name,
-            overwrite=False,
-            generate_data=False,
-        )
-        for sim_name in SIMULATIONS_NAMES
-        for n_samples in n_samples_list
-        for idx in range(n_repeats)
-    )
+    # root_dir = Path("/Volumes/Extreme Pro/cancer")
+
+    # SIMULATIONS_NAMES = [
+    #     # "mean_shift_compounding",
+    #     # "multi_modal_compounding",
+    #     # "multi_equal",
+    # ]
+    # model_name = "comight-perm"
+    # overwrite = False
+
+    # n_repeats = 100
+    # n_jobs = -2
+
+    # # Section: varying over dimensions
+    # n_samples = 4096
+    # n_dims_list = [2**i - 6 for i in range(3, 13)]
+    # print(n_dims_list)
+    # results = Parallel(n_jobs=n_jobs, verbose=True)(
+    #     delayed(_run_simulation)(
+    #         n_samples,
+    #         n_dims_1,
+    #         idx,
+    #         root_dir,
+    #         sim_name,
+    #         model_name,
+    #         overwrite=False,
+    #         generate_data=False,
+    #     )
+    #     for sim_name in SIMULATIONS_NAMES
+    #     for n_dims_1 in n_dims_list
+    #     for idx in range(n_repeats)
+    # )
+
+    # # Section: varying over sample-sizes
+    # n_samples_list = [2**x for x in range(8, 13)]
+    # n_dims_1 = 4090
+    # print(n_samples_list)
+    # results = Parallel(n_jobs=n_jobs)(
+    #     delayed(_run_simulation)(
+    #         n_samples,
+    #         n_dims_1,
+    #         idx,
+    #         root_dir,
+    #         sim_name,
+    #         model_name,
+    #         overwrite=False,
+    #         generate_data=False,
+    #     )
+    #     for sim_name in SIMULATIONS_NAMES
+    #     for n_samples in n_samples_list
+    #     for idx in range(n_repeats)
+    # )

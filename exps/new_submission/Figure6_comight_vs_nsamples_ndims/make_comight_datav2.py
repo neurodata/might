@@ -84,8 +84,8 @@ def make_multi_modal(
     root_dir,
     n_samples=4096,
     n_dim_1=4090,
-    mu_viewone=2,
-    mu_viewtwo=2,
+    mu_viewone=3,
+    mu_viewtwo=-3,
     mix=0.75,
     rho=0.8,
     seed=None,
@@ -145,11 +145,120 @@ def make_multi_modal(
     np.savez_compressed(output_fname, X=X, y=y)
     # return X, y
 
+def make_multi_equal(
+    root_dir,
+    n_samples=4096,
+    n_dim_1=4090,
+    mu_0=1,
+    mu_1=5,
+    mix=0.75,
+    seed=None,
+    n_dim_2=6,
+    return_params=False,
+):
+    """Make multi-modal binary classification data.
+
+    X comprises of [view_1, view_2] where view_1 is the first ``n_dim_1`` dimensions
+    and view_2 is the last ``n_dim_2`` dimensions.
+
+    view_1 is generated, such that [A, B] corresponding to class labels [0, 1]
+    are generated as follows:
+
+    A ~ mix * N(1, I) + (1 - mix) * N(m_factor, I)
+    B ~ mix * N(1, I) + (1 - mix) * N(m_factor, I)
+
+    view_2 is generated, such that [A, B] corresponding to class labels [0, 1]
+    are generated as follows:
+
+    A ~ mix * N(1 / np.sqrt(2), I) + (1 - mix) * N(1 / np.sqrt(2) * m_factor, I)
+    B ~ mix * N(1 / np.sqrt(2), I) + (1 - mix) * N(1 / np.sqrt(2) * m_factor, I)
+
+    Parameters
+    ----------
+    n_samples : int, optional
+        The number of samples to generate, by default 1024.
+    n_dim_1 : int, optional
+        The number of dimensions in first view, by default 4090.
+    mu_0 : int, optional
+        The mean of the first class, by default 1.
+    mu_1 : int, optional
+        The mean of the second class, by default -1.
+    seed : int, optional
+        Random seed, by default None.
+    n_dim_2 : int, optional
+        The number of dimensions in second view, by default 6.
+    return_params : bool
+        Whether to return parameters of the generating model or not. Default is False.
+
+    Returns
+    -------
+    X : ArrayLike of shape (n_samples, n_dim_1 + n_dim_2)
+        Data.
+    y : ArrayLike of shape (n_samples,)
+        Labels.
+    """
+    output_fname = (
+        root_dir
+        / "data"
+        / "multi_equal"
+        / f"multi_equal_{n_samples}_{n_dim_1}_{n_dim_2}_{seed}.npz"
+    )
+    output_fname.parent.mkdir(exist_ok=True, parents=True)
+
+    rng = np.random.default_rng(seed)
+    default_n_informative = 2
+
+    X1, _ = make_trunk_mixture_classification(
+        n_samples=n_samples,
+        n_dim=n_dim_1 + 1,
+        n_informative=default_n_informative,
+        mu_0=mu_0,
+        mu_1=mu_1,
+        mix=mix,
+        rho=0.5,
+        seed=rng.integers(0, np.iinfo(np.int32).max),
+        return_params=False,
+    )
+    # only keep the second half of samples, corresponding to the mixture
+    X1 = X1[n_samples // 2 :, :]
+
+    X2, _ = make_trunk_mixture_classification(
+        n_samples=n_samples,
+        n_dim=n_dim_1 + 1,
+        n_informative=default_n_informative,
+        mu_0=mu_0,
+        mu_1=mu_1,
+        mix=mix,
+        rho=0.5,
+        seed=rng.integers(0, np.iinfo(np.int32).max),
+        return_params=False,
+    )
+    # only keep the second half of samples, corresponding to the mixture
+    X2 = X2[n_samples // 2 :, :]
+
+    X = np.vstack((X1, X2))
+    y = np.hstack((np.zeros(n_samples // 2), np.ones(n_samples // 2)))
+
+    # get the second informative dimension
+    view_1 = X[:, 1:]
+
+    # only take one informative dimension
+    view_2 = X[:, (0,)]
+
+    # add noise to the second view so that view_2 = (n_samples, n_dim_2)
+    view_2 = np.concatenate(
+        (view_2, rng.standard_normal(size=(n_samples, n_dim_2 - view_2.shape[1]))),
+        axis=1,
+    )
+    X = np.concatenate((view_1, view_2), axis=1)
+    np.savez_compressed(output_fname, X=X, y=y)
+
+
 
 if __name__ == "__main__":
     # root_dir = sys.argv[1]
 
-    overwrite = False
+    overwrite = True
     n_repeats = 100
 
     # Section: Make data
@@ -161,6 +270,7 @@ if __name__ == "__main__":
         delayed(func)(
             Path(root_dir),
             seed=seed,
+            overwrite=overwrite
         )
         for seed in range(n_repeats)
         for func in [

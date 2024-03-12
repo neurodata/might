@@ -240,7 +240,7 @@ MODEL_NAMES = {
         "bootstrap": True,
         "stratify": True,
         "max_samples": 1.6,
-        'max_features': [0.9, 0.3],
+        'max_features': 0.3,
         "tree_estimator": MultiViewDecisionTreeClassifier(),
     },
 }
@@ -250,14 +250,14 @@ if __name__ == "__main__":
     # root_dir = Path("/data/adam/")
 
     SIMULATIONS_NAMES = [
-        "mean_shiftv2",
-        # "multi_modalv2",
+        # "mean_shiftv2",
+        "multi_modalv2",
         # "multi_modal_compounding",
         # "multi_equal",
     ]
 
     overwrite = True
-    n_repeats = 5
+    n_repeats = 4
     n_jobs = 1
     n_dims_1 =  1024-6
 
@@ -277,7 +277,7 @@ if __name__ == "__main__":
         )
         for sim_name in SIMULATIONS_NAMES
         for n_samples in n_samples_list
-        for idx in range(n_repeats)
+        for idx in range(2, n_repeats)
     )
 
     # Section: varying over sample-sizes

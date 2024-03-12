@@ -21,7 +21,7 @@
 ROOT_DIR="/path/to/root/directory"
 
 # Path to the Python script that extracts parameters
-PYTHON_SCRIPT="./cond_dcorr_power_vs_nsamples_ndims.py"
+PYTHON_SCRIPT="./comight-perm_sa98_vs_nsamples_ndims.py"
 
 # Read parameters from text file and submit Python job
 line=$(sed -n "${PBS_ARRAY_INDEX}p" ./parameters.txt)
