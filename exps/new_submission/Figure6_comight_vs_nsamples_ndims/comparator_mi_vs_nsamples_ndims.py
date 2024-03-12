@@ -126,24 +126,24 @@ if __name__ == "__main__":
     n_jobs = -3
 
     # Section: varying over samples
-    # n_dims_1 = 4096 - 6
-    # n_samples_list = [2**x for x in range(8, 13)]
-    # print(n_samples_list)
-    # model_name = "ksg"
-    # results = Parallel(n_jobs=n_jobs)(
-    #     delayed(_run_ksg_simulation)(
-    #         n_samples,
-    #         n_dims_1,
-    #         idx,
-    #         root_dir,
-    #         sim_name,
-    #         model_name,
-    #         overwrite=False,
-    #     )
-    #     for sim_name in SIMULATIONS_NAMES
-    #     for n_samples in n_samples_list
-    #     for idx in range(n_repeats)
-    # )
+    n_dims_1 = 4096 - 6
+    n_samples_list = [2**x for x in range(8, 13)]
+    print(n_samples_list)
+    model_name = "ksg"
+    results = Parallel(n_jobs=n_jobs)(
+        delayed(_run_ksg_simulation)(
+            n_samples,
+            n_dims_1,
+            idx,
+            root_dir,
+            sim_name,
+            model_name,
+            overwrite=False,
+        )
+        for sim_name in SIMULATIONS_NAMES
+        for n_samples in n_samples_list
+        for idx in range(n_repeats)
+    )
 
     # varying over dimensions
     n_dims_list = [2**i - 6 for i in range(3, 13)]
