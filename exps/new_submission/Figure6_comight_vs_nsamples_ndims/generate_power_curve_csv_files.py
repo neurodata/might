@@ -139,7 +139,7 @@ def make_csv_over_ndims1(
                 mi = loaded_data["cmi"]
                 results["cmi"].append(mi)
 
-                if model_name == "comight":
+                if "comight" in model_name:
                     I_XZ_Y = loaded_data["I_XZ_Y"]
                     I_Z_Y = loaded_data["I_Z_Y"]
                     results["I_XZ_Y"].append(I_XZ_Y)
@@ -154,7 +154,7 @@ def make_csv_over_ndims1(
         id_vars=["n_dims_1", "sim_type", "model"],
         value_vars=(
             [param_name]
-            if param_name == "sas98" or model_name != "comight"
+            if param_name == "sas98" or  "comight" in model_name
             else [param_name, "I_XZ_Y", "I_Z_Y"]
         ),
         var_name="metric",
@@ -173,7 +173,7 @@ if __name__ == "__main__":
     root_dir = Path("/Volumes/Extreme Pro/cancer")
     # root_dir = Path('/data/sambit/')
 
-    sim_name = "multi_modal-2202"
+    sim_name = "multi_modal-3302"
     model_name = "ksg"
     model_name = 'knn_viewtwo'
     model_name = 'comight-cmi'
