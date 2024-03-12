@@ -205,55 +205,55 @@ MODEL_NAMES = {
 }
 
 if __name__ == "__main__":
-    idx = int(sys.argv[1])
-    n_samples = int(sys.argv[2])
-    n_dims_1 = int(sys.argv[3])
-    sim_name = sys.argv[4]
-    root_dir = sys.argv[5]
+    # idx = int(sys.argv[1])
+    # n_samples = int(sys.argv[2])
+    # n_dims_1 = int(sys.argv[3])
+    # sim_name = sys.argv[4]
+    # root_dir = sys.argv[5]
 
-    model_name = "comight-perm"
-    _run_simulation(
-        n_samples,
-        n_dims_1,
-        idx,
-        Path(root_dir),
-        sim_name,
-        model_name,
-        overwrite=False,
-    )
-
-    # root_dir = Path("/Volumes/Extreme Pro/cancer")
-
-    # SIMULATIONS_NAMES = [
-    #     # "mean_shift_compounding",
-    #     # "multi_modal_compounding",
-    #     # "multi_equal",
-    # ]
     # model_name = "comight-perm"
-    # overwrite = False
-
-    # n_repeats = 100
-    # n_jobs = -2
-
-    # # Section: varying over dimensions
-    # n_samples = 4096
-    # n_dims_list = [2**i - 6 for i in range(3, 13)]
-    # print(n_dims_list)
-    # results = Parallel(n_jobs=n_jobs, verbose=True)(
-    #     delayed(_run_simulation)(
-    #         n_samples,
-    #         n_dims_1,
-    #         idx,
-    #         root_dir,
-    #         sim_name,
-    #         model_name,
-    #         overwrite=False,
-    #         generate_data=False,
-    #     )
-    #     for sim_name in SIMULATIONS_NAMES
-    #     for n_dims_1 in n_dims_list
-    #     for idx in range(n_repeats)
+    # _run_simulation(
+    #     n_samples,
+    #     n_dims_1,
+    #     idx,
+    #     Path(root_dir),
+    #     sim_name,
+    #     model_name,
+    #     overwrite=False,
     # )
+
+    root_dir = Path("/Volumes/Extreme Pro/cancer")
+
+    SIMULATIONS_NAMES = [
+        # "mean_shift_compounding",
+        'mean_shiftv2',
+        # "multi_modal_compounding",
+        # "multi_equal",
+    ]
+    model_name = "comight-perm"
+    overwrite = False
+
+    n_repeats = 100
+    n_jobs = -2
+
+    # Section: varying over dimensions
+    n_samples = 4096
+    n_dims_list = [2**i - 6 for i in range(3, 13)]
+    print(n_dims_list)
+    results = Parallel(n_jobs=n_jobs, verbose=True)(
+        delayed(_run_simulation)(
+            n_samples,
+            n_dims_1,
+            idx,
+            root_dir,
+            sim_name,
+            model_name,
+            overwrite=False,
+        )
+        for sim_name in SIMULATIONS_NAMES
+        for n_dims_1 in n_dims_list
+        for idx in range(n_repeats)
+    )
 
     # # Section: varying over sample-sizes
     # n_samples_list = [2**x for x in range(8, 13)]

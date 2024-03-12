@@ -115,16 +115,16 @@ if __name__ == "__main__":
     # root_dir = Path("/data/adam/")
 
     SIMULATIONS_NAMES = [
-        "mean_shiftv2",
+        # "mean_shiftv2",
         # "multi_modal_compounding",
-        # "multi_equal",
+        "multi_equal",
     ]
 
     overwrite = False
     n_repeats = 100
     n_jobs = -1
 
-    # Section: varying over dimensions
+    # Section: varying over samples
     # n_dims_1 = 4096 - 6
     # n_samples_list = [2**x for x in range(8, 13)]
     # print(n_samples_list)
@@ -144,6 +144,7 @@ if __name__ == "__main__":
     #     for idx in range(n_repeats)
     # )
 
+    # varying over dimensions
     n_dims_list = [2**i - 6 for i in range(3, 13)]
     n_samples = 4096
     print(n_dims_list)

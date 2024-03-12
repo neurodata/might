@@ -251,13 +251,13 @@ if __name__ == "__main__":
 
     SIMULATIONS_NAMES = [
         # "mean_shiftv2",
-        "multi_modalv2",
+        "multi_modal-3302",
         # "multi_modal_compounding",
         # "multi_equal",
     ]
 
     overwrite = True
-    n_repeats = 4
+    n_repeats = 3
     n_jobs = 1
     n_dims_1 =  1024-6
 

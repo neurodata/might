@@ -165,7 +165,7 @@ if __name__ == "__main__":
     # root_dir = Path('/data/sambit/')
     SIMULATIONS_NAMES = [
         # "mean_shiftv2", 
-                         "multi_modalv2"]
+                         "multi_modal-22"]
 
     model_names = [
         "comight-cmi",
