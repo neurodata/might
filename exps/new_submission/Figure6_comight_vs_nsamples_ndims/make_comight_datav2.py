@@ -84,9 +84,9 @@ def make_multi_modal(
     root_dir,
     n_samples=4096,
     n_dim_1=4090,
-    mu_viewone=3,
-    mu_viewtwo=3,
-    mix=0.74,
+    mu_viewone=5,
+    mu_viewtwo=-1,
+    mix=0.75,
     rho=0.2,
     seed=None,
     n_dim_2=6,
@@ -97,8 +97,8 @@ def make_multi_modal(
     output_fname = (
         root_dir
         / "data"
-        / "multi_modal-3302"
-        / f"multi_modal-3302_{n_samples}_{n_dim_1}_{n_dim_2}_{seed}.npz"
+        / "multi_modal-5-102"
+        / f"multi_modal-5-102_{n_samples}_{n_dim_1}_{n_dim_2}_{seed}.npz"
     )
     output_fname.parent.mkdir(exist_ok=True, parents=True)
     if not overwrite and output_fname.exists():
@@ -156,6 +156,7 @@ def make_multi_equal(
     seed=None,
     n_dim_2=6,
     return_params=False,
+    overwrite=False
 ):
     """Make multi-modal binary classification data.
 
@@ -205,7 +206,9 @@ def make_multi_equal(
         / f"multi_equal_{n_samples}_{n_dim_1}_{n_dim_2}_{seed}.npz"
     )
     output_fname.parent.mkdir(exist_ok=True, parents=True)
-
+    if not overwrite and output_fname.exists():
+        return
+    
     rng = np.random.default_rng(seed)
     default_n_informative = 2
 
@@ -256,13 +259,13 @@ def make_multi_equal(
 
 
 if __name__ == "__main__":
-    root_dir = sys.argv[1]
+    # root_dir = sys.argv[1]
 
     overwrite = False
     n_repeats = 100
 
     # Section: Make data
-    # root_dir = Path("/Volumes/Extreme Pro/cancer")
+    root_dir = Path("/Volumes/Extreme Pro/cancer")
     # root_dir = Path("/data/adam/")
 
     n_repeats = 100
@@ -271,7 +274,7 @@ if __name__ == "__main__":
         for seed in range(n_repeats)
         for func in [
             # make_mean_shift,
-            # make_multi_modal,
-            make_multi_equal,
+            make_multi_modal,
+            # make_multi_equal,
         ]
     )

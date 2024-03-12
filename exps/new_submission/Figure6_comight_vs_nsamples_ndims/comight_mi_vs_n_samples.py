@@ -251,7 +251,7 @@ if __name__ == "__main__":
 
     SIMULATIONS_NAMES = [
         # "mean_shiftv2",
-        "multi_modal-3302",
+        "multi_modal-5-102",
         # "multi_modal_compounding",
         # "multi_equal",
     ]
