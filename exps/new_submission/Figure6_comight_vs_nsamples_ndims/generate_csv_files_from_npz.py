@@ -162,17 +162,18 @@ def make_csv_over_ndims1(
 
 if __name__ == "__main__":
     root_dir = Path("/Volumes/Extreme Pro/cancer")
-    # root_dir = Path('/data/sambit/')
+    root_dir = Path('/data/hao/')
     SIMULATIONS_NAMES = [
-        # "mean_shiftv2",
-        "multi_modal-22"
+        "mean_shiftv2",
+        'multi_equal',
+        # "multi_modal-22"
     ]
 
     model_names = [
-        "comight-cmi",
+        # "comight-cmi",
         # "comight-cmi-with-max09",
-        # "might_viewone",
-        # "might_viewtwo",
+        "might_viewone",
+        "might_viewtwo",
         # "might_viewoneandtwo",
         # "knn",
         # "knn_viewone",

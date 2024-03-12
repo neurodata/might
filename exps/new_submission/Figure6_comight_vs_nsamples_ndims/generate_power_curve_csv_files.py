@@ -172,11 +172,13 @@ def make_csv_over_ndims1(
 
 if __name__ == "__main__":
     root_dir = Path("/Volumes/Extreme Pro/cancer")
-    # root_dir = Path('/data/sambit/')
+    root_dir = Path('/home/hao/')
 
-    sim_name = "multi_modal-5-102"
+    # sim_name = "multi_modal-5-102"
     sim_name = "mean_shiftv2"
-    model_name = "ksg"
+    model_name = "might_viewone",
+    model_name = "might_viewtwo",
+    # model_name = "ksg"
     # model_name = 'knn_viewtwo'
     # model_name = 'knn'
     # model_name = 'comight-cmi'
