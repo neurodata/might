@@ -6,7 +6,8 @@ from pathlib import Path
 
 import numpy as np
 from joblib import Parallel, delayed
-from sktree.datasets import make_trunk_classification, make_trunk_mixture_classification
+from sktree.datasets import (make_trunk_classification,
+                             make_trunk_mixture_classification)
 
 
 def make_mean_shift(
@@ -85,7 +86,7 @@ def make_multi_modal(
     n_samples=4096,
     n_dim_1=4090,
     mu_viewone=5,
-    mu_viewtwo=-1,
+    mu_viewtwo=1,
     mix=0.75,
     rho=0.2,
     seed=None,
@@ -97,8 +98,8 @@ def make_multi_modal(
     output_fname = (
         root_dir
         / "data"
-        / "multi_modal-5-102"
-        / f"multi_modal-5-102_{n_samples}_{n_dim_1}_{n_dim_2}_{seed}.npz"
+        / "multi_modalv2"
+        / f"multi_modalv2_{n_samples}_{n_dim_1}_{n_dim_2}_{seed}.npz"
     )
     output_fname.parent.mkdir(exist_ok=True, parents=True)
     if not overwrite and output_fname.exists():
@@ -156,7 +157,7 @@ def make_multi_equal(
     seed=None,
     n_dim_2=6,
     return_params=False,
-    overwrite=False
+    overwrite=False,
 ):
     """Make multi-modal binary classification data.
 
@@ -208,7 +209,7 @@ def make_multi_equal(
     output_fname.parent.mkdir(exist_ok=True, parents=True)
     if not overwrite and output_fname.exists():
         return
-    
+
     rng = np.random.default_rng(seed)
     default_n_informative = 2
 
@@ -259,22 +260,21 @@ def make_multi_equal(
 
 
 if __name__ == "__main__":
-    root_dir = sys.argv[1]
+    # root_dir = sys.argv[1]
 
     overwrite = False
     n_repeats = 100
 
     # Section: Make data
-    # root_dir = Path("/Volumes/Extreme Pro/cancer")
+    root_dir = Path("/Volumes/Extreme Pro/cancer")
     # root_dir = Path("/data/adam/")
 
-    n_repeats = 100
     Parallel(n_jobs=-1)(
         delayed(func)(Path(root_dir), seed=seed, overwrite=overwrite)
         for seed in range(n_repeats)
         for func in [
             # make_mean_shift,
-            # make_multi_modal,
-            make_multi_equal,
+            make_multi_modal,
+            # make_multi_equal,
         ]
     )

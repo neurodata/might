@@ -91,12 +91,8 @@ def _run_simulation(
             n_dims_1 + n_dims_2_,
         ]  # [4090, 4096] for varying samples
         assert X.shape[1] == feature_set_ends[1]
-        est = HonestForestClassifier(
-            seed=seed, **might_kwargs
-        )
-        perm_est = PermutationHonestForestClassifier(
-            seed=seed, **might_kwargs
-        )
+        est = HonestForestClassifier(seed=seed, **might_kwargs)
+        perm_est = PermutationHonestForestClassifier(seed=seed, **might_kwargs)
         # est = HonestForestClassifier(
         #     seed=seed, feature_set_ends=feature_set_ends, **might_kwargs
         # )
@@ -240,7 +236,7 @@ MODEL_NAMES = {
         "bootstrap": True,
         "stratify": True,
         "max_samples": 1.6,
-        'max_features': 0.3,
+        "max_features": 0.3,
         "tree_estimator": MultiViewDecisionTreeClassifier(),
     },
 }
@@ -259,7 +255,7 @@ if __name__ == "__main__":
     overwrite = True
     n_repeats = 3
     n_jobs = 1
-    n_dims_1 =  1024-6
+    n_dims_1 = 1024 - 6
 
     # Section: varying over sample-sizes
     model_name = "comight-cmi"

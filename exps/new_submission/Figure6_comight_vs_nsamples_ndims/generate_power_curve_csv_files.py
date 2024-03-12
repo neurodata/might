@@ -57,7 +57,7 @@ def make_csv_over_nsamples(
                 mi = loaded_data["cmi"]
                 results["cmi"].append(mi)
 
-                if model_name == "comight":
+                if "comight" in model_name:
                     I_XZ_Y = loaded_data["I_XZ_Y"]
                     I_Z_Y = loaded_data["I_Z_Y"]
                     results["I_XZ_Y"].append(I_XZ_Y)
@@ -72,7 +72,7 @@ def make_csv_over_nsamples(
         id_vars=["n_samples", "sim_type", "model"],
         value_vars=(
             [param_name]
-            if param_name == "sas98" or model_name != "comight"
+            if param_name == "sas98" or "comight" not in model_name
             else [param_name, "I_XZ_Y", "I_Z_Y"]
         ),
         var_name="metric",
@@ -148,13 +148,14 @@ def make_csv_over_ndims1(
 
     df = pd.DataFrame(results)
 
+    # print('\n\n HERE!', param_name == "sas98" or  "comight" not in model_name)
     # Melt the DataFrame to reshape it
     df_melted = pd.melt(
         df,
         id_vars=["n_dims_1", "sim_type", "model"],
         value_vars=(
             [param_name]
-            if param_name == "sas98" or  "comight" in model_name
+            if param_name == "sas98" or "comight" not in model_name
             else [param_name, "I_XZ_Y", "I_Z_Y"]
         ),
         var_name="metric",
@@ -173,17 +174,20 @@ if __name__ == "__main__":
     root_dir = Path("/Volumes/Extreme Pro/cancer")
     # root_dir = Path('/data/sambit/')
 
-    sim_name = "multi_modal-3302"
+    sim_name = "multi_modal-5-102"
+    sim_name = "mean_shiftv2"
     model_name = "ksg"
-    model_name = 'knn_viewtwo'
-    model_name = 'comight-cmi'
+    # model_name = 'knn_viewtwo'
+    # model_name = 'knn'
+    # model_name = 'comight-cmi'
     # perm_name = "comight-perm"
+    # param_name = "sas98"
     param_name = "sas98"
-    param_name = "cmi"
-    figname = "cmi"  # TODO: change
+    figname = "sas98"  # TODO: change
 
-    n_samples_list = [2**x for x in range(8, 13)]
-    n_dims_1 = 1024-6
+    n_samples_list = [2**x for x in range(8, 13)][-1:]
+    n_dims_1 = 1024 - 6
+    n_dims_1 = 4096 - 6
     n_repeats = 100
     print(n_samples_list)
 
@@ -211,21 +215,21 @@ if __name__ == "__main__":
     print(n_dims_list)
 
     # save the dataframe to a csv file over n-dims
-    # df = make_csv_over_ndims1(
-    #     root_dir,
-    #     sim_name,
-    #     n_dims_list,
-    #     n_samples,
-    #     n_repeats,
-    #     param_name=param_name,
-    #     model_name=model_name,
-    # )
-    # df.to_csv(
-    #     root_dir
-    #     / "output"
-    #     / f"results_vs_ndims_{figname}_{sim_name}_{model_name}_{param_name}_{n_dims_1}_{n_repeats}.csv",
-    #     index=False,
-    # )
+    df = make_csv_over_ndims1(
+        root_dir,
+        sim_name,
+        n_dims_list,
+        n_samples,
+        n_repeats,
+        param_name=param_name,
+        model_name=model_name,
+    )
+    df.to_csv(
+        root_dir
+        / "output"
+        / f"results_vs_ndims_{figname}_{sim_name}_{model_name}_{param_name}_{n_dims_1}_{n_repeats}.csv",
+        index=False,
+    )
 
     # perm_df = make_csv_over_ndims1(
     #     root_dir,

@@ -115,14 +115,14 @@ if __name__ == "__main__":
     # root_dir = Path("/data/adam/")
 
     SIMULATIONS_NAMES = [
-        # "mean_shiftv2",
+        "mean_shiftv2",
         # "multi_modal_compounding",
-        "multi_equal",
+        # "multi_equal",
     ]
 
     overwrite = False
     n_repeats = 100
-    n_jobs = -1
+    n_jobs = -3
 
     # Section: varying over samples
     # n_dims_1 = 4096 - 6

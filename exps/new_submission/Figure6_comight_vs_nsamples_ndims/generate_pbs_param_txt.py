@@ -1,7 +1,11 @@
-n_repeats = 100
-sim_name = 'multi_equal'
+import os
 
-with open(f"./parameters_{sim_name}.txt", "w") as file:
+n_repeats = 100
+sim_name = "multi_modalv2"
+
+curr_dir = os.getcwd()
+
+with open(f"{curr_dir}/parameters_{sim_name}.txt", "w") as file:
     for n_dims_1 in [2**i - 6 for i in range(3, 13)]:
         for idx in range(n_repeats):
             # seed, n_samples, n_dims_1, sim_name

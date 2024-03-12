@@ -11,7 +11,8 @@ import numpy as np
 from joblib import Parallel, delayed
 from sklearn.metrics import roc_curve
 from sklearn.model_selection import StratifiedShuffleSplit
-from sktree.stats import PermutationHonestForestClassifier, build_hyppo_oob_forest
+from sktree.stats import (PermutationHonestForestClassifier,
+                          build_hyppo_oob_forest)
 from sktree.tree import MultiViewDecisionTreeClassifier
 
 seed = 12345
@@ -226,7 +227,7 @@ if __name__ == "__main__":
 
     SIMULATIONS_NAMES = [
         # "mean_shift_compounding",
-        'mean_shiftv2',
+        "mean_shiftv2",
         # "multi_modal_compounding",
         # "multi_equal",
     ]

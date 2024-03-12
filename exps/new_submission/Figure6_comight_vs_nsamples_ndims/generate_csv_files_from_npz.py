@@ -59,10 +59,10 @@ def make_csv_over_nsamples(
                         mi = loaded_data["cmi"]
                         results["cmi"].append(mi)
 
-                        I_XZ_Y= loaded_data['I_XZ_Y']
-                        I_Z_Y= loaded_data['I_Z_Y']
-                        results['I_XZ_Y'].append(I_XZ_Y)
-                        results['I_Z_Y'].append(I_Z_Y)
+                        I_XZ_Y = loaded_data["I_XZ_Y"]
+                        I_Z_Y = loaded_data["I_Z_Y"]
+                        results["I_XZ_Y"].append(I_XZ_Y)
+                        results["I_Z_Y"].append(I_Z_Y)
                     # results["threshold"].append(threshold)
 
     df = pd.DataFrame(results)
@@ -71,9 +71,9 @@ def make_csv_over_nsamples(
     df_melted = pd.melt(
         df,
         id_vars=["n_samples", "sim_type", "model"],
-        value_vars=[
-            param_name
-        ] if param_name == "sas98" else [param_name, 'I_XZ_Y', 'I_Z_Y'],
+        value_vars=[param_name]
+        if param_name == "sas98"
+        else [param_name, "I_XZ_Y", "I_Z_Y"],
         var_name="metric",
         value_name="metric_value",
     )
@@ -164,8 +164,9 @@ if __name__ == "__main__":
     root_dir = Path("/Volumes/Extreme Pro/cancer")
     # root_dir = Path('/data/sambit/')
     SIMULATIONS_NAMES = [
-        # "mean_shiftv2", 
-                         "multi_modal-22"]
+        # "mean_shiftv2",
+        "multi_modal-22"
+    ]
 
     model_names = [
         "comight-cmi",
