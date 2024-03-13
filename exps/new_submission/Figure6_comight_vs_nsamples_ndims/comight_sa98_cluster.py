@@ -1,8 +1,4 @@
 """Generating data for CoMIGHT simulations with S@S98."""
-
-# A : Control ~ N(0, 1), Cancer ~ N(1, 1)
-# B:  Control ~ N(0, 1), Cancer ~ 0.75*N(1, 1) + 0.25*N(5, 1)
-# C:  Control~ 0.75*N(1, 1) + 0.25*N(5, 1), Cancer ~ 0.75*N(1, 1) + 0.25*N(5, 1)
 import sys
 from collections import defaultdict
 from pathlib import Path
@@ -12,8 +8,6 @@ from joblib import Parallel, delayed
 from sklearn.metrics import roc_curve
 from sklearn.model_selection import StratifiedShuffleSplit
 from sktree import HonestForestClassifier
-from sktree.datasets import (make_trunk_classification,
-                             make_trunk_mixture_classification)
 from sktree.stats import build_hyppo_oob_forest
 from sktree.tree import MultiViewDecisionTreeClassifier
 
@@ -82,8 +76,7 @@ def _run_simulation(
     sim_name,
     model_name,
     overwrite=False,
-    run_view=None,
-    use_second_split_for_threshold=False,
+    generate_data=False,
 ):
     n_samples_ = 4096
     n_dims_2_ = 6
@@ -108,7 +101,6 @@ def _run_simulation(
     print(f"Output file: {output_fname} {output_fname.exists()}")
     if not overwrite and output_fname.exists():
         return
-
     if not fname.exists():
         raise RuntimeError(f"{fname} does not exist")
     print(f"Reading {fname}")
@@ -126,15 +118,11 @@ def _run_simulation(
             continue
         X = X[train_idx, :]
         y = y[train_idx, ...].squeeze()
-    if run_view == "view_one":
-        X = X[:, :n_dims_1]
-        assert X.shape[1] == n_dims_1
-    elif run_view == "view_two":
-        X = X[:, -n_dims_2_:]
-        assert X.shape[1] == n_dims_2_
-    elif run_view == "view_oneandtwo":
-        X = X
-        assert X.shape[1] == n_dims_1 + n_dims_2_
+    if n_dims_1 < n_dims_1_:
+        view_one = X[:, :n_dims_1]
+        view_two = X[:, n_dims_1_:]
+        assert view_two.shape[1] == n_dims_2_
+        X = np.concatenate((view_one, view_two), axis=1)
 
     print(
         "Running analysis for: ",
@@ -144,11 +132,18 @@ def _run_simulation(
         n_samples,
         n_dims_1,
         n_dims_2_,
+        n_dims_1 + n_dims_2_,
     )
     if not output_fname.exists() or overwrite:
         might_kwargs = MODEL_NAMES["might"]
-
-        est = HonestForestClassifier(seed=seed, **might_kwargs)
+        feature_set_ends = [
+            n_dims_1,
+            n_dims_1 + n_dims_2_,
+        ]  # [4090, 4096] for varying samples
+        assert X.shape[1] == feature_set_ends[1]
+        est = HonestForestClassifier(
+            seed=seed, feature_set_ends=feature_set_ends, **might_kwargs
+        )
 
         est, posterior_arr = build_hyppo_oob_forest(
             est,
@@ -156,43 +151,22 @@ def _run_simulation(
             y,
             verbose=False,
         )
-        print(X.shape, n_samples, n_dims_1, n_dims_2_)
+        print(feature_set_ends, X.shape, n_samples, n_dims_1, n_dims_2_)
         print(max([tree.get_depth() for tree in est.estimators_]))
 
-        if use_second_split_for_threshold:
-            # array-like of shape (n_estimators, n_samples, n_classes)
-            honest_idx_posteriors = est.predict_proba_per_tree(
-                X, indices=est.honest_indices_
-            )
+        # Compute nan-averaged y_score along the trees axis
+        y_score_avg = np.nanmean(posterior_arr, axis=0)
 
-            # get the threshold for specified highest sensitivity at 0.98 specificity
-            # Compute nan-averaged y_score along the trees axis
-            y_score_avg = np.nanmean(honest_idx_posteriors, axis=0)
+        # Extract true labels and nan-averaged predicted scores for the positive class
+        y_true = y.ravel()
+        y_score_binary = y_score_avg[:, 1]
 
-            # Extract true labels and nan-averaged predicted scores for the positive class
-            y_true = y.ravel()
-            y_score_binary = y_score_avg[:, 1]
+        # Identify rows with NaN values in y_score_binary
+        nan_rows = np.isnan(y_score_binary)
 
-            # Identify rows with NaN values in y_score_binary
-            nan_rows = np.isnan(y_score_binary)
-
-            # Remove NaN rows from y_score_binary and y_true
-            y_score_binary = y_score_binary[~nan_rows]
-            y_true = y_true[~nan_rows]
-        else:
-            # Compute nan-averaged y_score along the trees axis
-            y_score_avg = np.nanmean(posterior_arr, axis=0)
-
-            # Extract true labels and nan-averaged predicted scores for the positive class
-            y_true = y.ravel()
-            y_score_binary = y_score_avg[:, 1]
-
-            # Identify rows with NaN values in y_score_binary
-            nan_rows = np.isnan(y_score_binary)
-
-            # Remove NaN rows from y_score_binary and y_true
-            y_score_binary = y_score_binary[~nan_rows]
-            y_true = y_true[~nan_rows]
+        # Remove NaN rows from y_score_binary and y_true
+        y_score_binary = y_score_binary[~nan_rows]
+        y_true = y_true[~nan_rows]
 
         threshold_at_specificity = _estimate_threshold(
             y_true, y_score_binary, target_specificity=0.98, pos_label=1
@@ -229,7 +203,7 @@ MODEL_NAMES = {
         "stratify": True,
         "max_samples": 1.6,
         "max_features": max_features,
-        # "tree_estimator": MultiViewDecisionTreeClassifier(),
+        "tree_estimator": MultiViewDecisionTreeClassifier(),
     },
 }
 
@@ -238,92 +212,18 @@ if __name__ == "__main__":
     n_samples = int(sys.argv[2])
     n_dims_1 = int(sys.argv[3])
     sim_name = sys.argv[4]
-    root_dir = sys.argv[5]
-    overwrite = False
-    # fixed number of dimensions in first view
-    # n_dims_1 = 2048 - 6
-    # n_dims_1 = 4096 - 6
+    root_dir = Path(sys.argv[5])
 
-    # # Section: varying over sample-sizes
-    model_name = "might_viewone"
-    _run_simulation(
-        n_samples,
-        n_dims_1,
-        idx,
-        Path(root_dir),
-        sim_name,
-        model_name,
-        run_view="view_one",
-        overwrite=False,
-    )
+    model_name = "comight"
+    overwrite = False
 
     # Section: varying over sample-sizes
-    model_name = "might_viewtwo"
     _run_simulation(
         n_samples,
         n_dims_1,
         idx,
-        Path(root_dir),
+        root_dir,
         sim_name,
         model_name,
-        run_view="view_two",
         overwrite=False,
     )
-
-    # root_dir = Path("/Volumes/Extreme Pro/cancer")
-    # root_dir = Path("/data/adam/")
-
-    # n_repeats = 100
-    # n_jobs = -2
-    # SIMULATIONS_NAMES = [
-    #     "mean_shiftv2",
-    #     # "mean_shift_compounding",
-    #     # "multi_modal_compounding",
-    #     # "multi_equal",
-    # ]
-
-    # overwrite = False
-
-    # # fixed number of dimensions in first view
-    # # n_dims_1 = 2048 - 6
-    # n_dims_1 = 4096 - 6
-
-    # # Section: varying over sample-sizes
-    # # model_name = "might_viewone"
-    # # n_samples_list = [2**x for x in range(8, 13)]
-    # # print(n_samples_list)
-    # # results = Parallel(n_jobs=n_jobs)(
-    # #     delayed(_run_simulation)(
-    # #         n_samples,
-    # #         n_dims_1,
-    # #         idx,
-    # #         Path(root_dir),
-    # #         sim_name,
-    # #         model_name,
-    # #         run_view="view_one",
-    # #         overwrite=False,
-    # #     )
-    # #     for sim_name in SIMULATIONS_NAMES
-    # #     for n_samples in n_samples_list
-    # #     for idx in range(n_repeats)
-    # # )
-
-    # model_name = "might_viewtwo"
-    # # Section: varying over sample-sizes
-    # n_samples_list = [2**x for x in range(8, 13)]
-    # print(n_samples_list)
-    # results = Parallel(n_jobs=n_jobs)(
-    #     delayed(_run_simulation)(
-    #         n_samples,
-    #         n_dims_1,
-    #         idx,
-    #         root_dir,
-    #         sim_name,
-    #         model_name,
-    #         run_view="view_two",
-    #         overwrite=False,
-    #     )
-    #     for sim_name in SIMULATIONS_NAMES
-    #     for n_samples in n_samples_list
-    #     for idx in range(n_repeats)
-    # )

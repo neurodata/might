@@ -291,66 +291,66 @@ if __name__ == "__main__":
     n_jobs = -3
 
     # Section: varying kNN over sample-sizes
-    n_samples_list = [2**x for x in range(8, 13)]
-    n_dims_1 = 4090
-    print(n_samples_list)
-    model_name = 'knn'
-    results = Parallel(n_jobs=n_jobs)(
-        delayed(_run_simulation)(
-            n_samples,
-            n_dims_1,
-            idx,
-            root_dir,
-            sim_name,
-            model_name,
-            overwrite=False,
-        )
-        for sim_name in SIMULATIONS_NAMES
-        for n_samples in n_samples_list
-        for idx in range(n_repeats)
-    )
+    # n_samples_list = [2**x for x in range(8, 13)]
+    # n_dims_1 = 4090
+    # print(n_samples_list)
+    # model_name = 'knn'
+    # results = Parallel(n_jobs=n_jobs)(
+    #     delayed(_run_simulation)(
+    #         n_samples,
+    #         n_dims_1,
+    #         idx,
+    #         root_dir,
+    #         sim_name,
+    #         model_name,
+    #         overwrite=False,
+    #     )
+    #     for sim_name in SIMULATIONS_NAMES
+    #     for n_samples in n_samples_list
+    #     for idx in range(n_repeats)
+    # )
 
-    # Section: varying kNN-viewone over sample-sizes
-    model_name = "knn_viewone"
-    n_samples_list = [2**x for x in range(8, 13)]
-    n_dims_1 = 4090
-    print(n_samples_list)
-    results = Parallel(n_jobs=n_jobs)(
-        delayed(_run_simulation_oneview)(
-            n_samples,
-            n_dims_1,
-            idx,
-            root_dir,
-            sim_name,
-            model_name,
-            run_view="view_one",
-            overwrite=False,
-        )
-        for sim_name in SIMULATIONS_NAMES
-        for n_samples in n_samples_list
-        for idx in range(n_repeats)
-    )
+    # # Section: varying kNN-viewone over sample-sizes
+    # model_name = "knn_viewone"
+    # n_samples_list = [2**x for x in range(8, 13)]
+    # n_dims_1 = 4090
+    # print(n_samples_list)
+    # results = Parallel(n_jobs=n_jobs)(
+    #     delayed(_run_simulation_oneview)(
+    #         n_samples,
+    #         n_dims_1,
+    #         idx,
+    #         root_dir,
+    #         sim_name,
+    #         model_name,
+    #         run_view="view_one",
+    #         overwrite=False,
+    #     )
+    #     for sim_name in SIMULATIONS_NAMES
+    #     for n_samples in n_samples_list
+    #     for idx in range(n_repeats)
+    # )
 
-    # Section: varying kNN-viewtwo over sample-sizes
-    model_name = "knn_viewtwo"
-    n_samples_list = [2**x for x in range(8, 13)]
-    n_dims_1 = 4090
-    print(n_samples_list)
-    results = Parallel(n_jobs=n_jobs)(
-        delayed(_run_simulation_oneview)(
-            n_samples,
-            n_dims_1,
-            idx,
-            root_dir,
-            sim_name,
-            model_name,
-            run_view="view_two",
-            overwrite=False,
-        )
-        for sim_name in SIMULATIONS_NAMES
-        for n_samples in n_samples_list
-        for idx in range(n_repeats)
-    )
+    # # Section: varying kNN-viewtwo over sample-sizes
+    # model_name = "knn_viewtwo"
+    # n_samples_list = [2**x for x in range(8, 13)]
+    # n_dims_1 = 4090
+    # print(n_samples_list)
+    # results = Parallel(n_jobs=n_jobs)(
+    #     delayed(_run_simulation_oneview)(
+    #         n_samples,
+    #         n_dims_1,
+    #         idx,
+    #         root_dir,
+    #         sim_name,
+    #         model_name,
+    #         run_view="view_two",
+    #         overwrite=False,
+    #     )
+    #     for sim_name in SIMULATIONS_NAMES
+    #     for n_samples in n_samples_list
+    #     for idx in range(n_repeats)
+    # )
 
     # Section: varying kNN over dimensions of the both views
     # model_name = "knn"
@@ -372,7 +372,7 @@ if __name__ == "__main__":
     #     for idx in range(n_repeats)
     # )
 
-    # Section: varying kNN-viewone over dimensions of the first view
+    # # Section: varying kNN-viewone over dimensions of the first view
     # model_name = "knn_viewone"
     # n_dims_list = [2**i - 6 for i in range(3, 13)]
     # n_samples = 4096
@@ -394,22 +394,22 @@ if __name__ == "__main__":
     # )
 
     # Section: varying kNN-viewtwo over dimensions of the first view
-    # model_name = "knn_viewtwo"
-    # n_dims_list = [2**i - 6 for i in range(3, 13)]
-    # n_samples = 4096
-    # print(n_dims_list)
-    # results = Parallel(n_jobs=n_jobs)(
-    #     delayed(_run_simulation_oneview)(
-    #         n_samples,
-    #         n_dims_1,
-    #         idx,
-    #         root_dir,
-    #         sim_name,
-    #         model_name,
-    #         run_view="view_two",
-    #         overwrite=False,
-    #     )
-    #     for sim_name in SIMULATIONS_NAMES
-    #     for n_dims_1 in n_dims_list
-    #     for idx in range(n_repeats)
-    # )
+    model_name = "knn_viewtwo"
+    n_dims_list = [2**i - 6 for i in range(3, 13)]
+    n_samples = 4096
+    print(n_dims_list)
+    results = Parallel(n_jobs=n_jobs)(
+        delayed(_run_simulation_oneview)(
+            n_samples,
+            n_dims_1,
+            idx,
+            root_dir,
+            sim_name,
+            model_name,
+            run_view="view_two",
+            overwrite=False,
+        )
+        for sim_name in SIMULATIONS_NAMES
+        for n_dims_1 in n_dims_list
+        for idx in range(n_repeats)
+    )

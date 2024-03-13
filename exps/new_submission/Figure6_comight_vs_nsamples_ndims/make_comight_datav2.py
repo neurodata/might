@@ -262,7 +262,7 @@ def make_multi_equal(
 if __name__ == "__main__":
     # root_dir = sys.argv[1]
 
-    overwrite = False
+    overwrite = True
     n_repeats = 100
 
     # Section: Make data

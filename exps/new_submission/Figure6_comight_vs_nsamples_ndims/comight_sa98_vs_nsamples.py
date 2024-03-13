@@ -205,6 +205,7 @@ MODEL_NAMES = {
         "bootstrap": True,
         "stratify": True,
         "max_samples": 1.6,
+        "max_features": max_features,
         "tree_estimator": MultiViewDecisionTreeClassifier(),
     },
 }
