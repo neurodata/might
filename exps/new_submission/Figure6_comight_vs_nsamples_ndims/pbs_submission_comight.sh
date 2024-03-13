@@ -22,7 +22,7 @@ path=~/miniconda3/envs/ms/bin
 PYTHON_SCRIPT="~/might/exps/new_submission/Figure6_comight_vs_nsamples_ndims/comight_sa98_cluster.py"
 
 # Read parameters from text file and submit Python job
-line=$(sed -n "${PBS_ARRAY_INDEX}p" ~/might/exps/new_submission/Figure6_comight_vs_nsamples_ndims/parameters.txt)
+line=$(sed -n "${PBS_ARRAY_INDEX}p" ./parameters_multi_modalv2.txt)
 seed=$(echo "$line" | awk '{print $1}')
 n_samples=$(echo "$line" | awk '{print $2}')
 n_dims_1=$(echo "$line" | awk '{print $3}')

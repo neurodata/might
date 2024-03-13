@@ -22,7 +22,7 @@ path=~/miniconda3/envs/ms/bin
 PYTHON_SCRIPT="~/might/exps/new_submission/Figure6_comight_vs_nsamples_ndims/comight-perm_sa98_vs_nsamples_ndims.py"
 
 # Read parameters from text file and submit Python job
-line=$(sed -n "${PBS_ARRAY_INDEX}p" ./parameters.txt)
+line=$(sed -n "${PBS_ARRAY_INDEX}p" ./parameters_mean_shiftv2.txt)
 seed=$(echo "$line" | awk '{print $1}')
 n_samples=$(echo "$line" | awk '{print $2}')
 n_dims_1=$(echo "$line" | awk '{print $3}')

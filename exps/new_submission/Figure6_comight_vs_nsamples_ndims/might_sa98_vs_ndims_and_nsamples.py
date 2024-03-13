@@ -274,7 +274,7 @@ if __name__ == "__main__":
     # root_dir = Path("/data/adam/")
 
     n_repeats = 100
-    n_jobs = -2
+    n_jobs = -3
     SIMULATIONS_NAMES = [
         # "mean_shiftv2",
         # "mean_shift_compounding",
