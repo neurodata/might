@@ -32,7 +32,7 @@ sim_name=$(echo "$line" | awk '{print $4}')
 $path/python "$PYTHON_SCRIPT" "$seed" "$n_samples" "$n_dims_1" "$sim_name" "$ROOT_DIR"
 
 # TO SUBMIT THIS:
-# qsub -J 1-4200 pbs_submission_comight.sh
+# qsub -J 1-1400 pbs_submission_comight.sh
 
 # To get an interactive session:
 # qsub -I -l select=1:ncpus=1:mpiprocs=1:mem=5gb,walltime=00:15:00 -j oe

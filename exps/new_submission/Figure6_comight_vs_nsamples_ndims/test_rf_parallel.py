@@ -2,7 +2,7 @@ from time import time
 import numpy as np
 
 from sklearn.ensemble import RandomForestClassifier
-from sktree import sktreeRandomForestClassifier
+from sktree import RandomForestClassifier as sktreeRandomForestClassifier
 
 
 seed = 12345

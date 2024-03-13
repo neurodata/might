@@ -1,7 +1,7 @@
 import os
 
 n_repeats = 100
-sim_name = "mean_shiftv2"
+sim_name = "multi_modalv2"
 
 curr_dir = os.getcwd()
 
