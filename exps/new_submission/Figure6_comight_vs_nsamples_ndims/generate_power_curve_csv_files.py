@@ -173,15 +173,17 @@ def make_csv_over_ndims1(
 if __name__ == "__main__":
     root_dir = Path("/Volumes/Extreme Pro/cancer")
     # root_dir = Path('/home/hao/')
-    output_dir = Path('/data/adam/')
+    # output_dir = Path('/data/adam/')
     output_dir = root_dir
 
     # sim_name = "multi_modal-5-102"
     sim_name = "mean_shiftv2"
-    # sim_name = "multi_modalv2"
+    sim_name = "multi_modalv2"
+
     # model_name = "might_viewone"
     # model_name = "might_viewtwo"
     model_name = "ksg"
+    # model_name = 'knn_viewone'
     # model_name = 'knn_viewtwo'
     # model_name = 'knn'
     # model_name = 'comight-cmi'
@@ -190,10 +192,11 @@ if __name__ == "__main__":
     param_name = "sas98"
     param_name = 'cmi'
     figname = "cmi"  # TODO: change
+    # figname = "sas98"  # TODO: change
 
-    n_samples_list = [2**x for x in range(8, 13)][-1:]
+    n_samples_list = [2**x for x in range(8, 13)]
     n_dims_1 = 1024 - 6
-    n_dims_1 = 4096 - 6
+    # n_dims_1 = 4096 - 6
     n_repeats = 100
     print(n_samples_list)
 
