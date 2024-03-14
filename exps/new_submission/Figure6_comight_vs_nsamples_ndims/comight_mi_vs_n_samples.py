@@ -7,7 +7,6 @@ from pathlib import Path
 
 import numpy as np
 from joblib import Parallel, delayed
-from npeet import entropy_estimators as ee
 from sklearn.model_selection import StratifiedShuffleSplit
 from sktree import HonestForestClassifier
 from sktree.datasets import (make_trunk_classification,
@@ -136,95 +135,6 @@ def _run_simulation(
             y=y,
             posterior_arr=posterior_arr,
             perm_posterior_arr=perm_posterior_arr,
-        )
-
-
-def _run_ksg_simulation(
-    n_samples,
-    n_dims_1,
-    idx,
-    root_dir,
-    sim_name,
-    model_name,
-    overwrite=False,
-):
-    n_samples_ = 4096
-    n_dims_2_ = 6
-    n_dims_1_ = 4090
-
-    fname = (
-        root_dir
-        / "data"
-        / sim_name
-        / f"{sim_name}_{n_samples_}_{n_dims_1_}_{n_dims_2_}_{idx}.npz"
-    )
-
-    output_fname = (
-        root_dir
-        / "output-mi"
-        / model_name
-        / sim_name
-        / f"{sim_name}_{n_samples}_{n_dims_1}_{n_dims_2_}_{idx}.npz"
-    )
-    output_fname.parent.mkdir(exist_ok=True, parents=True)
-    print(f"Output file: {output_fname} {output_fname.exists()}")
-    if not overwrite and output_fname.exists():
-        return
-    if not fname.exists():
-        raise RuntimeError(f"{fname} does not exist")
-    print(f"Reading {fname}")
-    data = np.load(fname, allow_pickle=True)
-    X, y = data["X"], data["y"]
-    print(X.shape, y.shape)
-    if n_samples < X.shape[0]:
-        _cv = StratifiedShuffleSplit(
-            n_splits=1, train_size=n_samples, random_state=seed
-        )
-        for train_idx, _ in _cv.split(X, y):
-            continue
-        X = X[train_idx, :]
-        y = y[train_idx, ...].squeeze()
-    if n_dims_1 < n_dims_1_:
-        view_one = X[:, :n_dims_1]
-        view_two = X[:, -n_dims_2_:]
-        assert view_two.shape[1] == n_dims_2_
-        X = np.concatenate((view_one, view_two), axis=1)
-
-    print(
-        "Running analysis for: ",
-        output_fname,
-        overwrite,
-        X.shape,
-        n_samples,
-        n_dims_1 + n_dims_2_,
-    )
-    if not output_fname.exists() or overwrite:
-        feature_set_ends = [
-            n_dims_1,
-            n_dims_1 + n_dims_2_,
-        ]  # [4090, 4096] for varying samples
-        assert X.shape[1] == feature_set_ends[1]
-
-        # permute the second view
-        covariate_index = np.arange(n_dims_1)
-        x = X[:, covariate_index]
-        z = X[:, -n_dims_2_:]
-        assert len(covariate_index) + n_dims_2_ == X.shape[1]
-        cmi = ee.mi(x=x, y=y, z=z, k=3)
-
-        print(x.shape, y.shape, z.shape, cmi)
-        if np.isnan(cmi):
-            raise RuntimeError(f"NaN values for {output_fname}")
-
-        np.savez_compressed(
-            output_fname,
-            idx=idx,
-            n_samples=n_samples,
-            n_dims_1=n_dims_1,
-            n_dims_2=n_dims_2_,
-            cmi=cmi,
-            sim_type=sim_name,
-            y=y,
         )
 
 
