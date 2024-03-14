@@ -169,7 +169,7 @@ if __name__ == "__main__":
 
     # Section: varying over sample-sizes
     model_name = "comight-cmi"
-    n_samples_list = [2**x for x in range(12, 13)]
+    n_samples_list = [2**x for x in range(8, 13)]
     print(n_samples_list)
     results = Parallel(n_jobs=n_jobs)(
         delayed(_run_simulation)(

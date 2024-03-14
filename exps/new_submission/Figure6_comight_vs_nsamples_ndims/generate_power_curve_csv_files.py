@@ -184,16 +184,16 @@ if __name__ == "__main__":
 
     # sim_name = "multi_modal-5-102"
     sim_name = "mean_shiftv2"
-    sim_name = "multi_modalv2"
-    sim_name = 'multi_equal'
+    # sim_name = "multi_modalv2"
+    # sim_name = 'multi_equal'
 
     # model_name = "might_viewone"
     # model_name = "might_viewtwo"
-    # model_name = "ksg"
+    model_name = "ksg"
     # model_name = 'knn_viewone'
     # model_name = 'knn_viewtwo'
     # model_name = 'knn'
-    model_name = 'comight-cmi'
+    # model_name = 'comight-cmi'
     # perm_name = "comight-perm"
     # param_name = "sas98"
     param_name = "sas98"
@@ -203,7 +203,7 @@ if __name__ == "__main__":
 
     n_samples_list = [2**x for x in range(8, 13)]
     n_dims_1 = 1024 - 6
-    n_dims_1 = 4096 - 6
+    # n_dims_1 = 4096 - 6
     n_repeats = 100
     print(n_samples_list)
 
