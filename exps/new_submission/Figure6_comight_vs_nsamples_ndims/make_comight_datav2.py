@@ -260,13 +260,13 @@ def make_multi_equal(
 
 
 if __name__ == "__main__":
-    # root_dir = sys.argv[1]
+    root_dir = sys.argv[1]
 
     overwrite = True
     n_repeats = 100
 
     # Section: Make data
-    root_dir = Path("/Volumes/Extreme Pro/cancer")
+    # root_dir = Path("/Volumes/Extreme Pro/cancer")
     # root_dir = Path("/data/adam/")
 
     Parallel(n_jobs=-1)(
