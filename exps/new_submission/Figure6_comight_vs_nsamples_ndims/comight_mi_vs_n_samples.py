@@ -162,7 +162,7 @@ if __name__ == "__main__":
         # "multi_equal",
     ]
 
-    overwrite = True
+    overwrite = False
     n_repeats = 100
     n_jobs = -2
     n_dims_1 = 1024 - 6
