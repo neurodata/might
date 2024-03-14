@@ -156,8 +156,8 @@ if __name__ == "__main__":
     root_dir = Path("/data/adam/")
 
     SIMULATIONS_NAMES = [
-        # "mean_shiftv2",
-        "multi_modalv2",
+        "mean_shiftv2",
+        # "multi_modalv2",
         # "multi_modal_compounding",
         # "multi_equal",
     ]

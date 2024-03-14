@@ -189,11 +189,11 @@ if __name__ == "__main__":
 
     # model_name = "might_viewone"
     # model_name = "might_viewtwo"
-    model_name = "ksg"
+    # model_name = "ksg"
     # model_name = 'knn_viewone'
     # model_name = 'knn_viewtwo'
     # model_name = 'knn'
-    # model_name = 'comight-cmi'
+    model_name = 'comight-cmi'
     # perm_name = "comight-perm"
     # param_name = "sas98"
     param_name = "sas98"

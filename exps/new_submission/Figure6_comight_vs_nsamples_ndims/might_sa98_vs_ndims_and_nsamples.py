@@ -12,8 +12,7 @@ from joblib import Parallel, delayed
 from sklearn.metrics import roc_curve
 from sklearn.model_selection import StratifiedShuffleSplit
 from sktree import HonestForestClassifier
-from sktree.datasets import (make_trunk_classification,
-                             make_trunk_mixture_classification)
+from sktree.datasets import make_trunk_classification, make_trunk_mixture_classification
 from sktree.stats import build_hyppo_oob_forest
 from sktree.tree import MultiViewDecisionTreeClassifier
 
@@ -274,12 +273,13 @@ if __name__ == "__main__":
     # root_dir = Path("/data/adam/")
 
     n_repeats = 100
-    n_jobs = -3
+    n_jobs = -1
     SIMULATIONS_NAMES = [
         # "mean_shiftv2",
+        "multi_modalv2",
         # "mean_shift_compounding",
         # "multi_modal_compounding",
-        "multi_equal",
+        # "multi_equal",
     ]
 
     overwrite = False
@@ -308,63 +308,64 @@ if __name__ == "__main__":
         for idx in range(n_repeats)
     )
 
-    # model_name = "might_viewtwo"
-    # # Section: varying over sample-sizes
-    # n_samples_list = [2**x for x in range(8, 13)]
-    # print(n_samples_list)
-    # results = Parallel(n_jobs=n_jobs)(
-    #     delayed(_run_simulation)(
-    #         n_samples,
-    #         n_dims_1,
-    #         idx,
-    #         root_dir,
-    #         sim_name,
-    #         model_name,
-    #         run_view="view_two",
-    #         overwrite=False,
-    #     )
-    #     for sim_name in SIMULATIONS_NAMES
-    #     for n_samples in n_samples_list
-    #     for idx in range(n_repeats)
-    # )
+    model_name = "might_viewtwo"
+    # Section: varying over sample-sizes
+    n_samples_list = [2**x for x in range(8, 13)]
+    print(n_samples_list)
+    results = Parallel(n_jobs=n_jobs)(
+        delayed(_run_simulation)(
+            n_samples,
+            n_dims_1,
+            idx,
+            root_dir,
+            sim_name,
+            model_name,
+            run_view="view_two",
+            overwrite=False,
+        )
+        for sim_name in SIMULATIONS_NAMES
+        for n_samples in n_samples_list
+        for idx in range(n_repeats)
+    )
 
-    # model_name = "might_viewone"
-    # n_dims_list = [2**i - 6 for i in range(3, 13)]
-    # n_samples = 4096
-    # print(n_dims_list)
-    # results = Parallel(n_jobs=n_jobs)(
-    #     delayed(_run_simulation)(
-    #         n_samples,
-    #         n_dims_1,
-    #         idx,
-    #         Path(root_dir),
-    #         sim_name,
-    #         model_name,
-    #         run_view="view_one",
-    #         overwrite=False,
-    #     )
-    #     for sim_name in SIMULATIONS_NAMES
-    #     for n_dims_1 in n_dims_list
-    #     for idx in range(n_repeats)
-    # )
+    # Section: varying over dims
+    model_name = "might_viewone"
+    n_dims_list = [2**i - 6 for i in range(3, 13)]
+    n_samples = 4096
+    print(n_dims_list)
+    results = Parallel(n_jobs=n_jobs)(
+        delayed(_run_simulation)(
+            n_samples,
+            n_dims_1,
+            idx,
+            Path(root_dir),
+            sim_name,
+            model_name,
+            run_view="view_one",
+            overwrite=False,
+        )
+        for sim_name in SIMULATIONS_NAMES
+        for n_dims_1 in n_dims_list
+        for idx in range(n_repeats)
+    )
 
-    # model_name = "might_viewtwo"
-    # # Section: varying over sample-sizes
-    # n_dims_list = [2**i - 6 for i in range(3, 13)]
-    # n_samples = 4096
-    # print(n_dims_list)
-    # results = Parallel(n_jobs=n_jobs)(
-    #     delayed(_run_simulation)(
-    #         n_samples,
-    #         n_dims_1,
-    #         idx,
-    #         root_dir,
-    #         sim_name,
-    #         model_name,
-    #         run_view="view_two",
-    #         overwrite=False,
-    #     )
-    #     for sim_name in SIMULATIONS_NAMES
-    #     for n_dims_1 in n_dims_list
-    #     for idx in range(n_repeats)
-    # )
+    model_name = "might_viewtwo"
+    # Section: varying over dims
+    n_dims_list = [2**i - 6 for i in range(3, 13)]
+    n_samples = 4096
+    print(n_dims_list)
+    results = Parallel(n_jobs=n_jobs)(
+        delayed(_run_simulation)(
+            n_samples,
+            n_dims_1,
+            idx,
+            root_dir,
+            sim_name,
+            model_name,
+            run_view="view_two",
+            overwrite=False,
+        )
+        for sim_name in SIMULATIONS_NAMES
+        for n_dims_1 in n_dims_list
+        for idx in range(n_repeats)
+    )
