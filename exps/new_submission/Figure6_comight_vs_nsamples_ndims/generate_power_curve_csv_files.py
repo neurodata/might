@@ -58,10 +58,13 @@ def make_csv_over_nsamples(
                 results["cmi"].append(mi)
 
                 if "comight" in model_name:
-                    I_XZ_Y = loaded_data["I_XZ_Y"]
-                    I_Z_Y = loaded_data["I_Z_Y"]
-                    results["I_XZ_Y"].append(I_XZ_Y)
-                    results["I_Z_Y"].append(I_Z_Y)
+                    try:
+                        I_XZ_Y = loaded_data["I_XZ_Y"]
+                        I_Z_Y = loaded_data["I_Z_Y"]
+                        results["I_XZ_Y"].append(I_XZ_Y)
+                        results["I_Z_Y"].append(I_Z_Y)
+                    except Exception as e:
+                        print(e)
                 # results["threshold"].append(threshold)
 
     df = pd.DataFrame(results)
@@ -72,8 +75,8 @@ def make_csv_over_nsamples(
         id_vars=["n_samples", "sim_type", "model"],
         value_vars=(
             [param_name]
-            if param_name == "sas98" or "comight" not in model_name
-            else [param_name, "I_XZ_Y", "I_Z_Y"]
+            # if param_name == "sas98" or "comight" not in model_name
+            # else [param_name, "I_XZ_Y", "I_Z_Y"]
         ),
         var_name="metric",
         value_name="metric_value",
@@ -140,10 +143,13 @@ def make_csv_over_ndims1(
                 results["cmi"].append(mi)
 
                 if "comight" in model_name:
-                    I_XZ_Y = loaded_data["I_XZ_Y"]
-                    I_Z_Y = loaded_data["I_Z_Y"]
-                    results["I_XZ_Y"].append(I_XZ_Y)
-                    results["I_Z_Y"].append(I_Z_Y)
+                    try:
+                        I_XZ_Y = loaded_data["I_XZ_Y"]
+                        I_Z_Y = loaded_data["I_Z_Y"]
+                        results["I_XZ_Y"].append(I_XZ_Y)
+                        results["I_Z_Y"].append(I_Z_Y)
+                    except Exception as e:
+                        print(e)
             # results["threshold"].append(threshold)
 
     df = pd.DataFrame(results)
@@ -155,8 +161,8 @@ def make_csv_over_ndims1(
         id_vars=["n_dims_1", "sim_type", "model"],
         value_vars=(
             [param_name]
-            if param_name == "sas98" or "comight" not in model_name
-            else [param_name, "I_XZ_Y", "I_Z_Y"]
+            # if param_name == "sas98" or "comight" not in model_name
+            # else [param_name, "I_XZ_Y", "I_Z_Y"]
         ),
         var_name="metric",
         value_name="metric_value",
@@ -183,11 +189,11 @@ if __name__ == "__main__":
 
     # model_name = "might_viewone"
     # model_name = "might_viewtwo"
-    model_name = "ksg"
+    # model_name = "ksg"
     # model_name = 'knn_viewone'
     # model_name = 'knn_viewtwo'
     # model_name = 'knn'
-    # model_name = 'comight-cmi'
+    model_name = 'comight-cmi'
     # perm_name = "comight-perm"
     # param_name = "sas98"
     param_name = "sas98"
@@ -197,7 +203,7 @@ if __name__ == "__main__":
 
     n_samples_list = [2**x for x in range(8, 13)]
     n_dims_1 = 1024 - 6
-    # n_dims_1 = 4096 - 6
+    n_dims_1 = 4096 - 6
     n_repeats = 100
     print(n_samples_list)
 
