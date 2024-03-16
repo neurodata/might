@@ -1,18 +1,14 @@
 """Generating data for CoMIGHT simulations with S@S98."""
 
-# A : Control ~ N(0, 1), Cancer ~ N(1, 1)
-# B:  Control ~ N(0, 1), Cancer ~ 0.75*N(1, 1) + 0.25*N(5, 1)
-# C:  Control~ 0.75*N(1, 1) + 0.25*N(5, 1), Cancer ~ 0.75*N(1, 1) + 0.25*N(5, 1)
+import sys
 from pathlib import Path
 
 import numpy as np
 from joblib import Parallel, delayed
 from sklearn.model_selection import StratifiedShuffleSplit
 from sktree import HonestForestClassifier
-from sktree.datasets import (make_trunk_classification,
-                             make_trunk_mixture_classification)
-from sktree.stats import (PermutationHonestForestClassifier,
-                          build_hyppo_oob_forest)
+from sktree.datasets import make_trunk_classification, make_trunk_mixture_classification
+from sktree.stats import PermutationHonestForestClassifier, build_hyppo_oob_forest
 from sktree.stats.utils import _mutual_information
 from sktree.tree import MultiViewDecisionTreeClassifier
 
@@ -152,36 +148,22 @@ MODEL_NAMES = {
 }
 
 if __name__ == "__main__":
-    root_dir = Path("/Volumes/Extreme Pro/cancer")
-    # root_dir = Path("/data/adam/")
-
-    SIMULATIONS_NAMES = [
-        "mean_shiftv2",
-        # "multi_modalv2",
-        # "multi_modal_compounding",
-        # "multi_equal",
-    ]
+    idx = int(sys.argv[1])
+    n_samples = int(sys.argv[2])
+    n_dims_1 = int(sys.argv[3])
+    sim_name = sys.argv[4]
+    root_dir = Path(sys.argv[5])
 
     overwrite = False
-    n_repeats = 100
-    n_jobs = 23
-    n_dims_1 = 512 - 6
 
     # Section: varying over sample-sizes
     model_name = "comight-cmi"
-    n_samples_list = [2**x for x in range(8, 13)]
-    print(n_samples_list)
-    results = Parallel(n_jobs=n_jobs)(
-        delayed(_run_simulation)(
-            n_samples,
-            n_dims_1,
-            idx,
-            root_dir,
-            sim_name,
-            model_name,
-            overwrite=False,
-        )
-        for sim_name in SIMULATIONS_NAMES
-        for n_samples in n_samples_list
-        for idx in range(n_repeats)
+    _run_simulation(
+        n_samples,
+        n_dims_1,
+        idx,
+        root_dir,
+        sim_name,
+        model_name,
+        overwrite=False,
     )
