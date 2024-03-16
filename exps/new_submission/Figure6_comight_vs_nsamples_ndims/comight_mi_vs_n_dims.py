@@ -138,7 +138,7 @@ MODEL_NAMES = {
     "might": {
         "n_estimators": n_estimators,
         "honest_fraction": 0.5,
-        "n_jobs": 1,
+        "n_jobs": 10,
         "bootstrap": True,
         "stratify": True,
         "max_samples": 1.6,
@@ -159,12 +159,12 @@ if __name__ == "__main__":
 
     overwrite = False
     n_repeats = 100
-    n_jobs = 23
+    n_jobs = 2
     n_samples = 4096
 
     # Section: varying over dims
     model_name = "comight-cmi"
-    n_dims_1_list = [2**i - 6 for i in range(3, 12)] #+ [2**12-6]
+    n_dims_1_list = [2**i - 6 for i in range(3, 12)] + [2**12-6]
     print('Analyzing for the following dims: ', n_dims_1_list)
     results = Parallel(n_jobs=n_jobs)(
         delayed(_run_simulation)(

@@ -183,8 +183,8 @@ if __name__ == "__main__":
     output_dir = root_dir
 
     # sim_name = "multi_modal-5-102"
-    sim_name = "mean_shiftv2"
-    # sim_name = "multi_modalv2"
+    # sim_name = "mean_shiftv2"
+    sim_name = "multi_modalv2"
     # sim_name = 'multi_equal'
 
     # model_name = "might_viewone"
@@ -194,7 +194,7 @@ if __name__ == "__main__":
     # model_name = 'knn_viewtwo'
     # model_name = 'knn'
     model_name = 'comight-cmi'
-    # perm_name = "comight-perm"
+    # model_name = "comight-perm"
     # param_name = "sas98"
     param_name = "sas98"
     param_name = 'cmi'
@@ -231,21 +231,21 @@ if __name__ == "__main__":
     print(n_dims_list)
 
     # save the dataframe to a csv file over n-dims
-    df = make_csv_over_ndims1(
-        root_dir,
-        sim_name,
-        n_dims_list,
-        n_samples,
-        n_repeats,
-        param_name=param_name,
-        model_name=model_name,
-    )
-    df.to_csv(
-        output_dir
-        / "output"
-        / f"results_vs_ndims_{figname}_{sim_name}_{model_name}_{param_name}_{n_dims_1}_{n_repeats}.csv",
-        index=False,
-    )
+    # df = make_csv_over_ndims1(
+    #     root_dir,
+    #     sim_name,
+    #     n_dims_list,
+    #     n_samples,
+    #     n_repeats,
+    #     param_name=param_name,
+    #     model_name=model_name,
+    # )
+    # df.to_csv(
+    #     output_dir
+    #     / "output"
+    #     / f"results_vs_ndims_{figname}_{sim_name}_{model_name}_{param_name}_{n_dims_1}_{n_repeats}.csv",
+    #     index=False,
+    # )
 
     # perm_df = make_csv_over_ndims1(
     #     root_dir,
