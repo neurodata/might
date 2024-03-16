@@ -60,7 +60,7 @@ def _run_simulation(
 
     # now compute the pvalue when shuffling X2
     covariate_index = np.arange(n_dims_1)
-    assert len(covariate_index) == n_dims_2_
+    assert len(covariate_index) == n_dims_1
 
     cdcorr = ConditionalDcorr(bandwidth="silverman")
     Z = X[:, covariate_index]
