@@ -216,15 +216,16 @@ if __name__ == "__main__":
 
     SIMULATIONS_NAMES = [
         # "mean_shiftv2",
-        'multi_modalv2',
+        # 'multi_modalv2',
         # "multi_modal_compounding",
-        # "multi_equal",
+        "multi_equal",
     ]
 
     model_name = "comight"
     overwrite = False
 
-    n_repeats = 100
+    n_start = 100  # job id that we start on
+    n_repeats = 200  # job that we end on
     n_jobs = -3
 
     # Section: varying over sample-sizes
@@ -245,5 +246,5 @@ if __name__ == "__main__":
         )
         for sim_name in SIMULATIONS_NAMES
         for n_samples in n_samples_list
-        for idx in range(n_repeats)
+        for idx in range(n_start, n_repeats)
     )

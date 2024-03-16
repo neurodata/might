@@ -11,10 +11,8 @@ from joblib import Parallel, delayed
 from sklearn.metrics import roc_curve
 from sklearn.model_selection import StratifiedShuffleSplit
 from sktree import HonestForestClassifier
-from sktree.datasets import (make_trunk_classification,
-                             make_trunk_mixture_classification)
-from sktree.stats import (PermutationHonestForestClassifier,
-                          build_hyppo_oob_forest)
+from sktree.datasets import make_trunk_classification, make_trunk_mixture_classification
+from sktree.stats import PermutationHonestForestClassifier, build_hyppo_oob_forest
 from sktree.tree import MultiViewDecisionTreeClassifier
 
 seed = 12345
@@ -512,14 +510,14 @@ if __name__ == "__main__":
     SIMULATIONS_NAMES = [
         # "mean_shift_compounding",
         # "multi_modal_compounding",
-        # "multi_equal",
-        'mean_shiftv2',
+        "multi_equal",
+        # 'mean_shiftv2',
         # 'multi_modalv2',
     ]
     model_name = "comight"
     overwrite = False
-
-    n_repeats = 100
+    n_start = 100  # job id that we start on
+    n_repeats = 200  # job that we end on
     n_jobs = 2
 
     # Section: varying over dimensions
@@ -539,5 +537,5 @@ if __name__ == "__main__":
         )
         for sim_name in SIMULATIONS_NAMES
         for n_dims_1 in n_dims_list
-        for idx in range(n_repeats)
+        for idx in range(n_start, n_repeats)
     )

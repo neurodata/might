@@ -6,8 +6,7 @@ from pathlib import Path
 
 import numpy as np
 from joblib import Parallel, delayed
-from sktree.datasets import (make_trunk_classification,
-                             make_trunk_mixture_classification)
+from sktree.datasets import make_trunk_classification, make_trunk_mixture_classification
 
 
 def make_mean_shift(
@@ -260,21 +259,22 @@ def make_multi_equal(
 
 
 if __name__ == "__main__":
-    root_dir = sys.argv[1]
+    # root_dir = sys.argv[1]
 
-    overwrite = True
-    n_repeats = 100
+    overwrite = False
+    n_start = 100
+    n_repeats = 200
 
     # Section: Make data
-    # root_dir = Path("/Volumes/Extreme Pro/cancer")
+    root_dir = Path("/Volumes/Extreme Pro/cancer")
     # root_dir = Path("/data/adam/")
 
     Parallel(n_jobs=-1)(
         delayed(func)(Path(root_dir), seed=seed, overwrite=overwrite)
-        for seed in range(n_repeats)
+        for seed in range(n_start, n_repeats)
         for func in [
             # make_mean_shift,
-            make_multi_modal,
-            # make_multi_equal,
+            # make_multi_modal,
+            make_multi_equal,
         ]
     )

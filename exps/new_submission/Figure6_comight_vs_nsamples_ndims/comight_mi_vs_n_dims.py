@@ -138,7 +138,7 @@ MODEL_NAMES = {
     "might": {
         "n_estimators": n_estimators,
         "honest_fraction": 0.5,
-        "n_jobs": 10,
+        "n_jobs": 1,
         "bootstrap": True,
         "stratify": True,
         "max_samples": 1.6,
@@ -149,17 +149,17 @@ MODEL_NAMES = {
 
 if __name__ == "__main__":
     root_dir = Path("/Volumes/Extreme Pro/cancer")
-    root_dir = Path("/data/adam/")
+    # root_dir = Path("/data/adam/")
 
     SIMULATIONS_NAMES = [
-        "multi_modalv2",
-        # "mean_shiftv2",
+        # "multi_modalv2",
+        "mean_shiftv2",
         # "multi_equal",
     ]
 
     overwrite = False
     n_repeats = 100
-    n_jobs = 2
+    n_jobs = -1
     n_samples = 4096
 
     # Section: varying over dims
