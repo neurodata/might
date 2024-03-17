@@ -64,7 +64,7 @@ def _run_simulation(
 
     cdcorr = ConditionalDcorr(bandwidth="silverman")
     Z = X[:, covariate_index]
-    assert Z.shape[1] == n_dims_2_
+    assert Z.shape[1] == n_dims_1
     assert X.shape[1] == n_dims_1 + n_dims_2_
     mask_array = np.ones(X.shape[1])
     mask_array[covariate_index] = 0

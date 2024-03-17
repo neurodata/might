@@ -9,10 +9,8 @@ import numpy as np
 from joblib import Parallel, delayed
 from sklearn.model_selection import StratifiedShuffleSplit
 from sktree import HonestForestClassifier
-from sktree.datasets import (make_trunk_classification,
-                             make_trunk_mixture_classification)
-from sktree.stats import (PermutationHonestForestClassifier,
-                          build_hyppo_oob_forest)
+from sktree.datasets import make_trunk_classification, make_trunk_mixture_classification
+from sktree.stats import PermutationHonestForestClassifier, build_hyppo_oob_forest
 from sktree.stats.utils import _mutual_information
 from sktree.tree import MultiViewDecisionTreeClassifier
 
@@ -97,7 +95,7 @@ def _run_simulation(
             seed=seed, feature_set_ends=feature_set_ends, **might_kwargs
         )
         # permute the second view
-        covariate_index = np.arange(n_dims_1, n_dims_1 + n_dims_2_)
+        covariate_index = np.arange(n_dims_1)
 
         est, posterior_arr = build_hyppo_oob_forest(
             est,
@@ -111,12 +109,12 @@ def _run_simulation(
 
         # mutual information for both
         y_pred_proba = np.nanmean(posterior_arr, axis=0)
-        I_X1X2_Y = _mutual_information(y, y_pred_proba)
+        I_XZ_Y = _mutual_information(y, y_pred_proba)
 
         y_pred_proba = np.nanmean(perm_posterior_arr, axis=0)
-        I_X1_Y = _mutual_information(y, y_pred_proba)
+        I_Z_Y = _mutual_information(y, y_pred_proba)
 
-        if np.isnan(I_X1_Y) or np.isnan(I_X1X2_Y):
+        if np.isnan(I_Z_Y) or np.isnan(I_XZ_Y):
             raise RuntimeError(f"NaN values for {output_fname}")
         np.savez_compressed(
             output_fname,
@@ -124,9 +122,9 @@ def _run_simulation(
             n_samples=n_samples,
             n_dims_1=n_dims_1,
             n_dims_2=n_dims_2_,
-            cmi=I_X1X2_Y - I_X1_Y,
-            I_X1X2_Y=I_X1X2_Y,
-            I_X1_Y=I_X1_Y,
+            cmi=I_XZ_Y - I_Z_Y,
+            I_XZ_Y=I_XZ_Y,
+            I_Z_Y=I_XZ_Y,
             sim_type=sim_name,
             y=y,
             posterior_arr=posterior_arr,
@@ -152,20 +150,20 @@ if __name__ == "__main__":
     # root_dir = Path("/data/adam/")
 
     SIMULATIONS_NAMES = [
-        # "multi_modalv2",
+        "multi_modalv2",
         "mean_shiftv2",
         # "multi_equal",
     ]
 
     overwrite = False
     n_repeats = 100
-    n_jobs = -1
+    n_jobs = 2
     n_samples = 4096
 
     # Section: varying over dims
     model_name = "comight-cmi"
-    n_dims_1_list = [2**i - 6 for i in range(3, 12)] + [2**12-6]
-    print('Analyzing for the following dims: ', n_dims_1_list)
+    n_dims_1_list = [2**i - 6 for i in range(3, 12)] + [2**12 - 6]
+    print("Analyzing for the following dims: ", n_dims_1_list)
     results = Parallel(n_jobs=n_jobs)(
         delayed(_run_simulation)(
             n_samples,

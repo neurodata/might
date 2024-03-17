@@ -10,8 +10,8 @@ rng = np.random.default_rng(seed)
 
 n_repeats = 5
 n_jobs = -1
-n_estimators = 6000
-n_samples = 256
+n_estimators = 100
+n_samples = 2048
 n_dims = 4096
 X = rng.standard_normal(size=(n_samples, n_dims))
 y = rng.integers(0, 2, size=(n_samples,))
