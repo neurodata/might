@@ -510,15 +510,15 @@ if __name__ == "__main__":
     SIMULATIONS_NAMES = [
         # "mean_shift_compounding",
         # "multi_modal_compounding",
-        "multi_equal",
-        # 'mean_shiftv2',
+        # "multi_equal",
+        'mean_shiftv2',
         # 'multi_modalv2',
     ]
     model_name = "comight"
     overwrite = False
     n_start = 100  # job id that we start on
     n_repeats = 200  # job that we end on
-    n_jobs = 2
+    n_jobs = -2
 
     # Section: varying over dimensions
     n_samples = 4096
