@@ -516,8 +516,8 @@ if __name__ == "__main__":
     ]
     model_name = "comight"
     overwrite = False
-    n_start = 100  # job id that we start on
-    n_repeats = 200  # job that we end on
+    n_start = 0  # job id that we start on
+    n_repeats = 100  # job that we end on
     n_jobs = -2
 
     # Section: varying over dimensions
