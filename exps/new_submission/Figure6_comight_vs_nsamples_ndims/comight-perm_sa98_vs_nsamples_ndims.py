@@ -253,7 +253,6 @@ if __name__ == "__main__":
             sim_name,
             model_name,
             overwrite=False,
-            generate_data=False,
         )
         for sim_name in SIMULATIONS_NAMES
         for n_samples in n_samples_list
