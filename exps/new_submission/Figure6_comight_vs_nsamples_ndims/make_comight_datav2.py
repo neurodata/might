@@ -266,8 +266,8 @@ if __name__ == "__main__":
     n_repeats = 200
 
     # Section: Make data
-    root_dir = Path("/Volumes/Extreme Pro/cancer")
-    # root_dir = Path("/data/adam/")
+    # root_dir = Path("/Volumes/Extreme Pro/cancer")
+    root_dir = Path("/data/adam/")
 
     Parallel(n_jobs=-1)(
         delayed(func)(Path(root_dir), seed=seed, overwrite=overwrite)

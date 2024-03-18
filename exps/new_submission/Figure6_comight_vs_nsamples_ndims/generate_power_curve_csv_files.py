@@ -193,11 +193,11 @@ if __name__ == "__main__":
     output_dir = root_dir
 
     # sim_name = "multi_modal-5-102"
-    sim_name = "mean_shiftv2"
+    # sim_name = "mean_shiftv2"
     # sim_name = "multi_modalv2"
-    # sim_name = 'multi_equal'
+    sim_name = 'multi_equal'
 
-    # model_name = "might_viewone"
+    model_name = "might_viewone"
     # model_name = "might_viewtwo"
     # model_name = "ksg"
     # model_name = 'knn_viewone'
@@ -205,7 +205,7 @@ if __name__ == "__main__":
     # model_name = 'knn'
     # model_name = 'comight-cmi'
     # model_name = "comight-perm"
-    model_name = "comight"
+    # model_name = "comight"
     # model_name = 'cdcorr'
     # param_name = "sas98"
     param_name = "sas98"
@@ -213,11 +213,11 @@ if __name__ == "__main__":
     # param_name = 'cdcorr_pvalue'
     figname = "cmi"  # TODO: change
     figname = "sas98"  # TODO: change
+    n_repeats = 100
 
     n_samples_list = [2**x for x in range(8, 13)]
     n_dims_1 = 1024 - 6
     n_dims_1 = 4096 - 6
-    n_repeats = 100
     print(n_samples_list)
 
     # save the dataframe to a csv file over n-samples
@@ -233,14 +233,13 @@ if __name__ == "__main__":
     df.to_csv(
         output_dir
         / "output"
-        / f"results_vs_nsamples_{figname}_{sim_name}_{model_name}_{param_name}_{n_dims_1}_{n_repeats}.csv",
+        / f"results_vs_nsamples_{sim_name}_{model_name}_{param_name}_{n_dims_1}_{n_repeats}.csv",
         index=False,
     )
 
     # Save the dataframe over varying ndims
     n_dims_list = [2**x - 6 for x in range(3, 13)]
     n_samples = 4096
-    n_repeats = 100
     print(n_dims_list)
 
     # save the dataframe to a csv file over n-dims
@@ -256,7 +255,7 @@ if __name__ == "__main__":
     df.to_csv(
         output_dir
         / "output"
-        / f"results_vs_ndims_{figname}_{sim_name}_{model_name}_{param_name}_{n_dims_1}_{n_repeats}.csv",
+        / f"results_vs_ndims_{sim_name}_{model_name}_{param_name}_{n_dims_1}_{n_repeats}.csv",
         index=False,
     )
 

@@ -116,7 +116,7 @@ def _run_simulation(
 
     print(X.shape, y.shape)
     if n_samples < X.shape[0]:
-        _cv = StratifiedShuffleSplit(n_splits=1, train_size=n_samples)
+        _cv = StratifiedShuffleSplit(n_splits=1, train_size=n_samples, random_state=seed)
         for train_idx, _ in _cv.split(X, y):
             continue
         X = X[train_idx, :]

@@ -113,7 +113,7 @@ def _run_simulation(
     X, y = data["X"], data["y"]
     print(X.shape, y.shape)
     if n_samples < X.shape[0]:
-        _cv = StratifiedShuffleSplit(n_splits=1, train_size=n_samples)
+        _cv = StratifiedShuffleSplit(n_splits=1, train_size=n_samples, random_state=seed)
         for train_idx, _ in _cv.split(X, y):
             continue
         X = X[train_idx, :]
@@ -206,73 +206,75 @@ MODEL_NAMES = {
 }
 
 if __name__ == "__main__":
-    idx = int(sys.argv[1])
-    n_samples = int(sys.argv[2])
-    n_dims_1 = int(sys.argv[3])
-    sim_name = sys.argv[4]
-    root_dir = sys.argv[5]
+    # idx = int(sys.argv[1])
+    # n_samples = int(sys.argv[2])
+    # n_dims_1 = int(sys.argv[3])
+    # sim_name = sys.argv[4]
+    # root_dir = sys.argv[5]
 
+    # model_name = "comight-perm"
+    # _run_simulation(
+    #     n_samples,
+    #     n_dims_1,
+    #     idx,
+    #     Path(root_dir),
+    #     sim_name,
+    #     model_name,
+    #     overwrite=False,
+    # )
+
+    root_dir = Path("/Volumes/Extreme Pro/cancer")
+    root_dir = Path("/data/adam/")
+
+    SIMULATIONS_NAMES = [
+        # "mean_shift_compounding",
+        # "mean_shiftv2",
+        # 'multi_modalv2',
+        # "multi_modal_compounding",
+        "multi_equal",
+    ]
     model_name = "comight-perm"
-    _run_simulation(
-        n_samples,
-        n_dims_1,
-        idx,
-        Path(root_dir),
-        sim_name,
-        model_name,
-        overwrite=False,
+    overwrite = False
+
+    n_start = 100
+    n_repeats = 200
+    n_jobs = -2
+
+    # Section: varying over sample-sizes
+    n_samples_list = [2**x for x in range(8, 13)]
+    n_dims_1 = 4090
+    print(n_samples_list)
+    results = Parallel(n_jobs=n_jobs)(
+        delayed(_run_simulation)(
+            n_samples,
+            n_dims_1,
+            idx,
+            root_dir,
+            sim_name,
+            model_name,
+            overwrite=False,
+            generate_data=False,
+        )
+        for sim_name in SIMULATIONS_NAMES
+        for n_samples in n_samples_list
+        for idx in range(n_start, n_repeats)
     )
 
-    # root_dir = Path("/Volumes/Extreme Pro/cancer")
-
-    # SIMULATIONS_NAMES = [
-    #     # "mean_shift_compounding",
-    #     # "mean_shiftv2",
-    #     'multi_modalv2',
-    #     # "multi_modal_compounding",
-    #     # "multi_equal",
-    # ]
-    # model_name = "comight-perm"
-    # overwrite = False
-
-    # n_repeats = 100
-    # n_jobs = -2
-
-    # # Section: varying over dimensions
-    # n_samples = 4096
-    # n_dims_list = [2**i - 6 for i in range(3, 13)]
-    # print(n_dims_list)
-    # results = Parallel(n_jobs=n_jobs, verbose=True)(
-    #     delayed(_run_simulation)(
-    #         n_samples,
-    #         n_dims_1,
-    #         idx,
-    #         root_dir,
-    #         sim_name,
-    #         model_name,
-    #         overwrite=False,
-    #     )
-    #     for sim_name in SIMULATIONS_NAMES
-    #     for n_dims_1 in n_dims_list
-    #     for idx in range(n_repeats)
-    # )
-
-    # # Section: varying over sample-sizes
-    # n_samples_list = [2**x for x in range(8, 13)]
-    # n_dims_1 = 4090
-    # print(n_samples_list)
-    # results = Parallel(n_jobs=n_jobs)(
-    #     delayed(_run_simulation)(
-    #         n_samples,
-    #         n_dims_1,
-    #         idx,
-    #         root_dir,
-    #         sim_name,
-    #         model_name,
-    #         overwrite=False,
-    #         generate_data=False,
-    #     )
-    #     for sim_name in SIMULATIONS_NAMES
-    #     for n_samples in n_samples_list
-    #     for idx in range(n_repeats)
-    # )
+    # Section: varying over dimensions
+    n_samples = 4096
+    n_dims_list = [2**i - 6 for i in range(3, 13)]
+    print(n_dims_list)
+    results = Parallel(n_jobs=n_jobs, verbose=True)(
+        delayed(_run_simulation)(
+            n_samples,
+            n_dims_1,
+            idx,
+            root_dir,
+            sim_name,
+            model_name,
+            overwrite=False,
+        )
+        for sim_name in SIMULATIONS_NAMES
+        for n_dims_1 in n_dims_list
+        for idx in range(n_start, n_repeats)
+    )
