@@ -9,10 +9,8 @@ import numpy as np
 from joblib import Parallel, delayed
 from sklearn.model_selection import StratifiedShuffleSplit
 from sktree import HonestForestClassifier
-from sktree.datasets import (make_trunk_classification,
-                             make_trunk_mixture_classification)
-from sktree.stats import (PermutationHonestForestClassifier,
-                          build_hyppo_oob_forest)
+from sktree.datasets import make_trunk_classification, make_trunk_mixture_classification
+from sktree.stats import PermutationHonestForestClassifier, build_hyppo_oob_forest
 from sktree.stats.utils import _mutual_information
 from sktree.tree import MultiViewDecisionTreeClassifier
 
@@ -62,13 +60,24 @@ def _run_simulation(
     X, y = data["X"], data["y"]
     print(X.shape, y.shape)
     if n_samples < X.shape[0]:
-        _cv = StratifiedShuffleSplit(
-            n_splits=1, train_size=n_samples, random_state=seed
+        # _cv = StratifiedShuffleSplit(
+        #     n_splits=1, train_size=n_samples, random_state=seed
+        # )
+        # for train_idx, _ in _cv.split(X, y):
+        #     continue
+        # X = X[train_idx, :]
+        # y = y[train_idx, ...].squeeze()
+        class_0_idx = np.arange(4096 // 2)
+        class_1_idx = np.arange(4096 // 2, 4096)
+
+        # vstack first class and second class?
+        X = np.vstack(
+            (X[class_0_idx[: n_samples // 2], :], X[class_1_idx[: n_samples // 2], :])
         )
-        for train_idx, _ in _cv.split(X, y):
-            continue
-        X = X[train_idx, :]
-        y = y[train_idx, ...].squeeze()
+        y = np.concatenate(
+            (y[class_0_idx[: n_samples // 2]], y[class_1_idx[: n_samples // 2]])
+        )
+        assert np.sum(y) == n_samples // 2, f"{np.sum(y)}, {n_samples // 2}"
     if n_dims_1 < n_dims_1_:
         view_one = X[:, :n_dims_1]
         view_two = X[:, -n_dims_2_:]
@@ -156,10 +165,9 @@ if __name__ == "__main__":
     # root_dir = Path("/data/adam/")
 
     SIMULATIONS_NAMES = [
-        "mean_shiftv2",
-        # "multi_modalv2",
-        # "multi_modal_compounding",
-        # "multi_equal",
+        # "mean_shiftv2",
+        "multi_modalv2",
+        "multi_equal",
     ]
 
     overwrite = False
@@ -169,7 +177,7 @@ if __name__ == "__main__":
 
     # Section: varying over sample-sizes
     model_name = "comight-cmi"
-    n_samples_list = [2**x for x in range(8, 13)]
+    n_samples_list = [2**x for x in range(8, 11)]
     print(n_samples_list)
     results = Parallel(n_jobs=n_jobs)(
         delayed(_run_simulation)(

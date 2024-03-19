@@ -60,13 +60,24 @@ def _run_simulation(
     X, y = data["X"], data["y"]
     print(X.shape, y.shape)
     if n_samples < X.shape[0]:
-        _cv = StratifiedShuffleSplit(
-            n_splits=1, train_size=n_samples, random_state=seed
+        # _cv = StratifiedShuffleSplit(
+        #     n_splits=1, train_size=n_samples, random_state=seed
+        # )
+        # for train_idx, _ in _cv.split(X, y):
+        #     continue
+        # X = X[train_idx, :]
+        # y = y[train_idx, ...].squeeze()
+        class_0_idx = np.arange(4096 // 2)
+        class_1_idx = np.arange(4096 // 2, 4096)
+
+        # vstack first class and second class?
+        X = np.vstack(
+            (X[class_0_idx[: n_samples // 2], :], X[class_1_idx[: n_samples // 2], :])
         )
-        for train_idx, _ in _cv.split(X, y):
-            continue
-        X = X[train_idx, :]
-        y = y[train_idx, ...].squeeze()
+        y = np.concatenate(
+            (y[class_0_idx[: n_samples // 2]], y[class_1_idx[: n_samples // 2]])
+        )
+        assert np.sum(y) == n_samples // 2, f"{np.sum(y)}, {n_samples // 2}"
     if n_dims_1 < n_dims_1_:
         view_one = X[:, :n_dims_1]
         view_two = X[:, -n_dims_2_:]
@@ -150,19 +161,20 @@ if __name__ == "__main__":
     # root_dir = Path("/data/adam/")
 
     SIMULATIONS_NAMES = [
+        # "mean_shiftv2",
         "multi_modalv2",
-        "mean_shiftv2",
-        # "multi_equal",
+        "multi_equal",
     ]
 
     overwrite = False
     n_repeats = 100
     n_jobs = 2
-    n_samples = 4096
+    n_samples = 1024
 
     # Section: varying over dims
     model_name = "comight-cmi"
-    n_dims_1_list = [2**i - 6 for i in range(3, 12)] + [2**12 - 6]
+    # n_dims_1_list = [2**i - 6 for i in range(3, 12)] + [2**12 - 6]
+    n_dims_1_list = [2**i - 6 for i in range(3, 11)]
     print("Analyzing for the following dims: ", n_dims_1_list)
     results = Parallel(n_jobs=n_jobs)(
         delayed(_run_simulation)(

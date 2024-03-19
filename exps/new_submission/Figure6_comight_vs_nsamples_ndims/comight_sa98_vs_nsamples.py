@@ -108,6 +108,7 @@ def _run_simulation(
         raise RuntimeError(f"{fname} does not exist")
     print(f"Reading {fname}")
     try:
+        # assume X is (4096, 4096) and y is (4096,)
         data = np.load(fname, allow_pickle=True)
         X, y = data["X"], data["y"]
     except Exception as e:
@@ -116,11 +117,18 @@ def _run_simulation(
 
     print(X.shape, y.shape)
     if n_samples < X.shape[0]:
-        _cv = StratifiedShuffleSplit(n_splits=1, train_size=n_samples, random_state=seed)
-        for train_idx, _ in _cv.split(X, y):
-            continue
-        X = X[train_idx, :]
-        y = y[train_idx, ...].squeeze()
+        # _cv = StratifiedShuffleSplit(n_splits=1, train_size=n_samples, random_state=seed)
+        # for train_idx, _ in _cv.split(X, y):
+        #     continue
+        # X = X[train_idx, :]
+        # y = y[train_idx, ...].squeeze()
+        class_0_idx = np.arange(4096 // 2)
+        class_1_idx = np.arange(4096 // 2, 4096)
+
+        # vstack first class and second class?
+        X = np.vstack((X[class_0_idx[:n_samples//2], :], X[class_1_idx[:n_samples//2], :]))
+        y = np.concatenate((y[class_0_idx[:n_samples//2]], y[class_1_idx[:n_samples//2]]))
+        assert np.sum(y) == n_samples // 2, f'{np.sum(y)}, {n_samples // 2}'
     if n_dims_1 < n_dims_1_:
         view_one = X[:, :n_dims_1]
         view_two = X[:, n_dims_1_:]
@@ -211,8 +219,8 @@ MODEL_NAMES = {
 }
 
 if __name__ == "__main__":
-    # root_dir = Path("/Volumes/Extreme Pro/cancer")
-    root_dir = Path("/data/adam/")
+    root_dir = Path("/Volumes/Extreme Pro/cancer")
+    # root_dir = Path("/data/adam/")
 
     SIMULATIONS_NAMES = [
         # "mean_shiftv2",
@@ -222,16 +230,15 @@ if __name__ == "__main__":
     ]
 
     model_name = "comight"
-    overwrite = False
+    overwrite = True
 
     n_start = 100  # job id that we start on
     n_repeats = 200  # job that we end on
-    n_jobs = -3
+    n_jobs = 1
 
     # Section: varying over sample-sizes
     n_samples_list = [2**x for x in range(8, 13)]
-    n_dims_1 = 4090
-    # n_dims_1 = 2048-6
+    n_dims_1 = 512
     print(n_samples_list)
     results = Parallel(n_jobs=n_jobs)(
         delayed(_run_simulation)(
@@ -242,7 +249,6 @@ if __name__ == "__main__":
             sim_name,
             model_name,
             overwrite=False,
-            generate_data=False,
         )
         for sim_name in SIMULATIONS_NAMES
         for n_samples in n_samples_list
