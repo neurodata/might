@@ -99,7 +99,7 @@ def _run_ksg_simulation(
         x = X[:, covariate_index]
         z = X[:, -n_dims_2_:]
         assert len(covariate_index) + n_dims_2_ == X.shape[1]
-        cmi = ee.mi(x=x, y=y, z=z, k=3)
+        cmi = ee.mi(x=x, y=y, z=z, k=int(np.sqrt(n_samples)))
 
         print(x.shape, y.shape, z.shape, cmi)
         if np.isnan(cmi):
@@ -122,9 +122,8 @@ if __name__ == "__main__":
     # root_dir = Path("/data/adam/")
 
     SIMULATIONS_NAMES = [
-        "mean_shiftv2",
+        "mean_shiftv3",
         'multi_modalv2',
-        # "multi_modal_compounding",
         "multi_equal",
     ]
 
@@ -134,8 +133,9 @@ if __name__ == "__main__":
 
     # Section: varying over samples
     # n_dims_1 = 4096 - 6
-    n_dims_1 = 1024 - 6
-    n_samples_list = [2**x for x in range(8, 13)]
+    # n_dims_1 = 1024 - 6
+    n_dims_1 = 512 - 6
+    n_samples_list = [2**x for x in range(8, 11)]
     print(n_samples_list)
     model_name = "ksg"
     results = Parallel(n_jobs=n_jobs)(
@@ -154,21 +154,21 @@ if __name__ == "__main__":
     )
 
     # varying over dimensions
-    n_dims_list = [2**i - 6 for i in range(3, 13)]
-    n_samples = 4096
-    print(n_dims_list)
-    model_name = "ksg"
-    results = Parallel(n_jobs=n_jobs)(
-        delayed(_run_ksg_simulation)(
-            n_samples,
-            n_dims_1,
-            idx,
-            root_dir,
-            sim_name,
-            model_name,
-            overwrite=False,
-        )
-        for sim_name in SIMULATIONS_NAMES
-        for n_dims_1 in n_dims_list
-        for idx in range(n_repeats)
-    )
+    # n_dims_list = [2**i - 6 for i in range(3, 10)]
+    # n_samples = 1024
+    # print(n_dims_list)
+    # model_name = "ksg"
+    # results = Parallel(n_jobs=n_jobs)(
+    #     delayed(_run_ksg_simulation)(
+    #         n_samples,
+    #         n_dims_1,
+    #         idx,
+    #         root_dir,
+    #         sim_name,
+    #         model_name,
+    #         overwrite=False,
+    #     )
+    #     for sim_name in SIMULATIONS_NAMES
+    #     for n_dims_1 in n_dims_list
+    #     for idx in range(n_repeats)
+    # )
