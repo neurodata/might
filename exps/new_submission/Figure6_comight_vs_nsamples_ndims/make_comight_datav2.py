@@ -15,7 +15,7 @@ def make_mean_shift(
     n_dim_1=4090,
     mu_viewone=-1,
     mu_viewtwo=1,
-    rho=0.2,
+    rho=-0.8,
     seed=None,
     n_dim_2=6,
     return_params=False,
@@ -38,8 +38,8 @@ def make_mean_shift(
     output_fname = (
         root_dir
         / "data"
-        / "mean_shiftv2"
-        / f"mean_shiftv2_{n_samples}_{n_dim_1}_{n_dim_2}_{seed}.npz"
+        / "mean_shiftv3"
+        / f"mean_shiftv3_{n_samples}_{n_dim_1}_{n_dim_2}_{seed}.npz"
     )
     output_fname.parent.mkdir(exist_ok=True, parents=True)
     if not overwrite and output_fname.exists():
@@ -259,22 +259,22 @@ def make_multi_equal(
 
 
 if __name__ == "__main__":
-    # root_dir = sys.argv[1]
+    root_dir = sys.argv[1]
 
     overwrite = True
-    n_start = 100
-    n_repeats = 200
+    n_start = 0
+    n_repeats = 100
 
     # Section: Make data
     # root_dir = Path("/Volumes/Extreme Pro/cancer")
-    root_dir = Path("/data/adam/")
+    # root_dir = Path("/data/adam/")
 
     Parallel(n_jobs=-1)(
         delayed(func)(Path(root_dir), seed=seed, overwrite=overwrite)
         for seed in range(n_start, n_repeats)
         for func in [
-            # make_mean_shift,
+            make_mean_shift,
             # make_multi_modal,
-            make_multi_equal,
+            # make_multi_equal,
         ]
     )

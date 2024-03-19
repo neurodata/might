@@ -131,27 +131,28 @@ def _run_simulation(
         if np.isnan(I_XZ_Y) or np.isnan(I_Z_Y):
             raise RuntimeError(f"NaN values for {output_fname}")
 
-        np.savez_compressed(
-            output_fname,
-            idx=idx,
-            n_samples=n_samples,
-            n_dims_1=n_dims_1,
-            n_dims_2=n_dims_2_,
-            cmi=I_XZ_Y - I_Z_Y,
-            I_XZ_Y=I_XZ_Y,
-            I_Z_Y=I_Z_Y,
-            sim_type=sim_name,
-            y=y,
-            posterior_arr=posterior_arr,
-            perm_posterior_arr=perm_posterior_arr,
-        )
+        print(I_XZ_Y - I_Z_Y, I_XZ_Y, I_Z_Y, sim_name, y.shape, posterior_arr.shape, perm_posterior_arr.shape)
+        # np.savez_compressed(
+        #     output_fname,
+        #     idx=idx,
+        #     n_samples=n_samples,
+        #     n_dims_1=n_dims_1,
+        #     n_dims_2=n_dims_2_,
+        #     cmi=I_XZ_Y - I_Z_Y,
+        #     I_XZ_Y=I_XZ_Y,
+        #     I_Z_Y=I_Z_Y,
+        #     sim_type=sim_name,
+        #     y=y,
+        #     posterior_arr=posterior_arr,
+        #     perm_posterior_arr=perm_posterior_arr,
+        # )
 
 
 MODEL_NAMES = {
     "might": {
         "n_estimators": n_estimators,
         "honest_fraction": 0.5,
-        "n_jobs": 1,
+        "n_jobs": -1,
         "bootstrap": True,
         "stratify": True,
         "max_samples": 1.6,
@@ -165,19 +166,19 @@ if __name__ == "__main__":
     # root_dir = Path("/data/adam/")
 
     SIMULATIONS_NAMES = [
-        # "mean_shiftv2",
-        "multi_modalv2",
-        "multi_equal",
+        "mean_shiftv3",
+        # "multi_modalv2",
+        # "multi_equal",
     ]
 
     overwrite = False
     n_repeats = 100
-    n_jobs = 23
+    n_jobs = 1
     n_dims_1 = 512 - 6
 
     # Section: varying over sample-sizes
     model_name = "comight-cmi"
-    n_samples_list = [2**x for x in range(8, 11)]
+    n_samples_list = [2**x for x in range(8, 11)][-1:]
     print(n_samples_list)
     results = Parallel(n_jobs=n_jobs)(
         delayed(_run_simulation)(
