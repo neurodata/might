@@ -231,44 +231,42 @@ if __name__ == "__main__":
     # )
 
     root_dir = Path("/Volumes/Extreme Pro/cancer")
-    # root_dir = Path("/data/adam/")
+    root_dir = Path("/data/adam/")
 
     SIMULATIONS_NAMES = [
-        # "mean_shift_compounding",
-        # "mean_shiftv2",
-        # 'multi_modalv2',
-        # "multi_modal_compounding",
+        "mean_shiftv3",
+        'multi_modalv2',
         "multi_equal",
     ]
     model_name = "comight-perm"
     overwrite = False
 
-    n_start = 100
-    n_repeats = 200
+    n_start = 0
+    n_repeats = 100
     n_jobs = -2
 
     # Section: varying over sample-sizes
-    # n_samples_list = [2**x for x in range(8, 13)]
-    # n_dims_1 = 4090
-    # print(n_samples_list)
-    # results = Parallel(n_jobs=n_jobs)(
-    #     delayed(_run_simulation)(
-    #         n_samples,
-    #         n_dims_1,
-    #         idx,
-    #         root_dir,
-    #         sim_name,
-    #         model_name,
-    #         overwrite=False,
-    #     )
-    #     for sim_name in SIMULATIONS_NAMES
-    #     for n_samples in n_samples_list
-    #     for idx in range(n_start, n_repeats)
-    # )
+    n_samples_list = [2**x for x in range(8, 11)]
+    n_dims_1 = 512 - 6
+    print(n_samples_list)
+    results = Parallel(n_jobs=n_jobs)(
+        delayed(_run_simulation)(
+            n_samples,
+            n_dims_1,
+            idx,
+            root_dir,
+            sim_name,
+            model_name,
+            overwrite=False,
+        )
+        for sim_name in SIMULATIONS_NAMES
+        for n_samples in n_samples_list
+        for idx in range(n_start, n_repeats)
+    )
 
     # Section: varying over dimensions
-    n_samples = 4096
-    n_dims_list = [2**i - 6 for i in range(3, 13)]
+    n_samples = 1024
+    n_dims_list = [2**i - 6 for i in range(3, 11)]
     print(n_dims_list)
     results = Parallel(n_jobs=n_jobs, verbose=True)(
         delayed(_run_simulation)(

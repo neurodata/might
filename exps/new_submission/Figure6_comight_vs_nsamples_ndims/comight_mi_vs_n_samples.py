@@ -167,8 +167,8 @@ if __name__ == "__main__":
 
     SIMULATIONS_NAMES = [
         "mean_shiftv3",
-        # "multi_modalv2",
-        # "multi_equal",
+        "multi_modalv2",
+        "multi_equal",
     ]
 
     overwrite = False
@@ -178,7 +178,7 @@ if __name__ == "__main__":
 
     # Section: varying over sample-sizes
     model_name = "comight-cmi"
-    n_samples_list = [2**x for x in range(8, 11)][-1:]
+    n_samples_list = [2**x for x in range(8, 11)]
     print(n_samples_list)
     results = Parallel(n_jobs=n_jobs)(
         delayed(_run_simulation)(
