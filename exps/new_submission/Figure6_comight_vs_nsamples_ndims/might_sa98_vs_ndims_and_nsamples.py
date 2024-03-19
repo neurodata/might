@@ -230,7 +230,7 @@ MODEL_NAMES = {
     "might": {
         "n_estimators": n_estimators,
         "honest_fraction": 0.5,
-        "n_jobs": -2,
+        "n_jobs": 1,
         "bootstrap": True,
         "stratify": True,
         "max_samples": 1.6,
@@ -250,7 +250,7 @@ if __name__ == "__main__":
     # # n_dims_1 = 2048 - 6
     # # n_dims_1 = 4096 - 6
 
-    # # # Section: varying over sample-sizes
+    # Section: varying over sample-sizes
     # model_name = "might_viewone"
     # _run_simulation(
     #     n_samples,
@@ -277,15 +277,13 @@ if __name__ == "__main__":
     # )
 
     root_dir = Path("/Volumes/Extreme Pro/cancer")
-    root_dir = Path("/data/adam/")
+    # root_dir = Path("/data/adam/")
 
     n_repeats = 100
-    n_jobs = 1
+    n_jobs = -3
     SIMULATIONS_NAMES = [
-        # "mean_shiftv2",
-        # "multi_modalv2",
-        # "mean_shift_compounding",
-        # "multi_modal_compounding",
+        "mean_shiftv3",
+        "multi_modalv2",
         "multi_equal",
     ]
 
@@ -294,10 +292,11 @@ if __name__ == "__main__":
     # fixed number of dimensions in first view
     # n_dims_1 = 2048 - 6
     n_dims_1 = 4096 - 6
+    n_dims_1 = 512 - 6
 
     # Section: varying over sample-sizes
     model_name = "might_viewone"
-    n_samples_list = [2**x for x in range(8, 13)]
+    n_samples_list = [2**x for x in range(8, 11)]
     print(n_samples_list)
     results = Parallel(n_jobs=n_jobs)(
         delayed(_run_simulation)(
@@ -317,7 +316,7 @@ if __name__ == "__main__":
 
     # model_name = "might_viewtwo"
     # # Section: varying over sample-sizes
-    # n_samples_list = [2**x for x in range(8, 13)]
+    # n_samples_list = [2**x for x in range(8, 11)]
     # print(n_samples_list)
     # results = Parallel(n_jobs=n_jobs)(
     #     delayed(_run_simulation)(
@@ -337,8 +336,9 @@ if __name__ == "__main__":
 
     # Section: varying over dims
     # model_name = "might_viewone"
-    # n_dims_list = [2**i - 6 for i in range(3, 13)]
+    # n_dims_list = [2**i - 6 for i in range(3, 11)]
     # n_samples = 4096
+    # n_samples = 1024
     # print(n_dims_list)
     # results = Parallel(n_jobs=n_jobs)(
     #     delayed(_run_simulation)(
@@ -358,8 +358,9 @@ if __name__ == "__main__":
 
     # model_name = "might_viewtwo"
     # # Section: varying over dims
-    # n_dims_list = [2**i - 6 for i in range(3, 13)]
+    # n_dims_list = [2**i - 6 for i in range(3, 11)]
     # n_samples = 4096
+    # n_samples = 1024
     # print(n_dims_list)
     # results = Parallel(n_jobs=n_jobs)(
     #     delayed(_run_simulation)(

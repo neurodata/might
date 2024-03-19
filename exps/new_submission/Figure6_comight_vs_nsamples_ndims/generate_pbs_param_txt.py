@@ -17,7 +17,7 @@ with open(f"{curr_dir}/parameters_cdcorr.txt", "w") as file:
 
         for n_samples in [2**x for x in range(8, 10)]:
             for idx in range(n_repeats):
-                params = [idx, n_samples, 512, sim_name]
+                params = [idx, n_samples, 512 - 6, sim_name]
                 file.write(" ".join(map(str, params)) + "\n")
 
 print("Parameters file generated successfully.")
