@@ -171,14 +171,14 @@ if __name__ == "__main__":
         # "multi_equal",
     ]
 
-    overwrite = True
+    overwrite = False
     n_repeats = 100
     n_jobs = 1
     n_dims_1 = 512 - 6
 
     # Section: varying over sample-sizes
     model_name = "comight-cmi"
-    n_samples_list = [2**x for x in range(8, 11)][-1:]
+    n_samples_list = [2**x for x in range(8, 11)]
     print(n_samples_list)
     results = Parallel(n_jobs=n_jobs)(
         delayed(_run_simulation)(
