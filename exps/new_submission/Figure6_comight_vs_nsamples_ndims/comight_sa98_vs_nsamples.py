@@ -237,7 +237,7 @@ if __name__ == "__main__":
     n_jobs = 24
 
     # Section: varying over sample-sizes
-    n_samples_list = [2**x for x in range(8, 11)][-1:]
+    n_samples_list = [2**x for x in range(8, 11)]
     n_dims_1 = 512 - 6
     print(n_samples_list)
     results = Parallel(n_jobs=n_jobs)(
