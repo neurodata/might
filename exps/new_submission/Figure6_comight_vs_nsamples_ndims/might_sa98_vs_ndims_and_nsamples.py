@@ -295,51 +295,9 @@ if __name__ == "__main__":
     n_dims_1 = 512 - 6
 
     # Section: varying over sample-sizes
-    model_name = "might_viewone"
-    n_samples_list = [2**x for x in range(8, 11)]
-    print(n_samples_list)
-    results = Parallel(n_jobs=n_jobs)(
-        delayed(_run_simulation)(
-            n_samples,
-            n_dims_1,
-            idx,
-            Path(root_dir),
-            sim_name,
-            model_name,
-            run_view="view_one",
-            overwrite=False,
-        )
-        for sim_name in SIMULATIONS_NAMES
-        for n_samples in n_samples_list
-        for idx in range(n_repeats)
-    )
-
-    # model_name = "might_viewtwo"
-    # # Section: varying over sample-sizes
+    # model_name = "might_viewone"
     # n_samples_list = [2**x for x in range(8, 11)]
     # print(n_samples_list)
-    # results = Parallel(n_jobs=n_jobs)(
-    #     delayed(_run_simulation)(
-    #         n_samples,
-    #         n_dims_1,
-    #         idx,
-    #         root_dir,
-    #         sim_name,
-    #         model_name,
-    #         run_view="view_two",
-    #         overwrite=False,
-    #     )
-    #     for sim_name in SIMULATIONS_NAMES
-    #     for n_samples in n_samples_list
-    #     for idx in range(n_repeats)
-    # )
-
-    # Section: varying over dims
-    # model_name = "might_viewone"
-    # n_dims_list = [2**i - 6 for i in range(3, 11)]
-    # n_samples = 4096
-    # n_samples = 1024
-    # print(n_dims_list)
     # results = Parallel(n_jobs=n_jobs)(
     #     delayed(_run_simulation)(
     #         n_samples,
@@ -352,28 +310,70 @@ if __name__ == "__main__":
     #         overwrite=False,
     #     )
     #     for sim_name in SIMULATIONS_NAMES
-    #     for n_dims_1 in n_dims_list
+    #     for n_samples in n_samples_list
     #     for idx in range(n_repeats)
     # )
 
-    # model_name = "might_viewtwo"
-    # # Section: varying over dims
-    # n_dims_list = [2**i - 6 for i in range(3, 11)]
-    # n_samples = 4096
-    # n_samples = 1024
-    # print(n_dims_list)
-    # results = Parallel(n_jobs=n_jobs)(
-    #     delayed(_run_simulation)(
-    #         n_samples,
-    #         n_dims_1,
-    #         idx,
-    #         root_dir,
-    #         sim_name,
-    #         model_name,
-    #         run_view="view_two",
-    #         overwrite=False,
-    #     )
-    #     for sim_name in SIMULATIONS_NAMES
-    #     for n_dims_1 in n_dims_list
-    #     for idx in range(n_repeats)
-    # )
+    model_name = "might_viewtwo"
+    # Section: varying over sample-sizes
+    n_samples_list = [2**x for x in range(8, 11)]
+    print(n_samples_list)
+    results = Parallel(n_jobs=n_jobs)(
+        delayed(_run_simulation)(
+            n_samples,
+            n_dims_1,
+            idx,
+            root_dir,
+            sim_name,
+            model_name,
+            run_view="view_two",
+            overwrite=False,
+        )
+        for sim_name in SIMULATIONS_NAMES
+        for n_samples in n_samples_list
+        for idx in range(n_repeats)
+    )
+
+    # Section: varying over dims
+    model_name = "might_viewone"
+    n_dims_list = [2**i - 6 for i in range(3, 11)]
+    n_samples = 4096
+    n_samples = 1024
+    print(n_dims_list)
+    results = Parallel(n_jobs=n_jobs)(
+        delayed(_run_simulation)(
+            n_samples,
+            n_dims_1,
+            idx,
+            Path(root_dir),
+            sim_name,
+            model_name,
+            run_view="view_one",
+            overwrite=False,
+        )
+        for sim_name in SIMULATIONS_NAMES
+        for n_dims_1 in n_dims_list
+        for idx in range(n_repeats)
+    )
+
+    model_name = "might_viewtwo"
+    # Section: varying over dims
+    n_dims_list = [2**i - 6 for i in range(3, 11)]
+    n_samples = 4096
+    n_samples = 1024
+    print(n_dims_list)
+    results = Parallel(n_jobs=n_jobs)(
+        delayed(_run_simulation)(
+            n_samples,
+            n_dims_1,
+            idx,
+            root_dir,
+            sim_name,
+            model_name,
+            run_view="view_two",
+            overwrite=False,
+        )
+        for sim_name in SIMULATIONS_NAMES
+        for n_dims_1 in n_dims_list
+        for idx in range(n_repeats)
+    )
