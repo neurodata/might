@@ -132,20 +132,20 @@ def _run_simulation(
             raise RuntimeError(f"NaN values for {output_fname}")
 
         print(I_XZ_Y - I_Z_Y, I_XZ_Y, I_Z_Y, sim_name, y.shape, posterior_arr.shape, perm_posterior_arr.shape)
-        # np.savez_compressed(
-        #     output_fname,
-        #     idx=idx,
-        #     n_samples=n_samples,
-        #     n_dims_1=n_dims_1,
-        #     n_dims_2=n_dims_2_,
-        #     cmi=I_XZ_Y - I_Z_Y,
-        #     I_XZ_Y=I_XZ_Y,
-        #     I_Z_Y=I_Z_Y,
-        #     sim_type=sim_name,
-        #     y=y,
-        #     posterior_arr=posterior_arr,
-        #     perm_posterior_arr=perm_posterior_arr,
-        # )
+        np.savez_compressed(
+            output_fname,
+            idx=idx,
+            n_samples=n_samples,
+            n_dims_1=n_dims_1,
+            n_dims_2=n_dims_2_,
+            cmi=I_XZ_Y - I_Z_Y,
+            I_XZ_Y=I_XZ_Y,
+            I_Z_Y=I_Z_Y,
+            sim_type=sim_name,
+            y=y,
+            posterior_arr=posterior_arr,
+            perm_posterior_arr=perm_posterior_arr,
+        )
 
 
 MODEL_NAMES = {
