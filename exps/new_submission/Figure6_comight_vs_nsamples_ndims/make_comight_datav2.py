@@ -13,9 +13,9 @@ def make_mean_shift(
     root_dir,
     n_samples=4096,
     n_dim_1=4090,
-    mu_viewone=-1,
-    mu_viewtwo=1,
-    rho=-0.8,
+    mu_viewone=1,
+    mu_viewtwo=0,
+    rho=0.5,
     seed=None,
     n_dim_2=6,
     return_params=False,
@@ -38,8 +38,8 @@ def make_mean_shift(
     output_fname = (
         root_dir
         / "data"
-        / "mean_shiftv3"
-        / f"mean_shiftv3_{n_samples}_{n_dim_1}_{n_dim_2}_{seed}.npz"
+        / "mean_shiftv4"
+        / f"mean_shiftv4_{n_samples}_{n_dim_1}_{n_dim_2}_{seed}.npz"
     )
     output_fname.parent.mkdir(exist_ok=True, parents=True)
     if not overwrite and output_fname.exists():

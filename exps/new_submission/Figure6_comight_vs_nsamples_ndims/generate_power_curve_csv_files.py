@@ -37,17 +37,16 @@ def make_csv_over_nsamples(
             except Exception as e:
                 print(e, output_fname)
                 continue
-
             # Extract variables with the same names
             idx = loaded_data["idx"]
-            n_samples = loaded_data["n_samples"]
-            n_dims_1 = loaded_data["n_dims_1"]
+            n_samples_ = loaded_data["n_samples"]
+            n_dims_1_ = loaded_data["n_dims_1"]
             sim_name = loaded_data["sim_type"]
             # threshold = loaded_data["threshold"]
 
             results["idx"].append(idx)
-            results["n_samples"].append(n_samples)
-            results["n_dims_1"].append(n_dims_1)
+            results["n_samples"].append(n_samples_)
+            results["n_dims_1"].append(n_dims_1_)
             results["sim_type"].append(sim_name)
             results["model"].append(model_name)
             if param_name == "sas98":
@@ -55,7 +54,7 @@ def make_csv_over_nsamples(
                 results["sas98"].append(sas98)
 
             elif param_name == 'cdcorr_pvalue':
-                print(dict(loaded_data).keys())
+                # print(dict(loaded_data).keys())
                 cdcorr_pvalue = loaded_data["cdcorr_pvalue"]
                 results["cdcorr_pvalue"].append(cdcorr_pvalue)
             elif param_name == "cmi":
@@ -135,14 +134,14 @@ def make_csv_over_ndims1(
 
             # Extract variables with the same names
             idx = loaded_data["idx"]
-            n_samples = loaded_data["n_samples"]
-            n_dims_1 = loaded_data["n_dims_1"]
+            n_samples_ = loaded_data["n_samples"]
+            n_dims_1_ = loaded_data["n_dims_1"]
             sim_name = loaded_data["sim_type"]
             # threshold = loaded_data["threshold"]
 
             results["idx"].append(idx)
-            results["n_samples"].append(n_samples)
-            results["n_dims_1"].append(n_dims_1)
+            results["n_samples"].append(n_samples_)
+            results["n_dims_1"].append(n_dims_1_)
             results["sim_type"].append(sim_name)
             results["model"].append(model_name)
 
@@ -200,64 +199,75 @@ if __name__ == "__main__":
     output_dir = root_dir
 
     # sim_name = "multi_modal-5-102"
-    sim_name = "mean_shiftv2"
-    sim_name = "multi_modalv2"
-    sim_name = 'multi_equal'
+    # sim_name = "mean_shiftv3"
+    # sim_name = "multi_modalv2"
+    # sim_name = 'multi_equal'
 
     # param_name = 'cdcorr_pvalue'
     # figname = "cmi"  # TODO: change
     # figname = "sas98"  # TODO: change
     n_repeats = 100
 
-    n_samples_list = [2**x for x in range(8, 13)]
-    n_dims_1 = 1024 - 6
+    n_samples_list = [2**x for x in range(8, 11)]
+    # n_dims_1 = 1024 - 6
+    # n_dims_1 = 512 - 6
     # n_dims_1 = 4096 - 6
     print(n_samples_list)
 
-    # param_name = "sas98"
-    # for model_name in ['comight', 'comight-perm', 'knn', 'knn_viewone', 'knn_viewtwo', 'might_viewone', 'might_viewtwo']:
-    param_name = 'cmi'
-    for model_name in [
-        'comight-cmi', 
-        # 'ksg'
-        ]:
-    # param_name = 'cdcorr_pvalue'
-    # for model_name in ['cdcorr']:
-        # save the dataframe to a csv file over n-samples
-        df = make_csv_over_nsamples(
-            root_dir,
-            sim_name,
-            n_samples_list,
-            n_dims_1,
-            n_repeats,
-            param_name=param_name,
-            model_name=model_name,
-        )
-        df.to_csv(
-            output_dir
-            / "output"
-            / f"results_vs_nsamples_{sim_name}_{model_name}_{param_name}_{n_dims_1}_{n_repeats}.csv",
-            index=False,
-        )
+    sim_names = ['mean_shiftv3', 
+                 'multi_modalv2', 'multi_equal'
+                 ]
+    for sim_name in sim_names:
+        param_name = "sas98"
+        for model_name in [
+            'comight',
+                        # 'comight-perm', 'knn', 'knn_viewone', 'knn_viewtwo', 
+                        #    'might_viewone', 'might_viewtwo'
+                        ]:
+        # param_name = 'cmi'
+        # for model_name in [
+        #     'comight-cmi', 
+        #     'ksg'
+        # ]:
+        # param_name = 'cdcorr_pvalue'
+        # for model_name in ['cdcorr']:
+            n_dims_1 = 512 - 6
+            # save the dataframe to a csv file over n-samples
+            # df = make_csv_over_nsamples(
+            #     root_dir,
+            #     sim_name,
+            #     n_samples_list,
+            #     n_dims_1,
+            #     n_repeats,
+            #     param_name=param_name,
+            #     model_name=model_name,
+            # )
+            # df.to_csv(
+            #     output_dir
+            #     / "output"
+            #     / f"results_vs_nsamples_{sim_name}_{model_name}_{param_name}_{n_dims_1}_{n_repeats}.csv",
+            #     index=False,
+            # )
 
-        # Save the dataframe over varying ndims
-        n_dims_list = [2**x - 6 for x in range(3, 13)]
-        n_samples = 4096
-        print(n_dims_list)
+            # Save the dataframe over varying ndims
+            n_dims_list = [2**x - 6 for x in range(3, 11)]
+            n_samples = 4096
+            n_samples = 1024
+            print(n_dims_list)
 
-        # save the dataframe to a csv file over n-dims
-        df = make_csv_over_ndims1(
-            root_dir,
-            sim_name,
-            n_dims_list,
-            n_samples,
-            n_repeats,
-            param_name=param_name,
-            model_name=model_name,
-        )
-        df.to_csv(
-            output_dir
-            / "output"
-            / f"results_vs_ndims_{sim_name}_{model_name}_{param_name}_{n_dims_1}_{n_repeats}.csv",
-            index=False,
-        )
+            # save the dataframe to a csv file over n-dims
+            df = make_csv_over_ndims1(
+                root_dir,
+                sim_name,
+                n_dims_list,
+                n_samples,
+                n_repeats,
+                param_name=param_name,
+                model_name=model_name,
+            )
+            df.to_csv(
+                output_dir
+                / "output"
+                / f"results_vs_ndims_{sim_name}_{model_name}_{param_name}_{n_dims_1}_{n_repeats}.csv",
+                index=False,
+            )

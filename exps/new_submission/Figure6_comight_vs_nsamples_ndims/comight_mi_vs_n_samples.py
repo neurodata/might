@@ -166,19 +166,19 @@ if __name__ == "__main__":
     # root_dir = Path("/data/adam/")
 
     SIMULATIONS_NAMES = [
-        "mean_shiftv3",
-        "multi_modalv2",
-        "multi_equal",
+        "mean_shiftv4",
+        # "multi_modalv2",
+        # "multi_equal",
     ]
 
-    overwrite = False
+    overwrite = True
     n_repeats = 100
     n_jobs = 1
     n_dims_1 = 512 - 6
 
     # Section: varying over sample-sizes
     model_name = "comight-cmi"
-    n_samples_list = [2**x for x in range(8, 11)]
+    n_samples_list = [2**x for x in range(8, 11)][-1:]
     print(n_samples_list)
     results = Parallel(n_jobs=n_jobs)(
         delayed(_run_simulation)(
@@ -188,7 +188,7 @@ if __name__ == "__main__":
             root_dir,
             sim_name,
             model_name,
-            overwrite=False,
+            overwrite=overwrite,
         )
         for sim_name in SIMULATIONS_NAMES
         for n_samples in n_samples_list

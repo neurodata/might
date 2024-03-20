@@ -512,10 +512,10 @@ MODEL_NAMES = {
 
 if __name__ == "__main__":
     root_dir = Path("/Volumes/Extreme Pro/cancer")
-    root_dir = Path("/data/adam/")
+    # root_dir = Path("/data/adam/")
 
     SIMULATIONS_NAMES = [
-        'mean_shiftv3',
+        # 'mean_shiftv3',
         'multi_modalv2',
         "multi_equal",
     ]
@@ -523,7 +523,7 @@ if __name__ == "__main__":
     overwrite = False
     n_start = 0  # job id that we start on
     n_repeats = 100  # job that we end on
-    n_jobs = 24
+    n_jobs = -2
 
     # Section: varying over dimensions
     n_samples = 4096

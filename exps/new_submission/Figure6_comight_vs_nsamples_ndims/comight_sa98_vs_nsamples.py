@@ -190,6 +190,7 @@ def _run_simulation(
             target_specificity=target_specificity,
             threshold=threshold_at_specificity,
         )
+        print(f'Estimated: ', sas98)
 
         np.savez_compressed(
             output_fname,
@@ -209,7 +210,7 @@ MODEL_NAMES = {
     "might": {
         "n_estimators": n_estimators,
         "honest_fraction": 0.5,
-        "n_jobs": 1,
+        "n_jobs": -1,
         "bootstrap": True,
         "stratify": True,
         "max_samples": 1.6,
@@ -220,24 +221,24 @@ MODEL_NAMES = {
 
 if __name__ == "__main__":
     root_dir = Path("/Volumes/Extreme Pro/cancer")
-    root_dir = Path("/data/adam/")
+    # root_dir = Path("/data/adam/")
 
     SIMULATIONS_NAMES = [
-        "mean_shiftv3",
-        'multi_modalv2',
-        "multi_equal",
+        "mean_shiftv4",
+        # 'multi_modalv2',
+        # "multi_equal",
     ]
 
     model_name = "comight"
-    overwrite = False
+    overwrite = True
 
     n_start = 0  # job id that we start on
     n_repeats = 100  # job that we end on
-    n_jobs = -2
+    n_jobs = 1
 
     # Section: varying over sample-sizes
-    n_samples_list = [2**x for x in range(8, 11)]
-    n_dims_1 = 512
+    n_samples_list = [2**x for x in range(8, 11)][-1:]
+    n_dims_1 = 512 - 6
     print(n_samples_list)
     results = Parallel(n_jobs=n_jobs)(
         delayed(_run_simulation)(
@@ -247,7 +248,7 @@ if __name__ == "__main__":
             root_dir,
             sim_name,
             model_name,
-            overwrite=False,
+            overwrite=overwrite,
         )
         for sim_name in SIMULATIONS_NAMES
         for n_samples in n_samples_list
