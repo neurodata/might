@@ -359,7 +359,7 @@ def recompute_metric_n_dims(
 
     # now we do the same for comight-permuted
     output_model_name = "comightperm-power"
-    fname = f"results_vs_ndims_{sim_name}_{output_model_name}_{n_dims_1}_{n_repeats}.csv"
+    fname = f"results_vs_ndims_{sim_name}_{output_model_name}_{n_samples}_{n_repeats}.csv"
     output_file = root_dir / 'output' /  fname
     if output_file.exists() and not overwrite:
         print(f"Output file: {output_file} exists")
