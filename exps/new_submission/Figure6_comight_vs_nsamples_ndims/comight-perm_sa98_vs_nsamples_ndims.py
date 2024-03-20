@@ -244,7 +244,7 @@ if __name__ == "__main__":
 
     n_start = 0
     n_repeats = 100
-    n_jobs = -1
+    n_jobs = 24
 
     # Section: varying over sample-sizes
     n_samples_list = [2**x for x in range(8, 11)]
@@ -266,20 +266,20 @@ if __name__ == "__main__":
     )
 
     # Section: varying over dimensions
-    n_samples = 1024
-    n_dims_list = [2**i - 6 for i in range(3, 11)]
-    print(n_dims_list)
-    results = Parallel(n_jobs=n_jobs, verbose=True)(
-        delayed(_run_simulation)(
-            n_samples,
-            n_dims_1,
-            idx,
-            root_dir,
-            sim_name,
-            model_name,
-            overwrite=False,
-        )
-        for sim_name in SIMULATIONS_NAMES
-        for n_dims_1 in n_dims_list
-        for idx in range(n_start, n_repeats)
-    )
+    # n_samples = 1024
+    # n_dims_list = [2**i - 6 for i in range(3, 11)]
+    # print(n_dims_list)
+    # results = Parallel(n_jobs=n_jobs, verbose=True)(
+    #     delayed(_run_simulation)(
+    #         n_samples,
+    #         n_dims_1,
+    #         idx,
+    #         root_dir,
+    #         sim_name,
+    #         model_name,
+    #         overwrite=False,
+    #     )
+    #     for sim_name in SIMULATIONS_NAMES
+    #     for n_dims_1 in n_dims_list
+    #     for idx in range(n_start, n_repeats)
+    # )
