@@ -21,8 +21,6 @@ rng = np.random.default_rng(seed)
 ### hard-coded parameters
 n_estimators = 6000
 max_features = 0.3
-test_size = 0.2
-n_jobs = -1
 
 
 def make_mean_shift(
@@ -512,18 +510,18 @@ MODEL_NAMES = {
 
 if __name__ == "__main__":
     root_dir = Path("/Volumes/Extreme Pro/cancer")
-    # root_dir = Path("/data/adam/")
+    root_dir = Path("/data/adam/")
 
     SIMULATIONS_NAMES = [
-        # 'mean_shiftv3',
-        'multi_modalv2',
-        "multi_equal",
+        'mean_shiftv4',
+        # 'multi_modalv2',
+        # "multi_equal",
     ]
     model_name = "comight"
     overwrite = False
     n_start = 0  # job id that we start on
     n_repeats = 100  # job that we end on
-    n_jobs = -2
+    n_jobs = 24
 
     # Section: varying over dimensions
     n_samples = 4096
