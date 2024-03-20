@@ -277,10 +277,10 @@ if __name__ == "__main__":
     # )
 
     root_dir = Path("/Volumes/Extreme Pro/cancer")
-    # root_dir = Path("/data/adam/")
+    root_dir = Path("/data/adam/")
 
     n_repeats = 100
-    n_jobs = -3
+    n_jobs = -1
     SIMULATIONS_NAMES = [
         "mean_shiftv3",
         "multi_modalv2",
