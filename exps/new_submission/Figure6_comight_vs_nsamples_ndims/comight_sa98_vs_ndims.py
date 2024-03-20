@@ -523,7 +523,7 @@ if __name__ == "__main__":
     overwrite = False
     n_start = 0  # job id that we start on
     n_repeats = 100  # job that we end on
-    n_jobs = -2
+    n_jobs = 6
 
     # Section: varying over dimensions
     n_samples = 4096
