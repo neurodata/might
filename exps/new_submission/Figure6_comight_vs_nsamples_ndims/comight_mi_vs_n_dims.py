@@ -158,23 +158,23 @@ MODEL_NAMES = {
 
 if __name__ == "__main__":
     root_dir = Path("/Volumes/Extreme Pro/cancer")
-    # root_dir = Path("/data/adam/")
+    root_dir = Path("/data/adam/")
 
     SIMULATIONS_NAMES = [
         "mean_shiftv4",
-        # "multi_modalv2",
-        # "multi_equal",
+        "multi_modalv2",
+        "multi_equal",
     ]
 
     overwrite = False
     n_repeats = 100
-    n_jobs = 2
+    n_jobs = 24
     n_samples = 1024
 
     # Section: varying over dims
     model_name = "comight-cmi"
     # n_dims_1_list = [2**i - 6 for i in range(3, 12)] + [2**12 - 6]
-    n_dims_1_list = [2**i - 6 for i in range(3, 11)]
+    n_dims_1_list = [2**i - 6 for i in range(10, 12)]
     print("Analyzing for the following dims: ", n_dims_1_list)
     results = Parallel(n_jobs=n_jobs)(
         delayed(_run_simulation)(

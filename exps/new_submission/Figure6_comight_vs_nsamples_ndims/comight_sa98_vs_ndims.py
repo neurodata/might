@@ -514,8 +514,8 @@ if __name__ == "__main__":
 
     SIMULATIONS_NAMES = [
         'mean_shiftv4',
-        # 'multi_modalv2',
-        # "multi_equal",
+        'multi_modalv2',
+        "multi_equal",
     ]
     model_name = "comight"
     overwrite = False
@@ -526,7 +526,7 @@ if __name__ == "__main__":
     # Section: varying over dimensions
     n_samples = 4096
     n_samples = 1024
-    n_dims_list = [2**i - 6 for i in range(3, 10)]
+    n_dims_list = [2**i - 6 for i in range(10, 12)]
     print(n_dims_list)
     results = Parallel(n_jobs=n_jobs, verbose=True)(
         delayed(_run_simulation)(
