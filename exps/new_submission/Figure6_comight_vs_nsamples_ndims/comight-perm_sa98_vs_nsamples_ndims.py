@@ -11,8 +11,7 @@ import numpy as np
 from joblib import Parallel, delayed
 from sklearn.metrics import roc_curve
 from sklearn.model_selection import StratifiedShuffleSplit
-from sktree.stats import (PermutationHonestForestClassifier,
-                          build_hyppo_oob_forest)
+from sktree.stats import PermutationHonestForestClassifier, build_hyppo_oob_forest
 from sktree.tree import MultiViewDecisionTreeClassifier
 
 seed = 12345
@@ -21,8 +20,6 @@ rng = np.random.default_rng(seed)
 ### hard-coded parameters
 n_estimators = 6000
 max_features = 0.3
-test_size = 0.2
-n_jobs = -1
 
 
 def _estimate_threshold(y_true, y_score, target_specificity=0.98, pos_label=1):
@@ -122,9 +119,13 @@ def _run_simulation(
         class_1_idx = np.arange(4096 // 2, 4096)
 
         # vstack first class and second class?
-        X = np.vstack((X[class_0_idx[:n_samples//2], :], X[class_1_idx[:n_samples//2], :]))
-        y = np.concatenate((y[class_0_idx[:n_samples//2]], y[class_1_idx[:n_samples//2]]))
-        assert np.sum(y) == n_samples // 2, f'{np.sum(y)}, {n_samples // 2}'
+        X = np.vstack(
+            (X[class_0_idx[: n_samples // 2], :], X[class_1_idx[: n_samples // 2], :])
+        )
+        y = np.concatenate(
+            (y[class_0_idx[: n_samples // 2]], y[class_1_idx[: n_samples // 2]])
+        )
+        assert np.sum(y) == n_samples // 2, f"{np.sum(y)}, {n_samples // 2}"
     if n_dims_1 < n_dims_1_:
         view_one = X[:, :n_dims_1]
         view_two = X[:, n_dims_1_:]
@@ -234,35 +235,35 @@ if __name__ == "__main__":
     root_dir = Path("/data/adam/")
 
     SIMULATIONS_NAMES = [
-        "mean_shiftv3",
-        'multi_modalv2',
-        "multi_equal",
+        "mean_shiftv4",
+        # 'multi_modalv2',
+        # "multi_equal",
     ]
     model_name = "comight-perm"
     overwrite = False
 
     n_start = 0
     n_repeats = 100
-    n_jobs = 24
+    n_jobs = -1
 
     # Section: varying over sample-sizes
-    # n_samples_list = [2**x for x in range(8, 11)]
-    # n_dims_1 = 512 - 6
-    # print(n_samples_list)
-    # results = Parallel(n_jobs=n_jobs)(
-    #     delayed(_run_simulation)(
-    #         n_samples,
-    #         n_dims_1,
-    #         idx,
-    #         root_dir,
-    #         sim_name,
-    #         model_name,
-    #         overwrite=False,
-    #     )
-    #     for sim_name in SIMULATIONS_NAMES
-    #     for n_samples in n_samples_list
-    #     for idx in range(n_start, n_repeats)
-    # )
+    n_samples_list = [2**x for x in range(8, 11)]
+    n_dims_1 = 512 - 6
+    print(n_samples_list)
+    results = Parallel(n_jobs=n_jobs)(
+        delayed(_run_simulation)(
+            n_samples,
+            n_dims_1,
+            idx,
+            root_dir,
+            sim_name,
+            model_name,
+            overwrite=False,
+        )
+        for sim_name in SIMULATIONS_NAMES
+        for n_samples in n_samples_list
+        for idx in range(n_start, n_repeats)
+    )
 
     # Section: varying over dimensions
     n_samples = 1024
