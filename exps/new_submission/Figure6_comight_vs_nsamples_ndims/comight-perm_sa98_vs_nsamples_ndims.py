@@ -236,15 +236,15 @@ if __name__ == "__main__":
 
     SIMULATIONS_NAMES = [
         "mean_shiftv4",
-        'multi_modalv2',
-        "multi_equal",
+        # 'multi_modalv2',
+        # "multi_equal",
     ]
     model_name = "comight-perm"
     overwrite = False
 
     n_start = 0
     n_repeats = 100
-    n_jobs = 24
+    n_jobs = -2
 
     # Section: varying over sample-sizes
     # n_samples_list = [2**x for x in range(8, 11)]
@@ -267,7 +267,7 @@ if __name__ == "__main__":
 
     # Section: varying over dimensions
     n_samples = 1024
-    n_dims_list = [2**i - 6 for i in range(11, 12)]
+    n_dims_list = [2**i - 6 for i in range(3, 13)]
     print(n_dims_list)
     results = Parallel(n_jobs=n_jobs, verbose=True)(
         delayed(_run_simulation)(

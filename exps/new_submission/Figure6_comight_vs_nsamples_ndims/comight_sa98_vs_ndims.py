@@ -510,23 +510,23 @@ MODEL_NAMES = {
 
 if __name__ == "__main__":
     root_dir = Path("/Volumes/Extreme Pro/cancer")
-    root_dir = Path("/data/adam/")
+    # root_dir = Path("/data/adam/")
 
     SIMULATIONS_NAMES = [
         'mean_shiftv4',
-        'multi_modalv2',
-        "multi_equal",
+        # 'multi_modalv2',
+        # "multi_equal",
     ]
     model_name = "comight"
     overwrite = False
     n_start = 0  # job id that we start on
     n_repeats = 100  # job that we end on
-    n_jobs = 24
+    n_jobs = -2
 
     # Section: varying over dimensions
     n_samples = 4096
     n_samples = 1024
-    n_dims_list = [2**i - 6 for i in range(10, 12)]
+    n_dims_list = [2**i - 6 for i in range(3, 4)]
     print(n_dims_list)
     results = Parallel(n_jobs=n_jobs, verbose=True)(
         delayed(_run_simulation)(
