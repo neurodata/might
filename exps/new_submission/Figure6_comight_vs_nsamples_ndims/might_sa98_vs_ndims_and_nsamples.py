@@ -282,9 +282,9 @@ if __name__ == "__main__":
     n_repeats = 100
     n_jobs = -1
     SIMULATIONS_NAMES = [
-        "mean_shiftv3",
-        "multi_modalv2",
-        "multi_equal",
+        "mean_shiftv4",
+        # "multi_modalv2",
+        # "multi_equal",
     ]
 
     overwrite = False
@@ -295,24 +295,24 @@ if __name__ == "__main__":
     n_dims_1 = 512 - 6
 
     # Section: varying over sample-sizes
-    # model_name = "might_viewone"
-    # n_samples_list = [2**x for x in range(8, 11)]
-    # print(n_samples_list)
-    # results = Parallel(n_jobs=n_jobs)(
-    #     delayed(_run_simulation)(
-    #         n_samples,
-    #         n_dims_1,
-    #         idx,
-    #         Path(root_dir),
-    #         sim_name,
-    #         model_name,
-    #         run_view="view_one",
-    #         overwrite=False,
-    #     )
-    #     for sim_name in SIMULATIONS_NAMES
-    #     for n_samples in n_samples_list
-    #     for idx in range(n_repeats)
-    # )
+    model_name = "might_viewone"
+    n_samples_list = [2**x for x in range(8, 11)]
+    print(n_samples_list)
+    results = Parallel(n_jobs=n_jobs)(
+        delayed(_run_simulation)(
+            n_samples,
+            n_dims_1,
+            idx,
+            Path(root_dir),
+            sim_name,
+            model_name,
+            run_view="view_one",
+            overwrite=False,
+        )
+        for sim_name in SIMULATIONS_NAMES
+        for n_samples in n_samples_list
+        for idx in range(n_repeats)
+    )
 
     model_name = "might_viewtwo"
     # Section: varying over sample-sizes
@@ -336,7 +336,7 @@ if __name__ == "__main__":
 
     # Section: varying over dims
     model_name = "might_viewone"
-    n_dims_list = [2**i - 6 for i in range(3, 11)]
+    n_dims_list = [2**i - 6 for i in range(3, 12)]
     n_samples = 4096
     n_samples = 1024
     print(n_dims_list)
@@ -358,7 +358,7 @@ if __name__ == "__main__":
 
     model_name = "might_viewtwo"
     # Section: varying over dims
-    n_dims_list = [2**i - 6 for i in range(3, 11)]
+    n_dims_list = [2**i - 6 for i in range(3, 12)]
     n_samples = 4096
     n_samples = 1024
     print(n_dims_list)
