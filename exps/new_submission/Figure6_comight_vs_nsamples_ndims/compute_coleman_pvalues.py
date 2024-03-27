@@ -1,4 +1,5 @@
 import cProfile
+from time import time
 from pstats import Stats
 import numpy as np
 import pandas as pd
@@ -156,7 +157,7 @@ def _compute_null_distribution_coleman(
     """
     # sample two sets of equal number of trees from the combined forest these are the posteriors
     # (n_estimators * 2, n_samples, n_outputs)
-    all_y_pred = np.concatenate((y_pred_proba_normal, y_pred_proba_perm), axis=0, dtype=np.float16)
+    all_y_pred = np.concatenate((y_pred_proba_normal, y_pred_proba_perm), axis=0)
 
     n_estimators, _, _ = y_pred_proba_normal.shape
     n_samples_test = len(y_test)
@@ -175,21 +176,35 @@ def _compute_null_distribution_coleman(
     # compute non-nan-mask array
     # non_nan_mask = np.ma.masked_invalid(all_y_pred)
     # print(non_nan_mask.shape)
+    # all_y_pred = np.nan_to_num(all_y_pred, nan=0)
 
     # generate the random seeds for the parallel jobs
-    ss = np.random.SeedSequence(seed)
+    # ss = np.random.SeedSequence(seed)
+    rng = np.random.default_rng(seed)
+    # for i, seed in zip(range(n_repeats), rng.integers(0, 2**32, n_repeats)):
+    #     now = time()
+    #     _parallel_build_null_forests(
+    #         y_pred_ind_arr,
+    #         n_estimators,
+    #         all_y_pred,
+    #         y_test,
+    #         # non_nan_mask,
+    #         seed,
+    #         metric,
+    #         **metric_kwargs,
+    #     )
+    #     print(f"Time taken: {time() - now}")
     out = Parallel(n_jobs=n_jobs)(
         delayed(_parallel_build_null_forests)(
             y_pred_ind_arr,
             n_estimators,
             all_y_pred,
             y_test,
-            # non_nan_mask,
             seed,
             metric,
             **metric_kwargs,
         )
-        for i, seed in zip(range(n_repeats), ss.spawn(n_repeats))
+        for i, seed in zip(range(n_repeats), rng.integers(0, 2**32, n_repeats))
     )
 
     for idx, (first_half_metric, second_half_metric) in enumerate(out):
@@ -199,7 +214,7 @@ def _compute_null_distribution_coleman(
     return metric_star, metric_star_pi
 
 
-# import numba as nb
+import numba as nb
 
 # @nb.jit(cache=True, parallel=True, nogil=True)
 # def nanmean3D_axis0(array):
@@ -210,12 +225,12 @@ def _compute_null_distribution_coleman(
 #     return output
 
 
-# @nb.jit(cache=True, parallel=True, nogil=True)
-# def nanmean2D_axis0(array):
-#     output = np.empty(array.shape[1])
-#     for i in nb.prange(array.shape[1]):
-#         output[i] = np.nanmean(array[:, i])
-#     return output
+@nb.jit(cache=True, parallel=True, nogil=True)
+def nanmean2D_axis0(array):
+    output = np.empty(array.shape[1])
+    for i in nb.prange(array.shape[1]):
+        output[i] = np.nanmean(array[:, i])
+    return output
 
 
 def _parallel_build_null_forests(
@@ -233,13 +248,13 @@ def _parallel_build_null_forests(
     metric_func = METRIC_FUNCTIONS[metric]
 
     # two sets of random indices from 1 : 2N are sampled using Fisher-Yates
-    first_forest_inds = rng.choice(len(index_arr), size=n_estimators, replace=False)
-    second_forest_inds = np.setdiff1d(index_arr, first_forest_inds)
-    # rng.shuffle(index_arr)
+    # first_forest_inds = rng.choice(len(index_arr), size=n_estimators, replace=False)
+    # second_forest_inds = np.setdiff1d(index_arr, first_forest_inds)
+    rng.shuffle(index_arr)
 
-    # # get random half of the posteriors from two sets of trees
-    # first_forest_inds = index_arr[: n_estimators // 2]
-    # second_forest_inds = index_arr[n_estimators // 2 :]
+    # get random half of the posteriors from two sets of trees
+    first_forest_inds = index_arr[: n_estimators // 2]
+    second_forest_inds = index_arr[n_estimators // 2 :]
 
     # get random half of the posteriors as one forest
     # print(non_nan_mask.shape)
@@ -269,26 +284,31 @@ def _parallel_build_null_forests(
 
     # XXX: slice it only on the first output and the second output is by definition 1 - first_output
     # (n_samples, n_outputs) and (n_samples, n_outputs)
-    y_pred_first_half = np.nanmean(first_forest_pred[:, :, 0], axis=0).reshape(-1, 1)
-    y_pred_second_half = np.nanmean(second_forest_pred[:, :, 0], axis=0).reshape(-1, 1)
+    # y_pred_first_half = np.nanmean(first_forest_pred[:, :, 0], axis=0).reshape(-1, 1)
+    # y_pred_second_half = np.nanmean(second_forest_pred[:, :, 0], axis=0).reshape(-1, 1)
 
-    # y_pred_first_half = nanmean2D_axis0(first_forest_pred[:, :, 0]).reshape(-1, 1)
-    # y_pred_second_half = nanmean2D_axis0(second_forest_pred[:, :, 0]).reshape(-1, 1)
+    y_pred_first_half = nanmean2D_axis0(first_forest_pred[:, :, 0]).reshape(-1, 1)
+    y_pred_second_half = nanmean2D_axis0(second_forest_pred[:, :, 0]).reshape(-1, 1)
 
     # make first axis: 1 - second axis
-    y_pred_first_half = np.concatenate((y_pred_first_half, 1 - y_pred_first_half), axis=1)
-    y_pred_second_half = np.concatenate((y_pred_second_half, 1 - y_pred_second_half), axis=1)
+    y_pred_first_half = np.concatenate(
+        (y_pred_first_half, 1 - y_pred_first_half), axis=1
+    )
+    y_pred_second_half = np.concatenate(
+        (y_pred_second_half, 1 - y_pred_second_half), axis=1
+    )
 
     # y_pred_first_half = nanmean3D_axis0(first_forest_pred)
     # y_pred_second_half = nanmean3D_axis0(second_forest_pred)
 
     # y_pred_first_half = np.mean(first_forest_pred, axis=0)
     # y_pred_second_half = np.mean(second_forest_pred, axis=0)
-    
+    # y_pred_first_half = np.sum(first_forest_pred, axis=0) / len(y_test)
+    # y_pred_second_half = np.sum(second_forest_pred, axis=0) / len(y_test)
+
     # print(y_pred_first_half.shape, y_pred_second_half.shape)
     # if np.isnan(y_pred_first_half).any() or np.isnan(y_pred_second_half).any():
     #     raise RuntimeError("NaNs in the first half of the posteriors.")
-
 
     # figure out if any sample indices have nans after averaging over trees
     # and just slice them out in both y_test and y_pred.
@@ -297,98 +317,206 @@ def _parallel_build_null_forests(
     first_half_metric = metric_func(y_test, y_pred_first_half, **metric_kwargs)
     second_half_metric = metric_func(y_test, y_pred_second_half, **metric_kwargs)
     return first_half_metric, second_half_metric
+    # return y_pred_first_half, y_pred_second_half
+    # return 0, 0
+
+
+def run_pvalue(
+    root_dir,
+    model_name,
+    perm_model_name,
+    sim_name,
+    n_samples,
+    n_dims_1,
+    n_dims_2_,
+    idx,
+    metric,
+    n_permutations,
+):
+    norm_output_fname = (
+        root_dir
+        / "output"
+        / model_name
+        / sim_name
+        / f"{sim_name}_{n_samples}_{n_dims_1}_{n_dims_2_}_{idx}.npz"
+    )
+
+    # load data
+    norm_data = np.load(norm_output_fname)
+    y = norm_data["y"]
+    y_pred_normal = norm_data["posterior_arr"]
+
+    perm_output_fname = (
+        root_dir
+        / "output"
+        / perm_model_name
+        / sim_name
+        / f"{sim_name}_{n_samples}_{n_dims_1}_{n_dims_2_}_{idx}.npz"
+    )
+    perm_data = np.load(perm_output_fname)
+    assert_array_equal(y, perm_data["y"])
+    y_pred_perm = perm_data["posterior_arr"]
+
+    # pr = cProfile.Profile()
+    # pr.enable()
+    metric_star, metric_star_pi = _compute_null_distribution_coleman(
+        y,
+        y_pred_normal,
+        y_pred_perm,
+        metric=metric,
+        n_repeats=n_permutations,
+        seed=idx,
+        n_jobs=n_jobs,
+    )
+    # pr.disable()
+    # stats = Stats(pr)
+    # stats.sort_stats("tottime").print_stats(10)
+
+    y_pred_proba_orig = np.nanmean(y_pred_normal, axis=0)
+    y_pred_proba_perm = np.nanmean(y_pred_perm, axis=0)
+    metric_func = METRIC_FUNCTIONS[metric]
+    observe_stat = metric_func(y, y_pred_proba_orig)
+    permute_stat = metric_func(y, y_pred_proba_perm)
+
+    # metric^\pi - metric = observed test statistic, which under the
+    # null is normally distributed around 0
+    observe_test_stat = permute_stat - observe_stat
+
+    # metric^\pi_j - metric_j, which is centered at 0
+    null_dist = metric_star_pi - metric_star
+
+    # compute pvalue
+    pvalue = (1 + (null_dist <= observe_test_stat).sum()) / (1 + n_permutations)
+
+    results = defaultdict(list)
+    results["pvalues"].append(pvalue)
+    results["n_samples"].append(n_samples)
+    results["sim_name"].append(sim_name)
+    results["idx"].append(idx)
+    results["n_dims_1"].append(n_dims_1)
+    return pvalue
 
 
 if __name__ == "__main__":
     root_dir = Path("/Volumes/Extreme Pro/cancer")
     # root_dir = Path("/data/adam/")
     n_repeats = 100
-    n_permutations = 5_000
+    n_permutations = 1_000
     metric = "mi"
-    sims = ["multi_equal", "multi_modalv2", "mean_shiftv4"]
-    n_jobs = 1
+    sims = [
+        "multi_equal",
+        "multi_modalv2",
+        "mean_shiftv4",
+    ]
+    n_jobs = -2
 
     # Section: varying over sample-sizes
     model_name = "comight"
     perm_model_name = "comight-perm"
     n_dims_1 = 512 - 6
     n_samples_list = [2**x for x in range(8, 11)]
+    n_samples_list = [2**8, 2**10]
+    print(n_samples_list)
 
     n_dims_2_ = 6
 
     # Section: varying over samples
     results = defaultdict(list)
-    for sim_name in sims:
-        for idx in range(n_repeats):
-            for n_samples in n_samples_list:
-                norm_output_fname = (
-                    root_dir
-                    / "output"
-                    / model_name
-                    / sim_name
-                    / f"{sim_name}_{n_samples}_{n_dims_1}_{n_dims_2_}_{idx}.npz"
-                )
+    out = Parallel(n_jobs=n_jobs)(
+        delayed(run_pvalue)(
+            root_dir,
+            model_name,
+            perm_model_name,
+            sim_name,
+            n_samples,
+            n_dims_1,
+            n_dims_2_,
+            idx,
+            metric,
+            n_permutations,
+        )
+        for sim_name in sims
+        for idx in range(n_repeats)
+        for n_samples in n_samples_list
+    )
+    for res in out:
+        for key in res.keys():
+            results[key].extend(res[key])
+    assert all(len(val) == len(results["pvalues"]) for key, val in results.items())
 
-                # load data
-                norm_data = np.load(norm_output_fname)
-                y = norm_data["y"]
-                y_pred_normal = norm_data["posterior_arr"]
+    # for sim_name in sims:
+    #     for idx in range(n_repeats):
+    #         for n_samples in n_samples_list:
+    #             norm_output_fname = (
+    #                 root_dir
+    #                 / "output"
+    #                 / model_name
+    #                 / sim_name
+    #                 / f"{sim_name}_{n_samples}_{n_dims_1}_{n_dims_2_}_{idx}.npz"
+    #             )
 
-                perm_output_fname = (
-                    root_dir
-                    / "output"
-                    / perm_model_name
-                    / sim_name
-                    / f"{sim_name}_{n_samples}_{n_dims_1}_{n_dims_2_}_{idx}.npz"
-                )
-                perm_data = np.load(perm_output_fname)
-                assert_array_equal(y, perm_data["y"])
-                y_pred_perm = perm_data["posterior_arr"]
+    #             # load data
+    #             norm_data = np.load(norm_output_fname)
+    #             y = norm_data["y"]
+    #             y_pred_normal = norm_data["posterior_arr"]
 
-                pr = cProfile.Profile()
-                pr.enable()
-                metric_star, metric_star_pi = _compute_null_distribution_coleman(
-                    y,
-                    y_pred_normal,
-                    y_pred_perm,
-                    metric=metric,
-                    n_repeats=n_permutations,
-                    seed=idx,
-                    n_jobs=n_jobs,
-                )
-                pr.disable()
-                stats = Stats(pr)
-                stats.sort_stats('tottime').print_stats(10)
+    #             perm_output_fname = (
+    #                 root_dir
+    #                 / "output"
+    #                 / perm_model_name
+    #                 / sim_name
+    #                 / f"{sim_name}_{n_samples}_{n_dims_1}_{n_dims_2_}_{idx}.npz"
+    #             )
+    #             perm_data = np.load(perm_output_fname)
+    #             assert_array_equal(y, perm_data["y"])
+    #             y_pred_perm = perm_data["posterior_arr"]
 
-                y_pred_proba_orig = np.nanmean(y_pred_normal, axis=0)
-                y_pred_proba_perm = np.nanmean(y_pred_perm, axis=0)
-                metric_func = METRIC_FUNCTIONS[metric]
-                observe_stat = metric_func(y, y_pred_proba_orig)
-                permute_stat = metric_func(y, y_pred_proba_perm)
+    #             pr = cProfile.Profile()
+    #             pr.enable()
+    #             metric_star, metric_star_pi = _compute_null_distribution_coleman(
+    #                 y,
+    #                 y_pred_normal,
+    #                 y_pred_perm,
+    #                 metric=metric,
+    #                 n_repeats=n_permutations,
+    #                 seed=idx,
+    #                 n_jobs=n_jobs,
+    #             )
+    #             pr.disable()
+    #             stats = Stats(pr)
+    #             stats.sort_stats("tottime").print_stats(10)
 
-                # metric^\pi - metric = observed test statistic, which under the
-                # null is normally distributed around 0
-                observe_test_stat = permute_stat - observe_stat
+    #             y_pred_proba_orig = np.nanmean(y_pred_normal, axis=0)
+    #             y_pred_proba_perm = np.nanmean(y_pred_perm, axis=0)
+    #             metric_func = METRIC_FUNCTIONS[metric]
+    #             observe_stat = metric_func(y, y_pred_proba_orig)
+    #             permute_stat = metric_func(y, y_pred_proba_perm)
 
-                # metric^\pi_j - metric_j, which is centered at 0
-                null_dist = metric_star_pi - metric_star
+    #             # metric^\pi - metric = observed test statistic, which under the
+    #             # null is normally distributed around 0
+    #             observe_test_stat = permute_stat - observe_stat
 
-                # compute pvalue
-                pvalue = (1 + (null_dist <= observe_test_stat).sum()) / (1 + n_permutations)
+    #             # metric^\pi_j - metric_j, which is centered at 0
+    #             null_dist = metric_star_pi - metric_star
 
-                print("done!")
-                print(pvalue)
+    #             # compute pvalue
+    #             pvalue = (1 + (null_dist <= observe_test_stat).sum()) / (
+    #                 1 + n_permutations
+    #             )
 
-                results['pvalues'].append(pvalue)
-                results['n_samples'].append(n_samples)
-                results['sim_name'].append(sim_name)
-                results['idx'].append(idx)
-                results['n_dims_1'].append(n_dims_1)
-                print("done")
-                assert False
+    #             print("done!")
+    #             print(pvalue)
+
+    #             results["pvalues"].append(pvalue)
+    #             results["n_samples"].append(n_samples)
+    #             results["sim_name"].append(sim_name)
+    #             results["idx"].append(idx)
+    #             results["n_dims_1"].append(n_dims_1)
+    #             print("done")
+    #             assert False
     # TODO: save coleman pvalues
-    # df = pd.DataFrame(results)
-    # df.to_csv(root_dir / "coleman_nsamples_pvalues.csv")
+    df = pd.DataFrame(results)
+    df.to_csv(root_dir / "coleman_nsamples_pvalues.csv")
 
     # Section: varying over dimensions
     # n_dims_list = [2**i - 6 for i in range(3, 12)]
