@@ -332,7 +332,19 @@ def run_pvalue(
     idx,
     metric,
     n_permutations,
+    overwrite=False
 ):
+    output_fname = (
+        root_dir
+        / "output"
+        / "coleman_pvalues"
+        / sim_name
+        / f"{sim_name}_{n_samples}_{n_dims_1}_{n_dims_2_}_{idx}.npz"
+    )
+    output_fname.parent.mkdir(parents=True, exist_ok=True)
+    if output_fname.exists() and not overwrite:
+        return
+    
     norm_output_fname = (
         root_dir
         / "output"
@@ -366,7 +378,7 @@ def run_pvalue(
         metric=metric,
         n_repeats=n_permutations,
         seed=idx,
-        n_jobs=n_jobs,
+        n_jobs=1,
     )
     # pr.disable()
     # stats = Stats(pr)
@@ -388,18 +400,31 @@ def run_pvalue(
     # compute pvalue
     pvalue = (1 + (null_dist <= observe_test_stat).sum()) / (1 + n_permutations)
 
-    results = defaultdict(list)
-    results["pvalues"].append(pvalue)
-    results["n_samples"].append(n_samples)
-    results["sim_name"].append(sim_name)
-    results["idx"].append(idx)
-    results["n_dims_1"].append(n_dims_1)
-    return pvalue
+    np.savez_compressed(
+        output_fname,
+        idx=idx,
+        pvalue=pvalue,
+        observe_test_stat=observe_test_stat,
+        null_dist=null_dist,
+        n_permutations=n_permutations,
+        n_samples=n_samples,
+        n_dims_1=n_dims_1,
+        n_dims_2=n_dims_2_,
+        sim_type=sim_name,
+    )
+
+    # results = defaultdict(list)
+    # results["pvalues"].append(pvalue)
+    # results["n_samples"].append(n_samples)
+    # results["sim_name"].append(sim_name)
+    # results["idx"].append(idx)
+    # results["n_dims_1"].append(n_dims_1)
+    # return results
 
 
 if __name__ == "__main__":
     root_dir = Path("/Volumes/Extreme Pro/cancer")
-    # root_dir = Path("/data/adam/")
+    root_dir = Path("/data/adam/")
     n_repeats = 100
     n_permutations = 1_000
     metric = "mi"
@@ -422,7 +447,7 @@ if __name__ == "__main__":
 
     # Section: varying over samples
     results = defaultdict(list)
-    out = Parallel(n_jobs=n_jobs)(
+    Parallel(n_jobs=n_jobs)(
         delayed(run_pvalue)(
             root_dir,
             model_name,
@@ -439,84 +464,14 @@ if __name__ == "__main__":
         for idx in range(n_repeats)
         for n_samples in n_samples_list
     )
-    for res in out:
-        for key in res.keys():
-            results[key].extend(res[key])
-    assert all(len(val) == len(results["pvalues"]) for key, val in results.items())
+    # for res in out:
+    #     for key in res.keys():
+    #         results[key].extend(res[key])
+    # assert all(len(val) == len(results["pvalues"]) for key, val in results.items())
 
-    # for sim_name in sims:
-    #     for idx in range(n_repeats):
-    #         for n_samples in n_samples_list:
-    #             norm_output_fname = (
-    #                 root_dir
-    #                 / "output"
-    #                 / model_name
-    #                 / sim_name
-    #                 / f"{sim_name}_{n_samples}_{n_dims_1}_{n_dims_2_}_{idx}.npz"
-    #             )
-
-    #             # load data
-    #             norm_data = np.load(norm_output_fname)
-    #             y = norm_data["y"]
-    #             y_pred_normal = norm_data["posterior_arr"]
-
-    #             perm_output_fname = (
-    #                 root_dir
-    #                 / "output"
-    #                 / perm_model_name
-    #                 / sim_name
-    #                 / f"{sim_name}_{n_samples}_{n_dims_1}_{n_dims_2_}_{idx}.npz"
-    #             )
-    #             perm_data = np.load(perm_output_fname)
-    #             assert_array_equal(y, perm_data["y"])
-    #             y_pred_perm = perm_data["posterior_arr"]
-
-    #             pr = cProfile.Profile()
-    #             pr.enable()
-    #             metric_star, metric_star_pi = _compute_null_distribution_coleman(
-    #                 y,
-    #                 y_pred_normal,
-    #                 y_pred_perm,
-    #                 metric=metric,
-    #                 n_repeats=n_permutations,
-    #                 seed=idx,
-    #                 n_jobs=n_jobs,
-    #             )
-    #             pr.disable()
-    #             stats = Stats(pr)
-    #             stats.sort_stats("tottime").print_stats(10)
-
-    #             y_pred_proba_orig = np.nanmean(y_pred_normal, axis=0)
-    #             y_pred_proba_perm = np.nanmean(y_pred_perm, axis=0)
-    #             metric_func = METRIC_FUNCTIONS[metric]
-    #             observe_stat = metric_func(y, y_pred_proba_orig)
-    #             permute_stat = metric_func(y, y_pred_proba_perm)
-
-    #             # metric^\pi - metric = observed test statistic, which under the
-    #             # null is normally distributed around 0
-    #             observe_test_stat = permute_stat - observe_stat
-
-    #             # metric^\pi_j - metric_j, which is centered at 0
-    #             null_dist = metric_star_pi - metric_star
-
-    #             # compute pvalue
-    #             pvalue = (1 + (null_dist <= observe_test_stat).sum()) / (
-    #                 1 + n_permutations
-    #             )
-
-    #             print("done!")
-    #             print(pvalue)
-
-    #             results["pvalues"].append(pvalue)
-    #             results["n_samples"].append(n_samples)
-    #             results["sim_name"].append(sim_name)
-    #             results["idx"].append(idx)
-    #             results["n_dims_1"].append(n_dims_1)
-    #             print("done")
-    #             assert False
     # TODO: save coleman pvalues
-    df = pd.DataFrame(results)
-    df.to_csv(root_dir / "coleman_nsamples_pvalues.csv")
+    # df = pd.DataFrame(results)
+    # df.to_csv(root_dir / "coleman_nsamples_pvalues.csv")
 
     # Section: varying over dimensions
     # n_dims_list = [2**i - 6 for i in range(3, 12)]
