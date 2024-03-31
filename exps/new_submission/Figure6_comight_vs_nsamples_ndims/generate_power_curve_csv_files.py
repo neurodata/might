@@ -148,6 +148,10 @@ def make_csv_over_ndims1(
             if param_name == "sas98":
                 sas98 = loaded_data["sas98"]
                 results["sas98"].append(sas98)
+            elif param_name == "cdcorr_pvalue":
+                # print(dict(loaded_data).keys())
+                cdcorr_pvalue = loaded_data["cdcorr_pvalue"]
+                results["cdcorr_pvalue"].append(cdcorr_pvalue)
             elif param_name == "cmi":
                 mi = loaded_data["cmi"]
                 results["cmi"].append(mi)
@@ -169,7 +173,7 @@ def make_csv_over_ndims1(
             # results["threshold"].append(threshold)
 
     df = pd.DataFrame(results)
-
+    print(df.head())
     # print('\n\n HERE!', param_name == "sas98" or  "comight" not in model_name)
     # Melt the DataFrame to reshape it
     df_melted = pd.melt(
@@ -198,11 +202,6 @@ if __name__ == "__main__":
     # output_dir = Path('/data/adam/')
     output_dir = root_dir
 
-    # sim_name = "multi_modal-5-102"
-    # sim_name = "mean_shiftv3"
-    # sim_name = "multi_modalv2"
-    # sim_name = 'multi_equal'
-
     # param_name = 'cdcorr_pvalue'
     # figname = "cmi"  # TODO: change
     # figname = "sas98"  # TODO: change
@@ -210,53 +209,51 @@ if __name__ == "__main__":
 
     n_samples_list = [2**x for x in range(8, 11)]
     # n_dims_1 = 1024 - 6
-    # n_dims_1 = 512 - 6
+    n_dims_1 = 512 - 6
     # n_dims_1 = 4096 - 6
     print(n_samples_list)
 
-    sim_names = [
-        # "mean_shiftv4",
-         'multi_modalv2', 'multi_equal'
-    ]
+    sim_names = ["mean_shiftv4", "multi_modalv2", "multi_equal"]
     for sim_name in sim_names:
         param_name = "sas98"
         for model_name in [
             # "comight",
             # "comight-perm",
-            # "knn",
+            "knn",
             # "knn_viewone",
             # "knn_viewtwo",
-               'might_viewone', 'might_viewtwo'
+            #    'might_viewone', 'might_viewtwo'
         ]:
             # param_name = 'cmi'
             # for model_name in [
             #     'comight-cmi',
             #     'ksg'
             # ]:
-            # param_name = 'cdcorr_pvalue'
-            # for model_name in ['cdcorr']:
-            n_dims_1 = 512 - 6
-            # save the dataframe to a csv file over n-samples
-            df = make_csv_over_nsamples(
-                root_dir,
-                sim_name,
-                n_samples_list,
-                n_dims_1,
-                n_repeats,
-                param_name=param_name,
-                model_name=model_name,
-            )
-            df.to_csv(
-                output_dir
-                / "output"
-                / f"results_vs_nsamples_{sim_name}_{model_name}_{param_name}_{n_dims_1}_{n_repeats}.csv",
-                index=False,
-            )
+        # param_name = 'cdcorr_pvalue'
+        # for model_name in ['cdcorr']:
+            # n_dims_1 = 512 - 6
+            # # save the dataframe to a csv file over n-samples
+            # df = make_csv_over_nsamples(
+            #     root_dir,
+            #     sim_name,
+            #     n_samples_list,
+            #     n_dims_1,
+            #     n_repeats,
+            #     param_name=param_name,
+            #     model_name=model_name,
+            # )
+            # df.to_csv(
+            #     output_dir
+            #     / "output"
+            #     / f"results_vs_nsamples_{sim_name}_{model_name}_{param_name}_{n_dims_1}_{n_repeats}.csv",
+            #     index=False,
+            # )
 
             # Save the dataframe over varying ndims
             n_dims_list = [2**x - 6 for x in range(3, 11)]
             n_samples = 4096
             n_samples = 1024
+            n_samples = 512
             print(n_dims_list)
 
             # save the dataframe to a csv file over n-dims

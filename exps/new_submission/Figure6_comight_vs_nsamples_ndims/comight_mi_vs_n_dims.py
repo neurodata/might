@@ -168,8 +168,8 @@ if __name__ == "__main__":
 
     overwrite = False
     n_repeats = 100
-    n_jobs = 24
-    n_samples = 1024
+    n_jobs = -2
+    n_samples = 512
 
     # Section: varying over dims
     model_name = "comight-cmi"
