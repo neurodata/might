@@ -215,20 +215,20 @@ if __name__ == "__main__":
 
     sim_names = ["mean_shiftv4", "multi_modalv2", "multi_equal"]
     for sim_name in sim_names:
-        param_name = "sas98"
+        # param_name = "sas98"
+        # for model_name in [
+        #     # "comight",
+        #     # "comight-perm",
+        #     "knn",
+        #     # "knn_viewone",
+        #     # "knn_viewtwo",
+        #     #    'might_viewone', 'might_viewtwo'
+        # ]:
+        param_name = 'cmi'
         for model_name in [
-            # "comight",
-            # "comight-perm",
-            "knn",
-            # "knn_viewone",
-            # "knn_viewtwo",
-            #    'might_viewone', 'might_viewtwo'
+            'comight-cmi',
+            # 'ksg'
         ]:
-            # param_name = 'cmi'
-            # for model_name in [
-            #     'comight-cmi',
-            #     'ksg'
-            # ]:
         # param_name = 'cdcorr_pvalue'
         # for model_name in ['cdcorr']:
             # n_dims_1 = 512 - 6

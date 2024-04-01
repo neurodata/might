@@ -173,8 +173,8 @@ if __name__ == "__main__":
 
     # Section: varying over dims
     model_name = "comight-cmi"
-    # n_dims_1_list = [2**i - 6 for i in range(3, 12)] + [2**12 - 6]
-    n_dims_1_list = [2**i - 6 for i in range(10, 12)]
+    n_dims_1_list = [2**i - 6 for i in range(3, 13)]
+    # n_dims_1_list = [2**i - 6 for i in range(10, 12)]
     print("Analyzing for the following dims: ", n_dims_1_list)
     results = Parallel(n_jobs=n_jobs)(
         delayed(_run_simulation)(
