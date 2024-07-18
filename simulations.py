@@ -63,7 +63,7 @@ def w_shaped(n, p, noise=False, coeffs=None):
         coeffs = np.array([np.exp(-0.2735 * (i + 10)) for i in range(p)])
     eps = np.random.normal(scale=30, size=(n, p))
     x_coeffs = x * coeffs
-    y = ((x_coeffs ** 4) - 7 * x_coeffs**2) + noise * eps
+    y = ((x_coeffs**4) - 7 * x_coeffs**2) + noise * eps
 
     return x, y
 
@@ -76,7 +76,7 @@ def logarithmic(n, p, noise=False, coeffs=None):
     x = rng.normal(size=(n, p))
     eps = rng.normal(size=(n, p))
 
-    y = np.log((x * coeffs + 1)**2) + noise * eps
+    y = np.log((x * coeffs + 1) ** 2) + noise * eps
 
     return x, y
 
@@ -93,12 +93,12 @@ def fourth_root(n, p, noise=False, coeffs=None):
     return x, y
 
 
-def _sin(n, p, noise=False, period=4*np.pi, coeffs=None):
+def _sin(n, p, noise=False, period=4 * np.pi, coeffs=None):
     rng = np.random.default_rng()
 
-    if period == 4*np.pi and coeffs is None:
+    if period == 4 * np.pi and coeffs is None:
         coeffs = np.array([np.exp(-0.0095 * (i + 50)) for i in range(p)])
-    elif period == 16*np.pi and coeffs is None:
+    elif period == 16 * np.pi and coeffs is None:
         coeffs = np.array([np.exp(-0.015 * (i + 50)) for i in range(p)])
     x = rng.normal(size=(n, p))
     eps = rng.normal(size=(n, p))
@@ -130,7 +130,9 @@ def _square_diamond(n, p, noise=False, low=-1, high=1, period=-np.pi / 2, coeffs
 
 
 def square(n, p, noise=False, low=-1, high=1, coeffs=None):
-    return _square_diamond(n, p, noise=noise, low=low, high=high, period=-np.pi / 8, coeffs=coeffs)
+    return _square_diamond(
+        n, p, noise=noise, low=low, high=high, period=-np.pi / 8, coeffs=coeffs
+    )
 
 
 def two_parabolas(n, p, noise=False, prob=0.5, coeffs=None):
@@ -147,15 +149,17 @@ def two_parabolas(n, p, noise=False, prob=0.5, coeffs=None):
 
 
 def diamond(n, p, noise=False, low=-1, high=1, coeffs=None):
-    return _square_diamond(n, p, noise=noise, low=low, high=high, period=-np.pi / 4, coeffs=coeffs)
+    return _square_diamond(
+        n, p, noise=noise, low=low, high=high, period=-np.pi / 4, coeffs=coeffs
+    )
 
 
 def multimodal_independence(n, p, prob=0.5, sep1=3, sep2=2):
     rng = np.random.default_rng()
 
     sig = np.identity(p)
-    u = rng.multivariate_normal(np.zeros(p), sig, size=n, method='cholesky')
-    v = rng.multivariate_normal(np.zeros(p), sig, size=n, method='cholesky')
+    u = rng.multivariate_normal(np.zeros(p), sig, size=n, method="cholesky")
+    v = rng.multivariate_normal(np.zeros(p), sig, size=n, method="cholesky")
     u_2 = rng.binomial(1, prob, size=(n, p))
     v_2 = rng.binomial(1, prob, size=(n, p))
 
@@ -163,6 +167,7 @@ def multimodal_independence(n, p, prob=0.5, sep1=3, sep2=2):
     y = v / sep1 + sep2 * v_2 - 1
 
     return x, y
+
 
 SIMS = {
     "linear": linear,

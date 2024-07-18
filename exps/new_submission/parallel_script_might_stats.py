@@ -1,16 +1,13 @@
-from pathlib import Path
 from collections import defaultdict
+from pathlib import Path
+
 import numpy as np
-from sklearn.model_selection import (
-    StratifiedShuffleSplit,
-)
+from joblib import Parallel, delayed
 from sklearn.metrics import roc_curve
-from joblib import delayed, Parallel
+from sklearn.model_selection import StratifiedShuffleSplit
 from sktree import HonestForestClassifier
-from sktree.stats import (
-    build_hyppo_oob_forest,
-)
 from sktree.datasets import make_trunk_classification
+from sktree.stats import build_hyppo_oob_forest
 
 seed = 12345
 rng = np.random.default_rng(seed)
@@ -22,12 +19,13 @@ test_size = 0.2
 n_jobs = -1
 
 SIMULATIONS = {
-        "trunk": {"mu_0": 1, "mu_1": -1},
-        "trunk-overlap": {"mu_0": 1, "mu_1": 1},
-        # "3": {"band_type": "ar", "rho": 0.5},
-        # "4": {"band_type": "ar", "m_factor": 1, "rho": 0.5},
-        # "5": {"mix": 0.5},
-    }
+    "trunk": {"mu_0": 1, "mu_1": -1},
+    "trunk-overlap": {"mu_0": 1, "mu_1": 1},
+    # "3": {"band_type": "ar", "rho": 0.5},
+    # "4": {"band_type": "ar", "m_factor": 1, "rho": 0.5},
+    # "5": {"mix": 0.5},
+}
+
 
 def _estimate_threshold(y_true, y_score, target_specificity=0.98, pos_label=1):
     # Compute ROC curve
@@ -39,7 +37,10 @@ def _estimate_threshold(y_true, y_score, target_specificity=0.98, pos_label=1):
 
     return threshold_at_specificity
 
-def sensitivity_at_specificity(y_true, y_score, target_specificity=0.98, pos_label=1, threshold=None):
+
+def sensitivity_at_specificity(
+    y_true, y_score, target_specificity=0.98, pos_label=1, threshold=None
+):
     n_trees, n_samples, n_classes = y_score.shape
 
     # Compute nan-averaged y_score along the trees axis
@@ -58,7 +59,9 @@ def sensitivity_at_specificity(y_true, y_score, target_specificity=0.98, pos_lab
 
     if threshold is None:
         # Find the threshold corresponding to the target specificity
-        threshold_at_specificity = _estimate_threshold(y_true, y_score_binary, target_specificity=0.98, pos_label=1)
+        threshold_at_specificity = _estimate_threshold(
+            y_true, y_score_binary, target_specificity=0.98, pos_label=1
+        )
     else:
         threshold_at_specificity = threshold
 
@@ -108,11 +111,7 @@ def _run_simulation(
 
     sim_params = SIMULATIONS[sim_name]
     X, y = make_trunk_classification(
-        n_samples=n_samples,
-        n_dim=n_dims,
-        n_informative=100,
-        seed=seed,
-        **sim_params
+        n_samples=n_samples, n_dim=n_dims, n_informative=100, seed=seed, **sim_params
     )
 
     output_fname = (
@@ -138,7 +137,9 @@ def _run_simulation(
 
         if use_second_split_for_threshold:
             # array-like of shape (n_estimators, n_samples, n_classes)
-            honest_idx_posteriors = est.predict_proba_per_tree(X, indices=est.honest_indices_)
+            honest_idx_posteriors = est.predict_proba_per_tree(
+                X, indices=est.honest_indices_
+            )
 
             # get the threshold for specified highest sensitivity at 0.98 specificity
             # Compute nan-averaged y_score along the trees axis
@@ -169,11 +170,17 @@ def _run_simulation(
             y_score_binary = y_score_binary[~nan_rows]
             y_true = y_true[~nan_rows]
 
-        threshold_at_specificity = _estimate_threshold(y_true, y_score_binary, target_specificity=0.98, pos_label=1)
+        threshold_at_specificity = _estimate_threshold(
+            y_true, y_score_binary, target_specificity=0.98, pos_label=1
+        )
 
         # generate S@S98 from posterior array
-        sas98 = sensitivity_at_specificity(y, posterior_arr, target_specificity=target_specificity,
-                                           threshold=threshold_at_specificity)
+        sas98 = sensitivity_at_specificity(
+            y,
+            posterior_arr,
+            target_specificity=target_specificity,
+            threshold=threshold_at_specificity,
+        )
 
         np.savez_compressed(
             output_fname,
@@ -184,7 +191,7 @@ def _run_simulation(
             sim_type=sim_name,
             y=y,
             posterior_arr=posterior_arr,
-            threshold=threshold_at_specificity
+            threshold=threshold_at_specificity,
         )
 
 
@@ -205,8 +212,8 @@ if __name__ == "__main__":
     overwrite = False
 
     root_dir = Path("/Volumes/Extreme Pro/cancer")
-    root_dir = Path('./output/')
-    
+    root_dir = Path("./output/")
+
     SIMULATIONS_NAMES = {
         "1": "trunk",
         "2": "trunk-overlap",
@@ -219,7 +226,7 @@ if __name__ == "__main__":
     n_dims = 2048
     n_samples = 524
     use_second_split_for_threshold = False
-    model_name = 'might-threshold-third-split'
+    model_name = "might-threshold-third-split"
 
     n_repeats = 2
     n_samples_list = [2**x for x in range(8, 13)]

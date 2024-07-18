@@ -8,11 +8,9 @@ from sklearn.metrics import roc_curve
 from sklearn.model_selection import train_test_split
 from sktree import HonestForestClassifier
 from sktree.datasets import make_trunk_classification
-from sktree.stats import (
-    PermutationForestClassifier,
-    PermutationHonestForestClassifier,
-    build_coleman_forest,
-)
+from sktree.stats import (PermutationForestClassifier,
+                          PermutationHonestForestClassifier,
+                          build_coleman_forest)
 
 seed = 12345
 rng = np.random.default_rng(seed)

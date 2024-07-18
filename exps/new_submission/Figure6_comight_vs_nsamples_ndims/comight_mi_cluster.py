@@ -6,13 +6,12 @@ from pathlib import Path
 import numpy as np
 from joblib import Parallel, delayed
 from sklearn.model_selection import StratifiedShuffleSplit
-from sktree import HonestForestClassifier
-from sktree.datasets import (make_trunk_classification,
-                             make_trunk_mixture_classification)
-from sktree.stats import (PermutationHonestForestClassifier,
-                          build_hyppo_oob_forest)
-from sktree.stats.utils import _mutual_information
-from sktree.tree import MultiViewDecisionTreeClassifier
+from treeple import HonestForestClassifier
+from treeple.datasets import (make_trunk_classification,
+                              make_trunk_mixture_classification)
+from treeple.stats import PermutationHonestForestClassifier, build_oob_forest
+from treeple.stats.utils import _mutual_information
+from treeple.tree import MultiViewDecisionTreeClassifier
 
 seed = 12345
 rng = np.random.default_rng(seed)
@@ -111,13 +110,13 @@ def _run_simulation(
         covariate_index = np.arange(n_dims_1)
         assert len(covariate_index) + n_dims_2_ == X.shape[1]
 
-        est, posterior_arr = build_hyppo_oob_forest(
+        est, posterior_arr = build_oob_forest(
             est,
             X,
             y,
             verbose=False,
         )
-        perm_est, perm_posterior_arr = build_hyppo_oob_forest(
+        perm_est, perm_posterior_arr = build_oob_forest(
             perm_est, X, y, verbose=False, covariate_index=covariate_index
         )
 

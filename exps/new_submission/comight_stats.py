@@ -1,17 +1,13 @@
-from pathlib import Path
 from collections import defaultdict
+from pathlib import Path
+
 import numpy as np
-from sklearn.model_selection import (
-    StratifiedShuffleSplit,
-)
+from joblib import Parallel, delayed
 from sklearn.metrics import roc_curve
-from joblib import delayed, Parallel
+from sklearn.model_selection import StratifiedShuffleSplit
 from sktree import HonestForestClassifier
 from sktree.datasets import make_trunk_classification
-from sktree.stats import (
-    build_hyppo_oob_forest,
-)
-
+from sktree.stats import build_hyppo_oob_forest
 
 seed = 12345
 rng = np.random.default_rng(seed)
@@ -58,7 +54,9 @@ def sensitivity_at_specificity(y_true, y_score, target_specificity=0.98, pos_lab
     return sensitivity
 
 
-def make_mean_shift(n_samples=1024, n_dim_1=4090, mu_0=-1, mu_1=1, seed=None, n_dim_2=6):
+def make_mean_shift(
+    n_samples=1024, n_dim_1=4090, mu_0=-1, mu_1=1, seed=None, n_dim_2=6
+):
     """Make mean shifted binary classification data.
 
     X comprises of [view_1, view_2] where view_1 is the first ``n_dim_1`` dimensions
@@ -253,7 +251,8 @@ def make_multi_equal(
     # only keep the second half of samples, corresponding to the mixture
     X1 = X1[n_samples // 2 :, :]
 
-    X2, _ = make_trunk_classification(n_samples=n_samples,
+    X2, _ = make_trunk_classification(
+        n_samples=n_samples,
         n_dim=n_dim_1 + default_n_informative,
         n_informative=default_n_informative,
         mu_0=mu_0,

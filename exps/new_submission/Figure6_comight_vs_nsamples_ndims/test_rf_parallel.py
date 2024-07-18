@@ -2,7 +2,7 @@ from time import time
 
 import numpy as np
 from sklearn.ensemble import RandomForestClassifier
-from sktree import RandomForestClassifier as sktreeRandomForestClassifier
+from treeple import RandomForestClassifier as treepleRandomForestClassifier
 
 seed = 12345
 rng = np.random.default_rng(seed)
@@ -27,10 +27,10 @@ for idx in range(n_repeats):
 
 
 for idx in range(n_repeats):
-    sktree_clf = sktreeRandomForestClassifier(
+    treeple_clf = treepleRandomForestClassifier(
         n_estimators=n_estimators, random_state=seed, n_jobs=n_jobs
     )
     tstart = time()
-    sktree_clf.fit(X, y)
+    treeple_clf.fit(X, y)
     fit_time = time() - tstart
-    print(f"Fit time for sktreeRandomForestClassifier: {fit_time}")
+    print(f"Fit time for treepleRandomForestClassifier: {fit_time}")

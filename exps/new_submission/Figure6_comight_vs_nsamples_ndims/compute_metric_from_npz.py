@@ -5,9 +5,9 @@ import numpy as np
 import pandas as pd
 from numpy.testing import assert_array_equal
 from sklearn.metrics import roc_curve
-from sktree.stats.utils import (METRIC_FUNCTIONS, POSITIVE_METRICS,
-                                _compute_null_distribution_coleman,
-                                _mutual_information)
+from treeple.stats.utils import (METRIC_FUNCTIONS, POSITIVE_METRICS,
+                                 _compute_null_distribution_coleman,
+                                 _mutual_information)
 
 n_dims_2_ = 6
 

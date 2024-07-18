@@ -11,9 +11,8 @@ import numpy as np
 from joblib import Parallel, delayed
 from sklearn.metrics import roc_curve
 from sklearn.model_selection import StratifiedShuffleSplit
-from sktree.stats import (PermutationHonestForestClassifier,
-                          build_hyppo_oob_forest)
-from sktree.tree import MultiViewDecisionTreeClassifier
+from treeple.stats import PermutationHonestForestClassifier, build_oob_forest
+from treeple.tree import MultiViewDecisionTreeClassifier
 
 seed = 12345
 rng = np.random.default_rng(seed)
@@ -153,7 +152,7 @@ def _run_simulation(
         )
         covariate_index = np.arange(n_dims_1)  # permute the first view (i.e. X)
 
-        est, posterior_arr = build_hyppo_oob_forest(
+        est, posterior_arr = build_oob_forest(
             est,
             X,
             y,
