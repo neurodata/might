@@ -1,9 +1,8 @@
 from time import time
-import numpy as np
 
+import numpy as np
 from sklearn.ensemble import RandomForestClassifier
 from sktree import RandomForestClassifier as sktreeRandomForestClassifier
-
 
 seed = 12345
 rng = np.random.default_rng(seed)

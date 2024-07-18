@@ -122,9 +122,13 @@ def _run_simulation(
         class_1_idx = np.arange(4096 // 2, 4096)
 
         # vstack first class and second class?
-        X = np.vstack((X[class_0_idx[:n_samples//2], :], X[class_1_idx[:n_samples//2], :]))
-        y = np.concatenate((y[class_0_idx[:n_samples//2]], y[class_1_idx[:n_samples//2]]))
-        assert np.sum(y) == n_samples // 2, f'{np.sum(y)}, {n_samples // 2}'
+        X = np.vstack(
+            (X[class_0_idx[: n_samples // 2], :], X[class_1_idx[: n_samples // 2], :])
+        )
+        y = np.concatenate(
+            (y[class_0_idx[: n_samples // 2]], y[class_1_idx[: n_samples // 2]])
+        )
+        assert np.sum(y) == n_samples // 2, f"{np.sum(y)}, {n_samples // 2}"
     if n_dims_1 < n_dims_1_:
         view_one = X[:, :n_dims_1]
         view_two = X[:, n_dims_1_:]

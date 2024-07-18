@@ -1,15 +1,13 @@
 from collections import defaultdict
 from pathlib import Path
-from numpy.testing import assert_array_equal
+
 import numpy as np
 import pandas as pd
+from numpy.testing import assert_array_equal
 from sklearn.metrics import roc_curve
-from sktree.stats.utils import (
-    _mutual_information,
-    _compute_null_distribution_coleman,
-    POSITIVE_METRICS,
-    METRIC_FUNCTIONS,
-)
+from sktree.stats.utils import (METRIC_FUNCTIONS, POSITIVE_METRICS,
+                                _compute_null_distribution_coleman,
+                                _mutual_information)
 
 n_dims_2_ = 6
 
@@ -289,7 +287,7 @@ def recompute_metric_n_dims(
     root_dir, sim_name, n_samples, n_dims_2, n_repeats, n_jobs=None, overwrite=False
 ):
     output_model_name = "comight-power"
-    n_dims_list = [2**i - 6 for i in range(3, 10)]
+    n_dims_list = [2**i - 6 for i in range(3, 11)]
 
     fname = (
         f"results_vs_ndims_{sim_name}_{output_model_name}_{n_samples}_{n_repeats}.csv"
@@ -440,21 +438,14 @@ if __name__ == "__main__":
     # output_dir = Path('/data/adam/')
     output_dir = root_dir
 
-    # sim_name = "multi_modal-5-102"
-    # sim_name = "mean_shiftv2"
-    sim_name = "multi_modalv2"
-    sim_name = "multi_equal"
+    sim_names = ["mean_shiftv4", "multi_modalv2", "multi_equal"]
 
-    sim_names = [
-        "mean_shiftv4",
-        # "multi_modalv2", "multi_equal"
-    ]
-
-    n_dims_1 = 4096 - 6
+    # n_dims_1 = 4096 - 6
     n_dims_1 = 512 - 6
     n_dims_2 = 6
 
-    n_samples = 1024
+    # n_samples = 1024
+    n_samples = 512
     n_repeats = 100
     n_jobs = -1
 

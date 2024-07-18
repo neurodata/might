@@ -6,7 +6,8 @@ from pathlib import Path
 
 import numpy as np
 from joblib import Parallel, delayed
-from sktree.datasets import make_trunk_classification, make_trunk_mixture_classification
+from sktree.datasets import (make_trunk_classification,
+                             make_trunk_mixture_classification)
 
 
 def make_mean_shift(

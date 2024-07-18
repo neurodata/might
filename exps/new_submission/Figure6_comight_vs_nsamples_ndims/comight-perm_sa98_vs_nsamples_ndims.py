@@ -11,7 +11,8 @@ import numpy as np
 from joblib import Parallel, delayed
 from sklearn.metrics import roc_curve
 from sklearn.model_selection import StratifiedShuffleSplit
-from sktree.stats import PermutationHonestForestClassifier, build_hyppo_oob_forest
+from sktree.stats import (PermutationHonestForestClassifier,
+                          build_hyppo_oob_forest)
 from sktree.tree import MultiViewDecisionTreeClassifier
 
 seed = 12345
@@ -236,7 +237,7 @@ if __name__ == "__main__":
 
     SIMULATIONS_NAMES = [
         "mean_shiftv4",
-        'multi_modalv2',
+        "multi_modalv2",
         "multi_equal",
     ]
     model_name = "comight-perm"
@@ -247,23 +248,23 @@ if __name__ == "__main__":
     n_jobs = -2
 
     # Section: varying over sample-sizes
-    # n_samples_list = [2**x for x in range(8, 11)]
-    # n_dims_1 = 512 - 6
-    # print(n_samples_list)
-    # results = Parallel(n_jobs=n_jobs)(
-    #     delayed(_run_simulation)(
-    #         n_samples,
-    #         n_dims_1,
-    #         idx,
-    #         root_dir,
-    #         sim_name,
-    #         model_name,
-    #         overwrite=False,
-    #     )
-    #     for sim_name in SIMULATIONS_NAMES
-    #     for n_samples in n_samples_list
-    #     for idx in range(n_start, n_repeats)
-    # )
+    n_samples_list = [2**x for x in range(8, 11)]
+    n_dims_1 = 512 - 6
+    print(n_samples_list)
+    results = Parallel(n_jobs=n_jobs)(
+        delayed(_run_simulation)(
+            n_samples,
+            n_dims_1,
+            idx,
+            root_dir,
+            sim_name,
+            model_name,
+            overwrite=False,
+        )
+        for sim_name in SIMULATIONS_NAMES
+        for n_samples in n_samples_list
+        for idx in range(n_start, n_repeats)
+    )
 
     # Section: varying over dimensions
     n_samples = 512

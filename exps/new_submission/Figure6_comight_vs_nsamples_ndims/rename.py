@@ -1,9 +1,10 @@
 import os
 import re
 
+
 def rename_files(directory, old_number, new_number):
     # Regular expression pattern to match the desired filename pattern
-    pattern = r'(.+?)_(\d+)_(\d+)_(\d+)_(\d+)\.npz'
+    pattern = r"(.+?)_(\d+)_(\d+)_(\d+)_(\d+)\.npz"
 
     for filename in os.listdir(directory):
         # Check if the file matches the pattern
@@ -16,7 +17,9 @@ def rename_files(directory, old_number, new_number):
             if n_dims_1 == str(old_number):
                 # Construct the new filename with updated n_dims_1
                 new_n_dims_1 = str(new_number)
-                new_filename = f"{sim_name}_{n_samples}_{new_n_dims_1}_{n_dims_2}_{seed}.npz"
+                new_filename = (
+                    f"{sim_name}_{n_samples}_{new_n_dims_1}_{n_dims_2}_{seed}.npz"
+                )
 
                 # Construct full file paths
                 old_path = os.path.join(directory, filename)
@@ -28,8 +31,7 @@ def rename_files(directory, old_number, new_number):
 
 
 # Replace 'directory_path' with the path to your directory containing the files
-directory_path = '/Volumes/Extreme Pro/cancer/output/cdcorr/multi_equal/'
+directory_path = "/Volumes/Extreme Pro/cancer/output/cdcorr/multi_equal/"
 old_number = 512  # Number to be replaced
 new_number = 506  # Number to replace with
 rename_files(directory_path, old_number, new_number)
-

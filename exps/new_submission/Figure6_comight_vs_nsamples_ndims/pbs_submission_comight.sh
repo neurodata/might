@@ -18,17 +18,22 @@
 ROOT_DIR="/data/home/ali39/output/"
 path=~/miniconda3/envs/ms/bin
 
+PYTHON_FILE="comight_sa98_cluster.py"
+
 # Path to the Python script that extracts parameters
-PYTHON_SCRIPT="~/might/exps/new_submission/Figure6_comight_vs_nsamples_ndims/comight_sa98_cluster.py"
+PYTHON_SCRIPT="~/might/exps/new_submission/Figure6_comight_vs_nsamples_ndims/$PYTHON_FILE"
 
 # Read parameters from text file and submit Python job
-line=$(sed -n "${PBS_ARRAY_INDEX}p" ./parameters_multi_modalv2.txt)
+line=$(sed -n "${PBS_ARRAY_INDEX}p" ./parameters_comight.txt)
 seed=$(echo "$line" | awk '{print $1}')
 n_samples=$(echo "$line" | awk '{print $2}')
 n_dims_1=$(echo "$line" | awk '{print $3}')
 sim_name=$(echo "$line" | awk '{print $4}')
 
 # Submit Python job with parameters
+echo $PYTHON_SCRIPT
+# echo "Submitting Python job with parameters: $seed $n_samples $n_dims_1 $sim_name"
+# echo "Command: $path/python $PYTHON_SCRIPT $seed $n_samples $n_dims_1 $sim_name $ROOT_DIR"
 $path/python "$PYTHON_SCRIPT" "$seed" "$n_samples" "$n_dims_1" "$sim_name" "$ROOT_DIR"
 
 # TO SUBMIT THIS:

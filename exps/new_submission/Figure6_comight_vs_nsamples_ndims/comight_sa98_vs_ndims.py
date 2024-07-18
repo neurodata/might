@@ -11,8 +11,10 @@ from joblib import Parallel, delayed
 from sklearn.metrics import roc_curve
 from sklearn.model_selection import StratifiedShuffleSplit
 from sktree import HonestForestClassifier
-from sktree.datasets import make_trunk_classification, make_trunk_mixture_classification
-from sktree.stats import PermutationHonestForestClassifier, build_hyppo_oob_forest
+from sktree.datasets import (make_trunk_classification,
+                             make_trunk_mixture_classification)
+from sktree.stats import (PermutationHonestForestClassifier,
+                          build_hyppo_oob_forest)
 from sktree.tree import MultiViewDecisionTreeClassifier
 
 seed = 12345
@@ -420,9 +422,13 @@ def _run_simulation(
         class_1_idx = np.arange(4096 // 2, 4096)
 
         # vstack first class and second class?
-        X = np.vstack((X[class_0_idx[:n_samples//2], :], X[class_1_idx[:n_samples//2], :]))
-        y = np.concatenate((y[class_0_idx[:n_samples//2]], y[class_1_idx[:n_samples//2]]))
-        assert np.sum(y) == n_samples // 2, f'{np.sum(y)}, {n_samples // 2}'
+        X = np.vstack(
+            (X[class_0_idx[: n_samples // 2], :], X[class_1_idx[: n_samples // 2], :])
+        )
+        y = np.concatenate(
+            (y[class_0_idx[: n_samples // 2]], y[class_1_idx[: n_samples // 2]])
+        )
+        assert np.sum(y) == n_samples // 2, f"{np.sum(y)}, {n_samples // 2}"
     if n_dims_1 < n_dims_1_:
         view_one = X[:, :n_dims_1]
         view_two = X[:, n_dims_1_:]
@@ -513,8 +519,8 @@ if __name__ == "__main__":
     # root_dir = Path("/data/adam/")
 
     SIMULATIONS_NAMES = [
-        'mean_shiftv4',
-        'multi_modalv2',
+        "mean_shiftv4",
+        "multi_modalv2",
         "multi_equal",
     ]
     model_name = "comight"

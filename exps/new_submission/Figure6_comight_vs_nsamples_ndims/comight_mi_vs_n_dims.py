@@ -9,8 +9,10 @@ import numpy as np
 from joblib import Parallel, delayed
 from sklearn.model_selection import StratifiedShuffleSplit
 from sktree import HonestForestClassifier
-from sktree.datasets import make_trunk_classification, make_trunk_mixture_classification
-from sktree.stats import PermutationHonestForestClassifier, build_hyppo_oob_forest
+from sktree.datasets import (make_trunk_classification,
+                             make_trunk_mixture_classification)
+from sktree.stats import (PermutationHonestForestClassifier,
+                          build_hyppo_oob_forest)
 from sktree.stats.utils import _mutual_information
 from sktree.tree import MultiViewDecisionTreeClassifier
 
@@ -166,7 +168,7 @@ if __name__ == "__main__":
         "multi_equal",
     ]
 
-    overwrite = False
+    overwrite = True
     n_repeats = 100
     n_jobs = -2
     n_samples = 512

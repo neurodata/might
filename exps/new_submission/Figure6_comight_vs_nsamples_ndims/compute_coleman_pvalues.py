@@ -1,23 +1,18 @@
 import cProfile
-from time import time
+from collections import defaultdict
+from pathlib import Path
 from pstats import Stats
+from time import time
+from typing import Optional, Tuple
+
 import numpy as np
 import pandas as pd
-from collections import defaultdict
-from typing import Optional, Tuple
-from pathlib import Path
-import numpy as np
-from numpy.testing import assert_array_equal
 from joblib import Parallel, delayed
+from numpy.testing import assert_array_equal
 from numpy.typing import ArrayLike
 from scipy.stats import entropy
-from sklearn.metrics import (
-    balanced_accuracy_score,
-    mean_absolute_error,
-    mean_squared_error,
-    roc_auc_score,
-    roc_curve,
-)
+from sklearn.metrics import (balanced_accuracy_score, mean_absolute_error,
+                             mean_squared_error, roc_auc_score, roc_curve)
 
 
 def _mutual_information(y_true: ArrayLike, y_pred_proba: ArrayLike) -> float:
@@ -332,7 +327,7 @@ def run_pvalue(
     idx,
     metric,
     n_permutations,
-    overwrite=False
+    overwrite=False,
 ):
     output_fname = (
         root_dir
@@ -344,7 +339,7 @@ def run_pvalue(
     output_fname.parent.mkdir(parents=True, exist_ok=True)
     if output_fname.exists() and not overwrite:
         return
-    
+
     norm_output_fname = (
         root_dir
         / "output"

@@ -57,6 +57,9 @@ def make_csv_over_nsamples(
                 # print(dict(loaded_data).keys())
                 cdcorr_pvalue = loaded_data["cdcorr_pvalue"]
                 results["cdcorr_pvalue"].append(cdcorr_pvalue)
+            elif param_name == "pvalue":
+                pvalue = loaded_data["pvalue"]
+                results["pvalue"].append(pvalue)
             elif param_name == "cmi":
                 mi = loaded_data["cmi"]
                 results["cmi"].append(mi)
@@ -224,44 +227,22 @@ if __name__ == "__main__":
         #     # "knn_viewtwo",
         #     #    'might_viewone', 'might_viewtwo'
         # ]:
-        param_name = 'cmi'
-        for model_name in [
-            'comight-cmi',
-            # 'ksg'
-        ]:
+        # param_name = 'cmi'
+        # for model_name in [
+        #     'comight-cmi',
+        #     # 'ksg'
+        # ]:
         # param_name = 'cdcorr_pvalue'
         # for model_name in ['cdcorr']:
-            # n_dims_1 = 512 - 6
-            # # save the dataframe to a csv file over n-samples
-            # df = make_csv_over_nsamples(
-            #     root_dir,
-            #     sim_name,
-            #     n_samples_list,
-            #     n_dims_1,
-            #     n_repeats,
-            #     param_name=param_name,
-            #     model_name=model_name,
-            # )
-            # df.to_csv(
-            #     output_dir
-            #     / "output"
-            #     / f"results_vs_nsamples_{sim_name}_{model_name}_{param_name}_{n_dims_1}_{n_repeats}.csv",
-            #     index=False,
-            # )
-
-            # Save the dataframe over varying ndims
-            n_dims_list = [2**x - 6 for x in range(3, 11)]
-            n_samples = 4096
-            n_samples = 1024
-            n_samples = 512
-            print(n_dims_list)
-
-            # save the dataframe to a csv file over n-dims
-            df = make_csv_over_ndims1(
+        param_name = "pvalue"
+        for model_name in ["coleman_pvalues"]:
+            n_dims_1 = 512 - 6
+            # save the dataframe to a csv file over n-samples
+            df = make_csv_over_nsamples(
                 root_dir,
                 sim_name,
-                n_dims_list,
-                n_samples,
+                n_samples_list,
+                n_dims_1,
                 n_repeats,
                 param_name=param_name,
                 model_name=model_name,
@@ -269,6 +250,30 @@ if __name__ == "__main__":
             df.to_csv(
                 output_dir
                 / "output"
-                / f"results_vs_ndims_{sim_name}_{model_name}_{param_name}_{n_dims_1}_{n_repeats}.csv",
+                / f"results_vs_nsamples_{sim_name}_{model_name}_{param_name}_{n_dims_1}_{n_repeats}.csv",
                 index=False,
             )
+
+            # Save the dataframe over varying ndims
+            # n_dims_list = [2**x - 6 for x in range(3, 11)]
+            # n_samples = 4096
+            # n_samples = 1024
+            # n_samples = 512
+            # print(n_dims_list)
+
+            # save the dataframe to a csv file over n-dims
+            # df = make_csv_over_ndims1(
+            #     root_dir,
+            #     sim_name,
+            #     n_dims_list,
+            #     n_samples,
+            #     n_repeats,
+            #     param_name=param_name,
+            #     model_name=model_name,
+            # )
+            # df.to_csv(
+            #     output_dir
+            #     / "output"
+            #     / f"results_vs_ndims_{sim_name}_{model_name}_{param_name}_{n_dims_1}_{n_repeats}.csv",
+            #     index=False,
+            # )

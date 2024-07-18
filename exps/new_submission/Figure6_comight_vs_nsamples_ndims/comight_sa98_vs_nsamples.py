@@ -126,9 +126,13 @@ def _run_simulation(
         class_1_idx = np.arange(4096 // 2, 4096)
 
         # vstack first class and second class?
-        X = np.vstack((X[class_0_idx[:n_samples//2], :], X[class_1_idx[:n_samples//2], :]))
-        y = np.concatenate((y[class_0_idx[:n_samples//2]], y[class_1_idx[:n_samples//2]]))
-        assert np.sum(y) == n_samples // 2, f'{np.sum(y)}, {n_samples // 2}'
+        X = np.vstack(
+            (X[class_0_idx[: n_samples // 2], :], X[class_1_idx[: n_samples // 2], :])
+        )
+        y = np.concatenate(
+            (y[class_0_idx[: n_samples // 2]], y[class_1_idx[: n_samples // 2]])
+        )
+        assert np.sum(y) == n_samples // 2, f"{np.sum(y)}, {n_samples // 2}"
     if n_dims_1 < n_dims_1_:
         view_one = X[:, :n_dims_1]
         view_two = X[:, n_dims_1_:]
@@ -190,7 +194,7 @@ def _run_simulation(
             target_specificity=target_specificity,
             threshold=threshold_at_specificity,
         )
-        print(f'Estimated: ', sas98)
+        print(f"Estimated: ", sas98)
 
         np.savez_compressed(
             output_fname,
@@ -237,7 +241,7 @@ if __name__ == "__main__":
     n_jobs = 24
 
     # Section: varying over sample-sizes
-    n_samples_list = [2**x for x in range(8, 11)]
+    n_samples_list = [2**x for x in range(7, 11)]
     n_dims_1 = 512 - 6
     print(n_samples_list)
     results = Parallel(n_jobs=n_jobs)(
