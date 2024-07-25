@@ -161,19 +161,20 @@ def make_csv_over_ndims1(
 
 
 if __name__ == "__main__":
-    root_dir = Path("/Volumes/Extreme Pro/cancer")
-    root_dir = Path("/data/hao/")
+    # root_dir = Path("/Volumes/Extreme Pro/cancer")
+    # root_dir = Path("/data/hao/")
+    root_dir = Path("/Users/spanda/Documents/comight")
     SIMULATIONS_NAMES = [
-        "mean_shiftv2",
+        "mean_shiftv4",
         "multi_equal",
-        # "multi_modal-22"
+        "multi_modalv2"
     ]
 
     model_names = [
-        # "comight-cmi",
+        "comight",
         # "comight-cmi-with-max09",
-        "might_viewone",
-        "might_viewtwo",
+        # "might_viewone",
+        # "might_viewtwo",
         # "might_viewoneandtwo",
         # "knn",
         # "knn_viewone",
@@ -181,7 +182,7 @@ if __name__ == "__main__":
         # 'comight-cmi',
         # 'ksg',
     ]
-    param_name = "cmi"
+    param_name = "sas98"
 
     n_samples_list = [2**x for x in range(8, 13)]
     n_dims_1 = 4090
