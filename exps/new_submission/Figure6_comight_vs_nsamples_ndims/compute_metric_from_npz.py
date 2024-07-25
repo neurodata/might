@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 from numpy.testing import assert_array_equal
 from sklearn.metrics import roc_curve
-from treeple.stats.utils import (METRIC_FUNCTIONS, POSITIVE_METRICS,
+from sktree.stats.utils import (METRIC_FUNCTIONS, POSITIVE_METRICS,
                                  _compute_null_distribution_coleman,
                                  _mutual_information)
 
@@ -158,25 +158,25 @@ def recompute_metric_n_samples(
         for n_samples in n_samples_list:
             comight_fname = (
                 root_dir
-                / "output"
-                / "comight"
+                # / "output"
+                # / "comight"
                 / sim_name
                 / f"{sim_name}_{n_samples}_{n_dims_1}_{n_dims_2}_{idx}.npz"
             )
-            comight_perm_fname = (
-                root_dir
-                / "output"
-                / "comight-perm"
-                / sim_name
-                / f"{sim_name}_{n_samples}_{n_dims_1}_{n_dims_2}_{idx}.npz"
-            )
+            # comight_perm_fname = (
+            #     root_dir
+            #     / "output"
+            #     / "comight-perm"
+            #     / sim_name
+            #     / f"{sim_name}_{n_samples}_{n_dims_1}_{n_dims_2}_{idx}.npz"
+            # )
             comight_data = np.load(comight_fname)
-            comight_perm_data = np.load(comight_perm_fname)
+            # comight_perm_data = np.load(comight_perm_fname)
 
             obs_posteriors = comight_data["posterior_arr"]
             obs_y = comight_data["y"]
-            perm_posteriors = comight_perm_data["posterior_arr"]
-            perm_y = comight_perm_data["y"]
+            # perm_posteriors = comight_perm_data["posterior_arr"]
+            # perm_y = comight_perm_data["y"]
 
             # mutual information for both
             y_pred_proba = np.nanmean(obs_posteriors, axis=0)
@@ -433,9 +433,10 @@ def recompute_metric_n_dims(
 
 
 if __name__ == "__main__":
-    root_dir = Path("/Volumes/Extreme Pro/cancer")
+    # root_dir = Path("/Volumes/Extreme Pro/cancer")
     # root_dir = Path('/home/hao/')
     # output_dir = Path('/data/adam/')
+    root_dir = Path("/Users/spanda/Documents/comight")
     output_dir = root_dir
 
     sim_names = ["mean_shiftv4", "multi_modalv2", "multi_equal"]
@@ -460,12 +461,12 @@ if __name__ == "__main__":
             overwrite=True,
         )
 
-        recompute_metric_n_dims(
-            root_dir,
-            sim_name,
-            n_samples,
-            n_dims_2,
-            n_repeats,
-            n_jobs=n_jobs,
-            overwrite=True,
-        )
+        # recompute_metric_n_dims(
+        #     root_dir,
+        #     sim_name,
+        #     n_samples,
+        #     n_dims_2,
+        #     n_repeats,
+        #     n_jobs=n_jobs,
+        #     overwrite=True,
+        # )
