@@ -38,3 +38,7 @@ Then one can submit PBS jobs for the following scripts, using the `pbs_submissio
 - `comight-perm_sa98_cluster.py`
 
 Note: you will have to set the PBS parameters based on the cluster specifications, and the file paths in the shell script.
+
+# Converting Saved NPZ files to CSV
+
+`compute_metric_from_npz.py`

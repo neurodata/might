@@ -450,15 +450,15 @@ if __name__ == "__main__":
     n_jobs = -1
 
     for sim_name in sim_names:
-        # recompute_metric_n_samples(
-        #     root_dir,
-        #     sim_name,
-        #     n_dims_1,
-        #     n_dims_2,
-        #     n_repeats,
-        #     n_jobs=n_jobs,
-        #     overwrite=True,
-        # )
+        recompute_metric_n_samples(
+            root_dir,
+            sim_name,
+            n_dims_1,
+            n_dims_2,
+            n_repeats,
+            n_jobs=n_jobs,
+            overwrite=True,
+        )
 
         recompute_metric_n_dims(
             root_dir,
