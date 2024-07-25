@@ -164,11 +164,7 @@ if __name__ == "__main__":
     # root_dir = Path("/Volumes/Extreme Pro/cancer")
     # root_dir = Path("/data/hao/")
     root_dir = Path("/Users/spanda/Documents/comight")
-    SIMULATIONS_NAMES = [
-        "mean_shiftv4",
-        "multi_equal",
-        "multi_modalv2"
-    ]
+    SIMULATIONS_NAMES = ["mean_shiftv4", "multi_equal", "multi_modalv2"]
 
     model_names = [
         "comight",

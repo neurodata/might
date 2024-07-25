@@ -1,3 +1,8 @@
+# Used for generating csv summary files for CoMIGHT power
+# from npz files.
+#
+# For other metrics, use `make_csv_summary_from_npz.py`.
+
 from collections import defaultdict
 from pathlib import Path
 
@@ -5,7 +10,7 @@ import numpy as np
 import pandas as pd
 from numpy.testing import assert_array_equal
 from sklearn.metrics import roc_curve
-from sktree.stats.utils import (METRIC_FUNCTIONS, POSITIVE_METRICS,
+from treeple.stats.utils import (METRIC_FUNCTIONS, POSITIVE_METRICS,
                                  _compute_null_distribution_coleman,
                                  _mutual_information)
 
@@ -137,6 +142,10 @@ def _estimate_pvalue(
 def recompute_metric_n_samples(
     root_dir, sim_name, n_dims_1, n_dims_2, n_repeats, n_jobs=None, overwrite=False
 ):
+    """Implement comight-power and comightperm-power over n_samples.
+
+    Each will have a separate csv file.
+    """
     output_model_name = "comight-power"
     n_samples_list = [2**x for x in range(8, 11)]
 
@@ -158,57 +167,33 @@ def recompute_metric_n_samples(
         for n_samples in n_samples_list:
             comight_fname = (
                 root_dir
-                # / "output"
-                # / "comight"
+                / "output"
+                / "comight"
                 / sim_name
                 / f"{sim_name}_{n_samples}_{n_dims_1}_{n_dims_2}_{idx}.npz"
             )
-            # comight_perm_fname = (
-            #     root_dir
-            #     / "output"
-            #     / "comight-perm"
-            #     / sim_name
-            #     / f"{sim_name}_{n_samples}_{n_dims_1}_{n_dims_2}_{idx}.npz"
-            # )
+            comight_perm_fname = (
+                root_dir
+                / "output"
+                / "comight-perm"
+                / sim_name
+                / f"{sim_name}_{n_samples}_{n_dims_1}_{n_dims_2}_{idx}.npz"
+            )
             comight_data = np.load(comight_fname)
-            # comight_perm_data = np.load(comight_perm_fname)
+            comight_perm_data = np.load(comight_perm_fname)
 
             obs_posteriors = comight_data["posterior_arr"]
             obs_y = comight_data["y"]
-            # perm_posteriors = comight_perm_data["posterior_arr"]
-            # perm_y = comight_perm_data["y"]
+            perm_posteriors = comight_perm_data["posterior_arr"]
+            perm_y = comight_perm_data["y"]
 
             # mutual information for both
             y_pred_proba = np.nanmean(obs_posteriors, axis=0)
             I_XZ_Y = _mutual_information(obs_y, y_pred_proba)
-
             y_pred_proba = np.nanmean(perm_posteriors, axis=0)
             I_Z_Y = _mutual_information(perm_y, y_pred_proba)
 
             assert_array_equal(obs_y, perm_y)
-            # pvalue_sas98 = _estimate_pvalue(
-            #     obs_y,
-            #     obs_posteriors,
-            #     perm_posteriors,
-            #     's@98',
-            #     10_000,
-            #     idx,
-            #     n_jobs,
-            # )
-
-            # pvalue_cmi = _estimate_pvalue(
-            #     obs_y,
-            #     obs_posteriors,
-            #     perm_posteriors,
-            #     'mi',
-            #     10_000,
-            #     idx,
-            #     n_jobs,
-            # )
-
-            # result["sas98_pvalue"].append(pvalue_sas98)
-            # result["cmi_pvalue"].append(pvalue_cmi)
-
             # compute sas98 diffs
             sas98_obs = _estimate_sas98(obs_y, obs_posteriors)
             sas98_perm = _estimate_sas98(perm_y, perm_posteriors)
@@ -335,28 +320,6 @@ def recompute_metric_n_dims(
             I_Z_Y = _mutual_information(perm_y, y_pred_proba)
 
             assert_array_equal(obs_y, perm_y)
-            # pvalue_sas98 = _estimate_pvalue(
-            #     obs_y,
-            #     obs_posteriors,
-            #     perm_posteriors,
-            #     's@98',
-            #     10_000,
-            #     idx,
-            #     n_jobs,
-            # )
-
-            # pvalue_cmi = _estimate_pvalue(
-            #     obs_y,
-            #     obs_posteriors,
-            #     perm_posteriors,
-            #     'mi',
-            #     10_000,
-            #     idx,
-            #     n_jobs,
-            # )
-
-            # result["sas98_pvalue"].append(pvalue_sas98)
-            # result["cmi_pvalue"].append(pvalue_cmi)
 
             # compute sas98 diffs
             sas98_obs = _estimate_sas98(obs_y, obs_posteriors)
@@ -461,12 +424,12 @@ if __name__ == "__main__":
             overwrite=True,
         )
 
-        # recompute_metric_n_dims(
-        #     root_dir,
-        #     sim_name,
-        #     n_samples,
-        #     n_dims_2,
-        #     n_repeats,
-        #     n_jobs=n_jobs,
-        #     overwrite=True,
-        # )
+        recompute_metric_n_dims(
+            root_dir,
+            sim_name,
+            n_samples,
+            n_dims_2,
+            n_repeats,
+            n_jobs=n_jobs,
+            overwrite=True,
+        )

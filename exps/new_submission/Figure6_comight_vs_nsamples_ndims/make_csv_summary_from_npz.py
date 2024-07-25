@@ -1,3 +1,8 @@
+# Used for generating csv summary files for all model metrics
+# from npz files.
+#
+# For specifically CoMIGHT power, use `make_csv_summary_for_comightpower_from_npz.py`.
+
 from collections import defaultdict
 from pathlib import Path
 
@@ -200,28 +205,30 @@ def make_csv_over_ndims1(
 
 
 if __name__ == "__main__":
-    root_dir = Path("/Volumes/Extreme Pro/cancer")
+    root_dir = Path("/Volumes/Extreme Pro/cancer/temp/")
     # root_dir = Path('/home/hao/')
     # output_dir = Path('/data/adam/')
     output_dir = root_dir
 
-    # param_name = 'cdcorr_pvalue'
-    # figname = "cmi"  # TODO: change
-    # figname = "sas98"  # TODO: change
     n_repeats = 100
 
     n_samples_list = [2**x for x in range(8, 11)]
     n_dims_list = [2**x - 6 for x in range(3, 11)]
-
     # n_dims_1 = 1024 - 6
     n_dims_1 = 512 - 6
     # n_dims_1 = 4096 - 6
     print(n_samples_list)
-    param_name = "sas98"
+
+    # Choose one of the parametr names
+    # param_name = "sas98"
+    # param_name = "cdcorr_pvalue"
+    param_name = "cmi"
+    # param_name = "pvalue"
+
     if param_name == "sas98":
         models = [
             "comight",
-            # 'comight-cmi',
+            "comight-perm",
             # "knn",
             # "knn_viewone",
             # "knn_viewtwo",
@@ -230,12 +237,15 @@ if __name__ == "__main__":
     elif param_name == "cmi":
         models = [
             "comight-cmi",
+            "ksg",
         ]
+    elif param_name == "cdcorr_pvalue":
+        models = ["cdcorr"]
+    # for model_name in ["coleman_pvalues"]:
 
     sim_names = ["mean_shiftv4", "multi_modalv2", "multi_equal"]
     for sim_name in sim_names:
-        param_name = "pvalue"
-        for model_name in ["coleman_pvalues"]:
+        for model_name in models:
             n_dims_1 = 512 - 6
             # save the dataframe to a csv file over n-samples
             df = make_csv_over_nsamples(
@@ -255,25 +265,24 @@ if __name__ == "__main__":
             )
 
             # Save the dataframe over varying ndims
-            # n_dims_list = [2**x - 6 for x in range(3, 11)]
-            # n_samples = 4096
+            n_samples = 4096
             # n_samples = 1024
-            # n_samples = 512
-            # print(n_dims_list)
+            n_samples = 512
+            print(n_dims_list)
 
             # save the dataframe to a csv file over n-dims
-            # df = make_csv_over_ndims1(
-            #     root_dir,
-            #     sim_name,
-            #     n_dims_list,
-            #     n_samples,
-            #     n_repeats,
-            #     param_name=param_name,
-            #     model_name=model_name,
-            # )
-            # df.to_csv(
-            #     output_dir
-            #     / "output"
-            #     / f"results_vs_ndims_{sim_name}_{model_name}_{param_name}_{n_dims_1}_{n_repeats}.csv",
-            #     index=False,
-            # )
+            df = make_csv_over_ndims1(
+                root_dir,
+                sim_name,
+                n_dims_list,
+                n_samples,
+                n_repeats,
+                param_name=param_name,
+                model_name=model_name,
+            )
+            df.to_csv(
+                output_dir
+                / "output"
+                / f"results_vs_ndims_{sim_name}_{model_name}_{param_name}_{n_dims_1}_{n_repeats}.csv",
+                index=False,
+            )

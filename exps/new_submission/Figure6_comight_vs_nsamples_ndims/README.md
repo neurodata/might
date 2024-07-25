@@ -41,4 +41,6 @@ Note: you will have to set the PBS parameters based on the cluster specification
 
 # Converting Saved NPZ files to CSV
 
-`compute_metric_from_npz.py`
+`make_csv_summary_for_comightpower_from_npz.py` and `make_csv_summary_from_npz.py` are the two main files
+that will convert a set of npz files into a csv file. The first one is used solely for computing the
+power curves (with ChenChen method) for CoMIGHT. The second will will be used for all other metrics, including the power curve for CDCorr.
