@@ -1,8 +1,3 @@
-"""Generating data for CoMIGHT simulations with S@S98."""
-
-# A : Control ~ N(0, 1), Cancer ~ N(1, 1)
-# B:  Control ~ N(0, 1), Cancer ~ 0.75*N(1, 1) + 0.25*N(5, 1)
-# C:  Control~ 0.75*N(1, 1) + 0.25*N(5, 1), Cancer ~ 0.75*N(1, 1) + 0.25*N(5, 1)
 from pathlib import Path
 
 import numpy as np
@@ -237,7 +232,12 @@ def _run_simulation(
         # train model in...
         cv = StratifiedKFold(n_splits=5, shuffle=True)
         stats = []
-        y_pred_probas = np.full((5, n_samples), np.nan, dtype=np.float32)
+
+        # y_pred_probas = np.full((5, n_samples), np.nan, dtype=np.float32)
+
+        # store the predictions as a full array to calculate the S@98
+        # This is considered "soft voting".
+        y_pred_probas = np.full((n_samples, 2), np.nan, dtype=np.float32)
         y_test_list = np.full((5, n_samples), np.nan, dtype=np.float32)
 
         for idx, (train_ix, test_ix) in enumerate(cv.split(X, y)):
@@ -245,15 +245,20 @@ def _run_simulation(
             y_train, y_test = y[train_ix], y[test_ix]
             model.fit(X_train, y_train)
             observe_proba = model.predict_proba(X_test)
+
             # calculate S@98 or whatever the stat is
-            y_pred_probas[idx, test_ix] = observe_proba[:, -1]
+            # y_pred_probas[idx, test_ix] = observe_proba[:, -1]
+            y_pred_probas[test_ix, :] = observe_proba
             y_test_list[idx, test_ix] = y_test
-            stat = Calculate_SA98(y_test, observe_proba, max_fpr=0.02)
-            stats.append(stat)
+            # stat = Calculate_SA98(y_test, observe_proba, max_fpr=0.02)
+            # stats.append(stat)
 
-        # average the stats
-        stat_avg = np.mean(stats)
+        # calculate the S@98 for the whole dataset - soft voting
+        stat_avg = Calculate_SA98(y, y_pred_probas, max_fpr=0.02)
 
+        # average the stats - hard voting
+        # stat_avg = np.mean(stats)
+        # print(stat_avg)
         np.savez_compressed(
             output_fname,
             idx=idx,
@@ -262,7 +267,6 @@ def _run_simulation(
             n_dims_2=n_dims_2_,
             sas98=stat_avg,
             sim_type=sim_name,
-            # sa98_list=stats,
             y_test_list=y_test_list,
             y_pred_probas=y_pred_probas,
         )
@@ -273,15 +277,15 @@ MODEL_NAMES = {
         "n_estimators": 1200,
         "max_features": 0.3,
     },
-    # "knn": {
-    #     "n_neighbors": 5,
-    # },
+    "knn": {
+        "n_neighbors": 5,
+    },
     "svm": {
         "probability": True,
     },
     "lr": {
         "max_iter": 1000,
-        "penalty": "l1",
+        "penalty": "l2",
         "solver": "liblinear",
     },
 }
@@ -296,30 +300,50 @@ if __name__ == "__main__":
         "multi_equal",
     ]
 
-    overwrite = False
+    overwrite = True
     n_repeats = 100
-    n_jobs = -2
+    n_jobs = 1
 
     # Section: varying kNN over sample-sizes
-    # n_dims_1 = 4090
-    # n_dims_1 = 512 - 6
-    # n_samples_list = [2**x for x in range(8, 11)]
-    # print(n_samples_list)
-    # model_name = 'knn'
-    # results = Parallel(n_jobs=n_jobs)(
-    #     delayed(_run_simulation)(
-    #         n_samples,
-    #         n_dims_1,
-    #         idx,
-    #         root_dir,
-    #         sim_name,
-    #         model_name,
-    #         overwrite=False,
-    #     )
-    #     for sim_name in SIMULATIONS_NAMES
-    #     for n_samples in n_samples_list
-    #     for idx in range(n_repeats)
-    # )
+    n_dims_1 = 4090
+    n_dims_1 = 512 - 6
+    n_samples_list = [2**x for x in range(8, 11)]
+    print(n_samples_list)
+    for model_name in ["knn", "rf", "svm", "lr"]:
+        results = Parallel(n_jobs=n_jobs)(
+            delayed(_run_simulation)(
+                n_samples,
+                n_dims_1,
+                idx,
+                root_dir,
+                sim_name,
+                model_name,
+                overwrite=False,
+            )
+            for sim_name in SIMULATIONS_NAMES
+            for n_samples in n_samples_list
+            for idx in range(n_repeats)
+        )
+
+    # Section: varying kNN over dimensions of the both views
+    n_dims_list = [2**i - 6 for i in range(3, 11)]
+    n_samples = 512
+    print(n_dims_list)
+    for model_name in ["knn", "rf", "svm", "lr"]:
+        results = Parallel(n_jobs=n_jobs)(
+            delayed(_run_simulation)(
+                n_samples,
+                n_dims_1,
+                idx,
+                root_dir,
+                sim_name,
+                model_name,
+                overwrite=False,
+            )
+            for sim_name in SIMULATIONS_NAMES
+            for n_dims_1 in n_dims_list
+            for idx in range(n_repeats)
+        )
 
     # # Section: varying kNN-viewone over sample-sizes
     # model_name = "knn_viewone"
@@ -364,26 +388,6 @@ if __name__ == "__main__":
     #     for n_samples in n_samples_list
     #     for idx in range(n_repeats)
     # )
-
-    # Section: varying kNN over dimensions of the both views
-    model_name = "knn"
-    n_dims_list = [2**i - 6 for i in range(3, 11)]
-    n_samples = 512
-    print(n_dims_list)
-    results = Parallel(n_jobs=n_jobs)(
-        delayed(_run_simulation)(
-            n_samples,
-            n_dims_1,
-            idx,
-            root_dir,
-            sim_name,
-            model_name,
-            overwrite=False,
-        )
-        for sim_name in SIMULATIONS_NAMES
-        for n_dims_1 in n_dims_list
-        for idx in range(n_repeats)
-    )
 
     # Section: varying kNN-viewone over dimensions of the first view
     # model_name = "knn_viewone"

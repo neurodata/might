@@ -44,3 +44,18 @@ Note: you will have to set the PBS parameters based on the cluster specification
 `make_csv_summary_for_comightpower_from_npz.py` and `make_csv_summary_from_npz.py` are the two main files
 that will convert a set of npz files into a csv file. The first one is used solely for computing the
 power curves (with ChenChen method) for CoMIGHT. The second will will be used for all other metrics, including the power curve for CDCorr.
+
+# Comparison Algorithms
+
+We will compare CoMIGHT against the following algorithms: Logistic Regression, KNN, SVM and Random Forest.
+
+- `comparator_sa98_vs_nsamples_ndims.py` will compute S@98 for varying n_samples and n_dims
+- `comparator_mi_vs_nsamples_ndims.py` will compute CMI for varying n_samples and n_dims
+
+For CMI, we will also compare against the KSG algorithm, which is a variant on kNN that estimates the MI.
+
+- `ksg_mi_vs_nsamples_ndims.py`
+
+For conditional independence testing, we will compare against the conditional Dcorr algorithm.
+
+- `cond_dcorr_power_vs_nsamples_ndims.py` to run conditional Dcorr on a cluster that will compute the power curve over varying n_samples and n_dims for conditional independence testing.
