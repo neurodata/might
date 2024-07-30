@@ -181,7 +181,7 @@ MODEL_NAMES = {
     },
     "lr": {
         "max_iter": 1000,
-        "penalty": "l2",
+        "penalty": "l1",
         "solver": "liblinear",
     },
 }

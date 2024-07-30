@@ -278,14 +278,16 @@ MODEL_NAMES = {
         "max_features": 0.3,
     },
     "knn": {
-        "n_neighbors": 5,
+        # XXX: above, we use sqrt of the total number of samples to allow
+        # scaling wrt the number of samples
+        # "n_neighbors": 5,
     },
     "svm": {
         "probability": True,
     },
     "lr": {
         "max_iter": 1000,
-        "penalty": "l2",
+        "penalty": "l1",
         "solver": "liblinear",
     },
 }
