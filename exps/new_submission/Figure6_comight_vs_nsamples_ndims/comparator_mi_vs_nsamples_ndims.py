@@ -132,11 +132,11 @@ def _run_simulation(
             perm_posterior_arr[test_ix, :] = perm_proba
 
         # mutual information for both
-        y_pred_proba = np.nanmean(posterior_arr, axis=0)
-        I_XZ_Y = _mutual_information(y, y_pred_proba)
+        # y_pred_proba = np.nanmean(posterior_arr, axis=0)
+        I_XZ_Y = _mutual_information(y, posterior_arr)
 
-        y_pred_proba = np.nanmean(perm_posterior_arr, axis=0)
-        I_Z_Y = _mutual_information(y, y_pred_proba)
+        # y_pred_proba = np.nanmean(perm_posterior_arr, axis=0)
+        I_Z_Y = _mutual_information(y, perm_posterior_arr)
 
         if np.isnan(I_XZ_Y) or np.isnan(I_Z_Y):
             raise RuntimeError(f"NaN values for {output_fname}")
