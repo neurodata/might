@@ -8,8 +8,24 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
+from sklearn.metrics import roc_auc_score, roc_curve
 
 n_dims_2_ = 6
+
+
+def Calculate_SA98(y_true, y_pred_proba, max_fpr=0.02) -> float:
+    if y_true.squeeze().ndim != 1:
+        raise ValueError(f"y_true must be 1d, not {y_true.shape}")
+    if 0 in y_true or -1 in y_true:
+        fpr, tpr, thresholds = roc_curve(
+            y_true, y_pred_proba[:, 1], pos_label=1, drop_intermediate=False
+        )
+    else:
+        fpr, tpr, thresholds = roc_curve(
+            y_true, y_pred_proba[:, 1], pos_label=2, drop_intermediate=False
+        )
+    s98 = max([tpr for (fpr, tpr) in zip(fpr, tpr) if fpr <= max_fpr])
+    return s98
 
 
 def make_csv_over_nsamples(
@@ -55,9 +71,40 @@ def make_csv_over_nsamples(
             results["sim_type"].append(sim_name)
             results["model"].append(model_name)
             if param_name == "sas98":
-                sas98 = loaded_data["sas98"]
-                results["sas98"].append(sas98)
+                # sas98 = loaded_data["sas98"]
+                # results["sas98"].append(sas98)
+                y_score = loaded_data["posterior_arr"]
+                y_true = loaded_data["y"]
+                assert len(y_score) == n_samples
+                if "might" in model_name:
+                    n_trees, n_samples, n_classes = y_score.shape
+                    y_score_avg = np.nanmean(y_score, axis=0)
+                    y_score_binary = y_score_avg  # [:, 1]
 
+                    nan_rows = np.isnan(y_score_binary)
+                    y_score_binary = y_score_binary[~nan_rows]
+                    y_true = y_true[~nan_rows]
+                else:
+                    #     y_score_binary = y_score[:, -1]
+                    y_score_binary = y_score
+                s98 = Calculate_SA98(y_true, y_score_binary, max_fpr=0.02)
+                results["sas98"].append(s98)
+            elif param_name == "auc":
+                y_score = loaded_data["posterior_arr"]
+                y_true = loaded_data["y"]
+                assert len(y_score) == n_samples
+                if "might" in model_name:
+                    n_trees, n_samples, n_classes = y_score.shape
+                    y_score_avg = np.nanmean(y_score, axis=0)
+                    y_score_binary = y_score_avg[:, 1]
+
+                    nan_rows = np.isnan(y_score_binary)
+                    y_score_binary = y_score_binary[~nan_rows]
+                    y_true = y_true[~nan_rows]
+                else:
+                    y_score_binary = y_score[:, -1]
+                auc = roc_auc_score(y_true, y_score_binary)
+                results["auc"].append(auc)
             elif param_name == "cdcorr_pvalue":
                 # print(dict(loaded_data).keys())
                 cdcorr_pvalue = loaded_data["cdcorr_pvalue"]
@@ -75,7 +122,7 @@ def make_csv_over_nsamples(
                         I_Z_Y = loaded_data["I_Z_Y"]
                         results["I_XZ_Y"].append(I_XZ_Y)
                         results["I_Z_Y"].append(I_Z_Y)
-                    except Exception as e:
+                    except Exception:
                         try:
                             I_XZ_Y = loaded_data["I_X1X2_Y"]
                             I_Z_Y = loaded_data["I_X1_Y"]
@@ -154,12 +201,44 @@ def make_csv_over_ndims1(
             results["model"].append(model_name)
 
             if param_name == "sas98":
-                sas98 = loaded_data["sas98"]
-                results["sas98"].append(sas98)
+                # sas98 = loaded_data["sas98"]
+                # results["sas98"].append(sas98)
+                y_score = loaded_data["posterior_arr"]
+                y_true = loaded_data["y"]
+                assert len(y_score) == n_samples
+                if "might" in model_name:
+                    n_trees, n_samples, n_classes = y_score.shape
+                    y_score_avg = np.nanmean(y_score, axis=0)
+                    y_score_binary = y_score_avg  # [:, 1]
+
+                    nan_rows = np.isnan(y_score_binary)
+                    y_score_binary = y_score_binary[~nan_rows]
+                    y_true = y_true[~nan_rows]
+                else:
+                    #     y_score_binary = y_score[:, -1]
+                    y_score_binary = y_score
+                s98 = Calculate_SA98(y_true, y_score_binary, max_fpr=0.02)
+                results["sas98"].append(s98)
             elif param_name == "cdcorr_pvalue":
                 # print(dict(loaded_data).keys())
                 cdcorr_pvalue = loaded_data["cdcorr_pvalue"]
                 results["cdcorr_pvalue"].append(cdcorr_pvalue)
+            elif param_name == "auc":
+                y_score = loaded_data["posterior_arr"]
+                y_true = loaded_data["y"]
+                assert len(y_score) == n_samples
+                if "might" in model_name:
+                    n_trees, n_samples, n_classes = y_score.shape
+                    y_score_avg = np.nanmean(y_score, axis=0)
+                    y_score_binary = y_score_avg[:, 1]
+
+                    nan_rows = np.isnan(y_score_binary)
+                    y_score_binary = y_score_binary[~nan_rows]
+                    y_true = y_true[~nan_rows]
+                else:
+                    y_score_binary = y_score[:, -1]
+                auc = roc_auc_score(y_true, y_score_binary)
+                results["auc"].append(auc)
             elif param_name == "cmi":
                 mi = loaded_data["cmi"]
                 results["cmi"].append(mi)
@@ -170,7 +249,7 @@ def make_csv_over_ndims1(
                         I_Z_Y = loaded_data["I_Z_Y"]
                         results["I_XZ_Y"].append(I_XZ_Y)
                         results["I_Z_Y"].append(I_Z_Y)
-                    except Exception as e:
+                    except Exception:
                         try:
                             I_XZ_Y = loaded_data["I_X1X2_Y"]
                             I_Z_Y = loaded_data["I_X1_Y"]
@@ -205,10 +284,10 @@ def make_csv_over_ndims1(
 
 
 if __name__ == "__main__":
-    root_dir = Path("/Volumes/Extreme Pro/cancer/temp/")
+    root_dir = Path("/Volumes/Extreme Pro/cancer/")
     # root_dir = Path('/home/hao/')
     # output_dir = Path('/data/adam/')
-    output_dir = root_dir
+    output_dir = Path("/Volumes/Extreme Pro/cancer/temp/")
 
     n_repeats = 100
 
@@ -220,19 +299,30 @@ if __name__ == "__main__":
     print(n_samples_list)
 
     # Choose one of the parametr names
-    # param_name = "sas98"
     # param_name = "cdcorr_pvalue"
     param_name = "cmi"
+    param_name = "sas98"
+    # param_name = 'auc'
     # param_name = "pvalue"
 
     if param_name == "sas98":
         models = [
-            "comight",
-            "comight-perm",
-            # "knn",
+            # "comight",
+            # "comight-perm",
+            "knn",
+            "rf",
+            "svm",
+            "lr",
             # "knn_viewone",
             # "knn_viewtwo",
             #    'might_viewone', 'might_viewtwo'
+        ]
+    elif param_name == "auc":
+        models = [
+            "knn",
+            "rf",
+            "svm",
+            "lr",
         ]
     elif param_name == "cmi":
         models = [

@@ -7,10 +7,7 @@ from pathlib import Path
 
 import numpy as np
 from joblib import Parallel, delayed
-from sklearn.model_selection import StratifiedShuffleSplit
 from treeple import HonestForestClassifier
-from treeple.datasets import (make_trunk_classification,
-                              make_trunk_mixture_classification)
 from treeple.stats import PermutationHonestForestClassifier, build_oob_forest
 from treeple.stats.utils import _mutual_information
 from treeple.tree import MultiViewDecisionTreeClassifier

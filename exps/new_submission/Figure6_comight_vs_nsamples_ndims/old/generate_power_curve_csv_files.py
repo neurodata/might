@@ -70,7 +70,7 @@ def make_csv_over_nsamples(
                         I_Z_Y = loaded_data["I_Z_Y"]
                         results["I_XZ_Y"].append(I_XZ_Y)
                         results["I_Z_Y"].append(I_Z_Y)
-                    except Exception as e:
+                    except Exception:
                         try:
                             I_XZ_Y = loaded_data["I_X1X2_Y"]
                             I_Z_Y = loaded_data["I_X1_Y"]
@@ -165,7 +165,7 @@ def make_csv_over_ndims1(
                         I_Z_Y = loaded_data["I_Z_Y"]
                         results["I_XZ_Y"].append(I_XZ_Y)
                         results["I_Z_Y"].append(I_Z_Y)
-                    except Exception as e:
+                    except Exception:
                         try:
                             I_XZ_Y = loaded_data["I_X1X2_Y"]
                             I_Z_Y = loaded_data["I_X1_Y"]

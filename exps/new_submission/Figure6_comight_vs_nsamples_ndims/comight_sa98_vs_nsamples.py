@@ -3,13 +3,11 @@
 # A : Control ~ N(0, 1), Cancer ~ N(1, 1)
 # B:  Control ~ N(0, 1), Cancer ~ 0.75*N(1, 1) + 0.25*N(5, 1)
 # C:  Control~ 0.75*N(1, 1) + 0.25*N(5, 1), Cancer ~ 0.75*N(1, 1) + 0.25*N(5, 1)
-from collections import defaultdict
 from pathlib import Path
 
 import numpy as np
 from joblib import Parallel, delayed
 from sklearn.metrics import roc_curve
-from sklearn.model_selection import StratifiedShuffleSplit
 from treeple import HonestForestClassifier
 from treeple.stats import build_oob_forest
 from treeple.tree import MultiViewDecisionTreeClassifier
@@ -194,7 +192,7 @@ def _run_simulation(
             target_specificity=target_specificity,
             threshold=threshold_at_specificity,
         )
-        print(f"Estimated: ", sas98)
+        print("Estimated: ", sas98)
 
         np.savez_compressed(
             output_fname,

@@ -1,10 +1,8 @@
 import os
 import sys
-from itertools import product
 
 import numpy as np
 from hyppo.conditional import ConditionalDcorr
-from joblib import Parallel, delayed
 from numpy import log
 from scipy.special import digamma
 from sklearn.model_selection import StratifiedShuffleSplit

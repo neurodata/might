@@ -1,12 +1,9 @@
 """Generating data for CoMIGHT simulations with S@S98."""
 import sys
-from collections import defaultdict
 from pathlib import Path
 
 import numpy as np
-from joblib import Parallel, delayed
 from sklearn.metrics import roc_curve
-from sklearn.model_selection import StratifiedShuffleSplit
 from treeple import HonestForestClassifier
 from treeple.stats import build_oob_forest
 from treeple.tree import MultiViewDecisionTreeClassifier

@@ -18,7 +18,7 @@
 ROOT_DIR="/data/home/ali39/output/"
 path=~/miniconda3/envs/ms/bin
 
-PYTHON_FILE="comight_sa98_cluster.py"
+PYTHON_FILE="comight_mi_cluster.py"
 
 # Path to the Python script that extracts parameters
 PYTHON_SCRIPT="~/might/exps/new_submission/Figure6_comight_vs_nsamples_ndims/$PYTHON_FILE"

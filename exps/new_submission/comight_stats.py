@@ -1,13 +1,6 @@
-from collections import defaultdict
-from pathlib import Path
-
 import numpy as np
-from joblib import Parallel, delayed
 from sklearn.metrics import roc_curve
-from sklearn.model_selection import StratifiedShuffleSplit
-from sktree import HonestForestClassifier
 from sktree.datasets import make_trunk_classification
-from sktree.stats import build_hyppo_oob_forest
 
 seed = 12345
 rng = np.random.default_rng(seed)

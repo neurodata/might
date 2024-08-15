@@ -234,7 +234,6 @@ def _run_simulation(
         stats = []
 
         # y_pred_probas = np.full((5, n_samples), np.nan, dtype=np.float32)
-
         # store the predictions as a full array to calculate the S@98
         # This is considered "soft voting".
         y_pred_probas = np.full((n_samples, 2), np.nan, dtype=np.float32)

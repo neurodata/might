@@ -1,12 +1,8 @@
-import cProfile
 from collections import defaultdict
 from pathlib import Path
-from pstats import Stats
-from time import time
 from typing import Optional, Tuple
 
 import numpy as np
-import pandas as pd
 from joblib import Parallel, delayed
 from numpy.testing import assert_array_equal
 from numpy.typing import ArrayLike
