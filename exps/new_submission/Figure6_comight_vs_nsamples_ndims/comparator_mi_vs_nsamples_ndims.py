@@ -198,7 +198,7 @@ if __name__ == "__main__":
 
     overwrite = True
     n_repeats = 100
-    n_jobs = 1
+    n_jobs = 4
 
     # Section: varying model over samples
     n_dims_1 = 4090
