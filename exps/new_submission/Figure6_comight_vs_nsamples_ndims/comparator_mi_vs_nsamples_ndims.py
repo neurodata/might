@@ -4,9 +4,10 @@ import numpy as np
 from joblib import Parallel, delayed
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
-from sklearn.model_selection import StratifiedKFold
+from sklearn.model_selection import StratifiedKFold, train_test_split
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.svm import SVC
+from sklearn.calibration import CalibratedClassifierCV
 from treeple.stats.utils import _mutual_information
 
 seed = 12345
@@ -113,23 +114,84 @@ def _run_simulation(
         posterior_arr = np.full((n_samples, 2), np.nan, dtype=np.float32)
         perm_posterior_arr = np.full((n_samples, 2), np.nan, dtype=np.float32)
 
+        result_pos_list = []
+        result_pos_list_perm = []
         for idx, (train_ix, test_ix) in enumerate(cv.split(X, y)):
             X_train, X_test = X[train_ix, :], X[test_ix, :]
             y_train, y_test = y[train_ix], y[test_ix]
 
-            est.fit(X_train, y_train)
-            observe_proba = est.predict_proba(X_test)
-            posterior_arr[test_ix, :] = observe_proba
+            ### Split Training Set into Fitting Set (40%) and Calibarating Set (40%)
+            train_idx = np.arange(X_train.shape[0])
+            fit_idx, cal_idx = train_test_split(
+                train_idx, test_size=0.5, random_state=idx, stratify=y_train
+            )
+            X_fit, X_cal, y_fit, y_cal = (
+                X_train[fit_idx],
+                X_train[cal_idx],
+                y_train[fit_idx],
+                y_train[cal_idx],
+            )
+            # print(X_fit.shape,X_cal.shape,X_val.shape)
 
-            # permute the second view
+            POS = np.zeros((len(y_test), 3))
+            POS[:, 0] = y_test
+            est.fit(X_fit, y_fit)
+            if X_cal.shape[0] <= 1000:
+                calibrated_model = CalibratedClassifierCV(
+                    est, cv="prefit", method="sigmoid"
+                )
+            else:
+                calibrated_model = CalibratedClassifierCV(
+                    est, cv="prefit", method="isotonic"
+                )
+            calibrated_model.fit(X_cal, y_cal)
+            posterior = calibrated_model.predict_proba(X_test)
+
+            POS[:, 1:] = posterior
+            result_pos_list.append(POS)
+
             X_train_perm = X_train.copy()
             X_train_perm[:, covariate_index] = rng.permutation(
                 X_train[:, covariate_index]
             )
-            perm_est.fit(X_train_perm, y_train)
-            perm_proba = perm_est.predict_proba(X_test)
+            X_fit_perm, X_cal_perm = X_train_perm[fit_idx], X_train_perm[cal_idx]
 
-            perm_posterior_arr[test_ix, :] = perm_proba
+            perm_POS = np.zeros((len(y_test), 3))
+            perm_POS[:, 0] = y_test
+            perm_est.fit(X_fit_perm, y_fit)
+            if X_cal.shape[0] <= 1000:
+                calibrated_model = CalibratedClassifierCV(
+                    perm_est, cv="prefit", method="sigmoid"
+                )
+            else:
+                calibrated_model = CalibratedClassifierCV(
+                    perm_est, cv="prefit", method="isotonic"
+                )
+            calibrated_model.fit(X_cal_perm, y_cal)
+            posterior = calibrated_model.predict_proba(X_test)
+            perm_POS[:, 1:] = posterior
+            result_pos_list_perm.append(perm_POS)
+            # est.fit(X_train, y_train)
+            # observe_proba = est.predict_proba(X_test)
+            # posterior_arr[test_ix, :] = observe_proba
+
+            # permute the second view
+            # X_train_perm = X_train.copy()
+            # X_train_perm[:, covariate_index] = rng.permutation(
+            #     X_train[:, covariate_index]
+            # )
+            # perm_est.fit(X_train_perm, y_train)
+            # perm_proba = perm_est.predict_proba(X_test)
+
+            # perm_posterior_arr[test_ix, :] = perm_proba
+
+        POS = np.vstack(result_pos_list)
+        y = POS[:, 0]
+        posterior_arr = POS[:, 1:]
+
+        perm_POS = np.vstack(result_pos_list_perm)
+        y = perm_POS[:, 0]
+        perm_posterior_arr = perm_POS[:, 1:]
 
         # mutual information for both
         # y_pred_proba = np.nanmean(posterior_arr, axis=0)
