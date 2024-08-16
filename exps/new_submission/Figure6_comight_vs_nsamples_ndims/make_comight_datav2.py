@@ -81,13 +81,13 @@ def make_mean_shift(
 def make_multi_modal(
     root_dir,
     n_samples=4096,
-    n_dim_1=4090,
-    mu_viewone=5,
-    mu_viewtwo=1,
+    n_dim_1=4093,
+    mu_viewone=1,
+    mu_viewtwo=5,
     mix=0.75,
     rho=0.2,
     seed=None,
-    n_dim_2=6,
+    n_dim_2=3,
     return_params=False,
     overwrite=False,
 ):
@@ -271,8 +271,8 @@ if __name__ == "__main__":
         delayed(func)(Path(root_dir), seed=seed, overwrite=overwrite)
         for seed in range(n_start, n_repeats)
         for func in [
-            make_mean_shift,
-            # make_multi_modal,
+            # make_mean_shift,
+            make_multi_modal,
             # make_multi_equal,
         ]
     )
