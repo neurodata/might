@@ -121,7 +121,9 @@ def _run_simulation(
             y_train, y_test = y[train_ix], y[test_ix]
 
             ### Split Training Set into Fitting Set (40%) and Calibarating Set (40%)
-            train_idx = np.arange(X_train.shape[0])
+            train_idx = np.arange(
+                X_train.shape[0]
+            )  # use index array to split, so we can use the same index for the permuted array as well
             fit_idx, cal_idx = train_test_split(
                 train_idx, test_size=0.5, random_state=idx, stratify=y_train
             )
@@ -131,7 +133,6 @@ def _run_simulation(
                 y_train[fit_idx],
                 y_train[cal_idx],
             )
-            # print(X_fit.shape,X_cal.shape,X_val.shape)
 
             POS = np.zeros((len(y_test), 3))
             POS[:, 0] = y_test
