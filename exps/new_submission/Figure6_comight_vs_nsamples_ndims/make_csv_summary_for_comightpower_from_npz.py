@@ -185,18 +185,18 @@ def recompute_metric_n_samples(
             obs_posteriors = model_data["posterior_arr"]
             obs_y = model_data["y"]
 
-            # model_perm_fname = (
-            #     root_dir
-            #     / "output"
-            #     / f"{model_name}-perm"
-            #     / sim_name
-            #     / f"{sim_name}_{n_samples}_{n_dims_1}_{n_dims_2}_{idx}.npz"
-            # )
-            # model_perm_data = np.load(model_perm_fname)
-            # perm_posteriors = model_perm_data["posterior_arr"]
-            # perm_y = model_perm_data["y"]
-            perm_posteriors = model_data["posterior_arr"]
-            perm_y = model_data["y"]
+            model_perm_fname = (
+                root_dir
+                / "output"
+                / f"{model_name}-perm"
+                / sim_name
+                / f"{sim_name}_{n_samples}_{n_dims_1}_{n_dims_2}_{idx}.npz"
+            )
+            model_perm_data = np.load(model_perm_fname)
+            perm_posteriors = model_perm_data["posterior_arr"]
+            perm_y = model_perm_data["y"]
+            # perm_posteriors = model_data["posterior_arr"]
+            # perm_y = model_data["y"]
 
             # mutual information for both
             y_pred_proba = np.nanmean(obs_posteriors, axis=0)
@@ -232,34 +232,34 @@ def recompute_metric_n_samples(
     for idx in range(n_repeats):
         for n_samples in n_samples_list:
             perm_idx = idx + 1 if idx <= n_repeats - 2 else 0
-            # model_fname = (
-            #     root_dir
-            #     / "output"
-            #     / f"{model_name}-perm"
-            #     / sim_name
-            #     / f"{sim_name}_{n_samples}_{n_dims_1}_{n_dims_2}_{idx}.npz"
-            # )
-            # model_perm_fname = (
-            #     root_dir
-            #     / "output"
-            #     / f"{model_name}-perm"
-            #     / sim_name
-            #     / f"{sim_name}_{n_samples}_{n_dims_1}_{n_dims_2}_{perm_idx}.npz"
-            # )
             model_fname = (
                 root_dir
                 / "output"
-                / f"{model_name}"
+                / f"{model_name}-perm"
                 / sim_name
                 / f"{sim_name}_{n_samples}_{n_dims_1}_{n_dims_2}_{idx}.npz"
             )
             model_perm_fname = (
                 root_dir
                 / "output"
-                / f"{model_name}"
+                / f"{model_name}-perm"
                 / sim_name
                 / f"{sim_name}_{n_samples}_{n_dims_1}_{n_dims_2}_{perm_idx}.npz"
             )
+            # model_fname = (
+            #     root_dir
+            #     / "output"
+            #     / f"{model_name}"
+            #     / sim_name
+            #     / f"{sim_name}_{n_samples}_{n_dims_1}_{n_dims_2}_{idx}.npz"
+            # )
+            # model_perm_fname = (
+            #     root_dir
+            #     / "output"
+            #     / f"{model_name}"
+            #     / sim_name
+            #     / f"{sim_name}_{n_samples}_{n_dims_1}_{n_dims_2}_{perm_idx}.npz"
+            # )
 
             model_data = np.load(model_fname)
             obs_posteriors = model_data["posterior_arr"]
@@ -434,7 +434,10 @@ if __name__ == "__main__":
     # root_dir = Path("/Users/spanda/Documents/comight")
     output_dir = Path("/Volumes/Extreme Pro/cancer/temp/")
 
-    sim_names = ["mean_shiftv4", "multi_modalv2", "multi_equal"]
+    sim_names = [
+        # "mean_shiftv4", "multi_modalv2", 
+        "multi_equal"
+        ]
 
     # n_dims_1 = 4096 - 6
     n_dims_1 = 512 - 6
@@ -446,7 +449,7 @@ if __name__ == "__main__":
     n_jobs = -1
 
     model_name = "comight"
-    model_name = "knn"
+    # model_name = "knn"
 
     for sim_name in sim_names:
         recompute_metric_n_samples(

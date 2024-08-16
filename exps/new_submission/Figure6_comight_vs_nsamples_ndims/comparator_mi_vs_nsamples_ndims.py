@@ -24,8 +24,8 @@ def _run_simulation(
     overwrite=False,
 ):
     n_samples_ = 4096
-    n_dims_2_ = 6
-    n_dims_1_ = 4090
+    n_dims_2_ = 3
+    n_dims_1_ = 4093
 
     fname = (
         root_dir
@@ -255,7 +255,7 @@ if __name__ == "__main__":
 
     SIMULATIONS_NAMES = [
         # "mean_shiftv4",
-        "multi_modalv2",
+        "multi_modalv3",
         # "multi_equal",
     ]
 
@@ -264,7 +264,7 @@ if __name__ == "__main__":
     n_jobs = 4
 
     # Section: varying model over samples
-    n_dims_1 = 4090
+    n_dims_1 = 4093
     # n_dims_1 = 512 - 6
     n_samples_list = [2**x for x in range(7, 11)]
     print(n_samples_list)
@@ -289,7 +289,7 @@ if __name__ == "__main__":
         )
 
     # Section: varying model over dimensions
-    n_dims_list = [2**i - 6 for i in range(3, 13)]
+    n_dims_list = [2**i - 3 for i in range(3, 13)]
     n_samples = 256
     print(n_dims_list)
     for model_name in [
