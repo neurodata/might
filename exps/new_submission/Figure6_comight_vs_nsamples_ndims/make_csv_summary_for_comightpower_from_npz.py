@@ -282,7 +282,8 @@ def recompute_metric_n_samples(
             sas98_obs = _estimate_sas98(obs_y, obs_posteriors)
             sas98_perm = _estimate_sas98(perm_y, perm_posteriors)
 
-            result["sas98"].append(sas98_obs - sas98_perm)
+            # S@98 should at least be positive
+            result["sas98"].append(np.abs(sas98_obs - sas98_perm))
             result["cmi"].append(I_XZ_Y - I_Z_Y)
             result["idx"].append(idx)
             result["n_samples"].append(n_samples)

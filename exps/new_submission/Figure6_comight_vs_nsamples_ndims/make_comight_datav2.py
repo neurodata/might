@@ -267,7 +267,7 @@ if __name__ == "__main__":
     # root_dir = Path("/Volumes/Extreme Pro/cancer")
     root_dir = Path("/data/adam/")
 
-    Parallel(n_jobs=-1)(
+    Parallel(n_jobs=1)(
         delayed(func)(Path(root_dir), seed=seed, overwrite=overwrite)
         for seed in range(n_start, n_repeats)
         for func in [

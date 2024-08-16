@@ -27,8 +27,8 @@ def _run_simulation(
     overwrite=False,
 ):
     n_samples_ = 4096
-    n_dims_2_ = 6
-    n_dims_1_ = 4090
+    n_dims_2_ = 3
+    n_dims_1_ = 4093
 
     fname = (
         root_dir
