@@ -139,7 +139,7 @@ def _estimate_pvalue(
     return pvalue
 
 
-def recompute_metric_n_samples(
+def recompute_obs_metric_n_samples(
     root_dir,
     model_name,
     sim_name,
@@ -147,7 +147,6 @@ def recompute_metric_n_samples(
     n_dims_2,
     n_repeats,
     output_dir,
-    n_jobs=None,
     overwrite=False,
 ):
     """Implement comight-power and comightperm-power over n_samples.
@@ -219,6 +218,30 @@ def recompute_metric_n_samples(
     df = pd.DataFrame(result)
     df.to_csv(output_file, index=False)
 
+
+def recompute_perm_metric_n_samples(
+    root_dir,
+    model_name,
+    sim_name,
+    n_dims_1,
+    n_dims_2,
+    n_repeats,
+    output_dir,
+    overwrite=False,
+):
+    output_model_name = f"{model_name}-permuted-power"
+    n_samples_list = [2**x for x in range(8, 11)]
+
+    fname = (
+        f"results_vs_nsamples_{sim_name}_{output_model_name}_{n_dims_1}_{n_repeats}.csv"
+    )
+    output_file = output_dir / fname
+    output_file.parent.mkdir(exist_ok=True, parents=True)
+
+    if output_file.exists() and not overwrite:
+        print(f"Output file: {output_file} exists")
+        return
+
     # now we do the same for comight-permuted
     fname = (
         f"results_vs_nsamples_{sim_name}_{output_model_name}_{n_dims_1}_{n_repeats}.csv"
@@ -283,7 +306,7 @@ def recompute_metric_n_samples(
             sas98_perm = _estimate_sas98(perm_y, perm_posteriors)
 
             # S@98 should at least be positive
-            result["sas98"].append(np.abs(sas98_obs - sas98_perm))
+            result["sas98"].append(sas98_obs - sas98_perm)
             result["cmi"].append(I_XZ_Y - I_Z_Y)
             result["idx"].append(idx)
             result["n_samples"].append(n_samples)
@@ -294,7 +317,7 @@ def recompute_metric_n_samples(
     df.to_csv(output_file, index=False)
 
 
-def recompute_metric_n_dims(
+def recompute_obs_metric_n_dims(
     root_dir,
     model_name,
     sim_name,
@@ -302,7 +325,6 @@ def recompute_metric_n_dims(
     n_dims_2,
     n_repeats,
     output_dir,
-    n_jobs=None,
     overwrite=False,
 ):
     n_dims_list = [2**i - 6 for i in range(3, 11)]
@@ -333,7 +355,7 @@ def recompute_metric_n_dims(
             model_perm_fname = (
                 root_dir
                 / "output"
-                / f"{model_fname}-perm"
+                / f"{model_name}-perm"
                 / sim_name
                 / f"{sim_name}_{n_samples}_{n_dims_1}_{n_dims_2}_{idx}.npz"
             )
@@ -367,6 +389,29 @@ def recompute_metric_n_dims(
 
     df = pd.DataFrame(result)
     df.to_csv(output_file, index=False)
+
+
+def recompute_perm_metric_n_dims(
+    root_dir,
+    model_name,
+    sim_name,
+    n_samples,
+    n_dims_2,
+    n_repeats,
+    output_dir,
+    overwrite=False,
+):
+    n_dims_list = [2**i - 6 for i in range(3, 11)]
+    output_model_name = f"{model_name}-permuted-power"
+    fname = (
+        f"results_vs_ndims_{sim_name}_{output_model_name}_{n_samples}_{n_repeats}.csv"
+    )
+    output_file = output_dir / fname
+    output_file.parent.mkdir(exist_ok=True, parents=True)
+
+    if output_file.exists() and not overwrite:
+        print(f"Output file: {output_file} exists")
+        return
 
     # now we do the same for comight-permuted
     fname = (
@@ -452,19 +497,28 @@ if __name__ == "__main__":
     # model_name = "knn"
 
     for sim_name in sim_names:
-        recompute_metric_n_samples(
-            root_dir,
-            model_name,
-            sim_name,
-            n_dims_1,
-            n_dims_2,
-            n_repeats,
-            output_dir,
-            n_jobs=n_jobs,
-            overwrite=True,
-        )
+        # recompute_obs_metric_n_samples(
+        #     root_dir,
+        #     model_name,
+        #     sim_name,
+        #     n_dims_1,
+        #     n_dims_2,
+        #     n_repeats,
+        #     output_dir,
+        #     overwrite=True,
+        # )
+        # recompute_perm_metric_n_samples(
+        #     root_dir,
+        #     model_name,
+        #     sim_name,
+        #     n_dims_1,
+        #     n_dims_2,
+        #     n_repeats,
+        #     output_dir,
+        #     overwrite=True,
+        # )
 
-        recompute_metric_n_dims(
+        recompute_obs_metric_n_dims(
             root_dir,
             model_name,
             sim_name,
@@ -472,6 +526,15 @@ if __name__ == "__main__":
             n_dims_2,
             n_repeats,
             output_dir,
-            n_jobs=n_jobs,
+            overwrite=True,
+        )
+        recompute_perm_metric_n_dims(
+            root_dir,
+            model_name,
+            sim_name,
+            n_samples,
+            n_dims_2,
+            n_repeats,
+            output_dir,
             overwrite=True,
         )

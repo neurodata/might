@@ -261,7 +261,7 @@ if __name__ == "__main__":
 
     overwrite = True
     n_repeats = 100
-    n_jobs = 4
+    n_jobs = 14
 
     # Section: varying model over samples
     n_dims_1 = 4093
@@ -269,10 +269,9 @@ if __name__ == "__main__":
     n_samples_list = [2**x for x in range(7, 11)]
     print(n_samples_list)
     for model_name in [
-        # "knn",
-        "rf",
-        # "svm", "lr"
-    ]:
+        # "knn", "rf", 
+                       "svm", "lr"
+                       ]:
         results = Parallel(n_jobs=n_jobs)(
             delayed(_run_simulation)(
                 n_samples,
@@ -292,11 +291,7 @@ if __name__ == "__main__":
     n_dims_list = [2**i - 3 for i in range(3, 13)]
     n_samples = 256
     print(n_dims_list)
-    for model_name in [
-        # "knn",
-        "rf",
-        # "svm", "lr"
-    ]:
+    for model_name in ["knn", "rf", "svm", "lr"]:
         results = Parallel(n_jobs=n_jobs)(
             delayed(_run_simulation)(
                 n_samples,
