@@ -2,12 +2,12 @@ from pathlib import Path
 
 import numpy as np
 from joblib import Parallel, delayed
+from sklearn.calibration import CalibratedClassifierCV
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import StratifiedKFold, train_test_split
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.svm import SVC
-from sklearn.calibration import CalibratedClassifierCV
 from treeple.stats.utils import _mutual_information
 
 seed = 12345
@@ -233,7 +233,7 @@ MODEL_NAMES = {
     "rf": {
         "n_estimators": 1200,
         "max_features": 0.3,
-        "n_jobs": 4,
+        "n_jobs": -2,
     },
     "knn": {
         # XXX: above, we use sqrt of the total number of samples to allow
@@ -251,8 +251,8 @@ MODEL_NAMES = {
 }
 
 if __name__ == "__main__":
-    # root_dir = Path("/Volumes/Extreme Pro/cancer")
-    root_dir = Path("/data/adam/")
+    root_dir = Path("/Volumes/Extreme Pro/cancer")
+    # root_dir = Path("/data/adam/")
 
     SIMULATIONS_NAMES = [
         # "mean_shiftv4",
@@ -262,7 +262,7 @@ if __name__ == "__main__":
 
     overwrite = False
     n_repeats = 100
-    n_jobs = 4
+    n_jobs = 1
 
     # Section: varying model over samples
     n_dims_1 = 4093
@@ -282,7 +282,7 @@ if __name__ == "__main__":
                 root_dir,
                 sim_name,
                 model_name,
-                overwrite=False,
+                overwrite=overwrite,
             )
             for sim_name in SIMULATIONS_NAMES
             for n_samples in n_samples_list
@@ -302,7 +302,7 @@ if __name__ == "__main__":
     #             root_dir,
     #             sim_name,
     #             model_name,
-    #             overwrite=False,
+    #             overwrite=overwrite,
     #         )
     #         for sim_name in SIMULATIONS_NAMES
     #         for n_dims_1 in n_dims_list

@@ -154,7 +154,7 @@ def recompute_obs_metric_n_samples(
     Each will have a separate csv file.
     """
     output_model_name = f"{model_name}-power"
-    n_samples_list = [2**x for x in range(8, 11)]
+    n_samples_list = [2**x for x in range(7, 11)]
 
     fname = (
         f"results_vs_nsamples_{sim_name}_{output_model_name}_{n_dims_1}_{n_repeats}.csv"
@@ -184,18 +184,18 @@ def recompute_obs_metric_n_samples(
             obs_posteriors = model_data["posterior_arr"]
             obs_y = model_data["y"]
 
-            model_perm_fname = (
-                root_dir
-                / "output"
-                / f"{model_name}-perm"
-                / sim_name
-                / f"{sim_name}_{n_samples}_{n_dims_1}_{n_dims_2}_{idx}.npz"
-            )
-            model_perm_data = np.load(model_perm_fname)
-            perm_posteriors = model_perm_data["posterior_arr"]
-            perm_y = model_perm_data["y"]
-            # perm_posteriors = model_data["posterior_arr"]
-            # perm_y = model_data["y"]
+            # model_perm_fname = (
+            #     root_dir
+            #     / "output"
+            #     / f"{model_name}-perm"
+            #     / sim_name
+            #     / f"{sim_name}_{n_samples}_{n_dims_1}_{n_dims_2}_{idx}.npz"
+            # )
+            # model_perm_data = np.load(model_perm_fname)
+            # perm_posteriors = model_perm_data["posterior_arr"]
+            # perm_y = model_perm_data["y"]
+            perm_posteriors = model_data["posterior_arr"]
+            perm_y = model_data["y"]
 
             # mutual information for both
             y_pred_proba = np.nanmean(obs_posteriors, axis=0)
@@ -255,34 +255,34 @@ def recompute_perm_metric_n_samples(
     for idx in range(n_repeats):
         for n_samples in n_samples_list:
             perm_idx = idx + 1 if idx <= n_repeats - 2 else 0
-            model_fname = (
-                root_dir
-                / "output"
-                / f"{model_name}-perm"
-                / sim_name
-                / f"{sim_name}_{n_samples}_{n_dims_1}_{n_dims_2}_{idx}.npz"
-            )
-            model_perm_fname = (
-                root_dir
-                / "output"
-                / f"{model_name}-perm"
-                / sim_name
-                / f"{sim_name}_{n_samples}_{n_dims_1}_{n_dims_2}_{perm_idx}.npz"
-            )
             # model_fname = (
             #     root_dir
             #     / "output"
-            #     / f"{model_name}"
+            #     / f"{model_name}-perm"
             #     / sim_name
             #     / f"{sim_name}_{n_samples}_{n_dims_1}_{n_dims_2}_{idx}.npz"
             # )
             # model_perm_fname = (
             #     root_dir
             #     / "output"
-            #     / f"{model_name}"
+            #     / f"{model_name}-perm"
             #     / sim_name
             #     / f"{sim_name}_{n_samples}_{n_dims_1}_{n_dims_2}_{perm_idx}.npz"
             # )
+            model_fname = (
+                root_dir
+                / "output"
+                / f"{model_name}"
+                / sim_name
+                / f"{sim_name}_{n_samples}_{n_dims_1}_{n_dims_2}_{idx}.npz"
+            )
+            model_perm_fname = (
+                root_dir
+                / "output"
+                / f"{model_name}"
+                / sim_name
+                / f"{sim_name}_{n_samples}_{n_dims_1}_{n_dims_2}_{perm_idx}.npz"
+            )
 
             model_data = np.load(model_fname)
             obs_posteriors = model_data["posterior_arr"]
@@ -327,7 +327,7 @@ def recompute_obs_metric_n_dims(
     output_dir,
     overwrite=False,
 ):
-    n_dims_list = [2**i - 6 for i in range(3, 11)]
+    n_dims_list = [2**i - n_dims_2 for i in range(3, 11)]
     output_model_name = f"{model_name}-power"
     fname = (
         f"results_vs_ndims_{sim_name}_{output_model_name}_{n_samples}_{n_repeats}.csv"
@@ -352,15 +352,17 @@ def recompute_obs_metric_n_dims(
                 / sim_name
                 / f"{sim_name}_{n_samples}_{n_dims_1}_{n_dims_2}_{idx}.npz"
             )
-            model_perm_fname = (
-                root_dir
-                / "output"
-                / f"{model_name}-perm"
-                / sim_name
-                / f"{sim_name}_{n_samples}_{n_dims_1}_{n_dims_2}_{idx}.npz"
-            )
             comight_data = np.load(model_fname)
-            model_perm_data = np.load(model_perm_fname)
+
+            # model_perm_fname = (
+            #     root_dir
+            #     / "output"
+            #     / f"{model_name}-perm"
+            #     / sim_name
+            #     / f"{sim_name}_{n_samples}_{n_dims_1}_{n_dims_2}_{idx}.npz"
+            # )
+            # model_perm_data = np.load(model_perm_fname)
+            model_perm_data = comight_data
 
             obs_posteriors = comight_data["posterior_arr"]
             obs_y = comight_data["y"]
@@ -401,7 +403,7 @@ def recompute_perm_metric_n_dims(
     output_dir,
     overwrite=False,
 ):
-    n_dims_list = [2**i - 6 for i in range(3, 11)]
+    n_dims_list = [2**i - n_dims_2 for i in range(3, 11)]
     output_model_name = f"{model_name}-permuted-power"
     fname = (
         f"results_vs_ndims_{sim_name}_{output_model_name}_{n_samples}_{n_repeats}.csv"
@@ -426,17 +428,31 @@ def recompute_perm_metric_n_dims(
     for idx in range(n_repeats):
         for n_dims_1 in n_dims_list:
             perm_idx = idx + 1 if idx <= n_repeats - 2 else 0
+            # model_fname = (
+            #     root_dir
+            #     / "output"
+            #     / f"{model_name}-perm"
+            #     / sim_name
+            #     / f"{sim_name}_{n_samples}_{n_dims_1}_{n_dims_2}_{idx}.npz"
+            # )
+            # model_perm_fname = (
+            #     root_dir
+            #     / "output"
+            #     / f"{model_name}-perm"
+            #     / sim_name
+            #     / f"{sim_name}_{n_samples}_{n_dims_1}_{n_dims_2}_{perm_idx}.npz"
+            # )
             model_fname = (
                 root_dir
                 / "output"
-                / f"{model_name}-perm"
+                / f"{model_name}"
                 / sim_name
                 / f"{sim_name}_{n_samples}_{n_dims_1}_{n_dims_2}_{idx}.npz"
             )
             model_perm_fname = (
                 root_dir
                 / "output"
-                / f"{model_name}-perm"
+                / f"{model_name}"
                 / sim_name
                 / f"{sim_name}_{n_samples}_{n_dims_1}_{n_dims_2}_{perm_idx}.npz"
             )
@@ -477,23 +493,24 @@ if __name__ == "__main__":
     # root_dir = Path('/home/hao/')
     # output_dir = Path('/data/adam/')
     # root_dir = Path("/Users/spanda/Documents/comight")
-    output_dir = Path("/Volumes/Extreme Pro/cancer/temp/")
+    output_dir = Path("/Volumes/Extreme Pro/cancer/")
 
     sim_names = [
-        # "mean_shiftv4", "multi_modalv2", 
-        "multi_equal"
-        ]
+        # "mean_shiftv4", 
+        "multi_modalv3",
+        # "multi_equal"
+    ]
 
-    # n_dims_1 = 4096 - 6
-    n_dims_1 = 512 - 6
-    n_dims_2 = 6
+    n_dims_2 = 3
+    n_dims_1 = 4096 - 3
+    # n_dims_1 = 512 - 6
 
     # n_samples = 1024
-    n_samples = 512
+    n_samples = 256
     n_repeats = 100
     n_jobs = -1
 
-    model_name = "comight"
+    model_name = "comight-cmi"
     # model_name = "knn"
 
     for sim_name in sim_names:
@@ -518,16 +535,16 @@ if __name__ == "__main__":
         #     overwrite=True,
         # )
 
-        recompute_obs_metric_n_dims(
-            root_dir,
-            model_name,
-            sim_name,
-            n_samples,
-            n_dims_2,
-            n_repeats,
-            output_dir,
-            overwrite=True,
-        )
+        # recompute_obs_metric_n_dims(
+        #     root_dir,
+        #     model_name,
+        #     sim_name,
+        #     n_samples,
+        #     n_dims_2,
+        #     n_repeats,
+        #     output_dir,
+        #     overwrite=True,
+        # )
         recompute_perm_metric_n_dims(
             root_dir,
             model_name,

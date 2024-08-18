@@ -10,7 +10,7 @@ import numpy as np
 import pandas as pd
 from sklearn.metrics import roc_auc_score, roc_curve
 
-n_dims_2_ = 6
+n_dims_2_ = 3
 
 
 def Calculate_SA98(y_true, y_pred_proba, max_fpr=0.02) -> float:
@@ -75,16 +75,18 @@ def make_csv_over_nsamples(
                 # results["sas98"].append(sas98)
                 y_score = loaded_data["posterior_arr"]
                 y_true = loaded_data["y"]
-                assert len(y_score) == n_samples
+                
                 if "might" in model_name:
+                    assert y_score.shape[1] == n_samples, f"{y_score.shape[1]} != {n_samples}"
                     n_trees, n_samples, n_classes = y_score.shape
                     y_score_avg = np.nanmean(y_score, axis=0)
                     y_score_binary = y_score_avg  # [:, 1]
 
-                    nan_rows = np.isnan(y_score_binary)
+                    nan_rows = np.isnan(y_score_binary)[:, 0]
                     y_score_binary = y_score_binary[~nan_rows]
                     y_true = y_true[~nan_rows]
                 else:
+                    assert len(y_score) == n_samples, f"{len(y_score)} != {n_samples}"
                     #     y_score_binary = y_score[:, -1]
                     y_score_binary = y_score
                 s98 = Calculate_SA98(y_true, y_score_binary, max_fpr=0.02)
@@ -205,16 +207,18 @@ def make_csv_over_ndims1(
                 # results["sas98"].append(sas98)
                 y_score = loaded_data["posterior_arr"]
                 y_true = loaded_data["y"]
-                assert len(y_score) == n_samples
+                
                 if "might" in model_name:
+                    assert y_score.shape[1] == n_samples, f"{y_score.shape[1]} != {n_samples}"
                     n_trees, n_samples, n_classes = y_score.shape
                     y_score_avg = np.nanmean(y_score, axis=0)
                     y_score_binary = y_score_avg  # [:, 1]
 
-                    nan_rows = np.isnan(y_score_binary)
+                    nan_rows = np.isnan(y_score_binary)[:, 0]
                     y_score_binary = y_score_binary[~nan_rows]
                     y_true = y_true[~nan_rows]
                 else:
+                    assert len(y_score) == n_samples
                     #     y_score_binary = y_score[:, -1]
                     y_score_binary = y_score
                 s98 = Calculate_SA98(y_true, y_score_binary, max_fpr=0.02)
@@ -287,14 +291,13 @@ if __name__ == "__main__":
     root_dir = Path("/Volumes/Extreme Pro/cancer/")
     # root_dir = Path('/home/hao/')
     # output_dir = Path('/data/adam/')
-    output_dir = Path("/Volumes/Extreme Pro/cancer/temp/")
+    output_dir = Path("/Volumes/Extreme Pro/cancer/")
 
     n_repeats = 100
 
-    n_samples_list = [2**x for x in range(8, 11)]
-    n_dims_list = [2**x - 6 for x in range(3, 11)]
+    n_samples_list = [2**x for x in range(7, 11)]
+    n_dims_list = [2**x - 3 for x in range(3, 11)]
     # n_dims_1 = 1024 - 6
-    n_dims_1 = 512 - 6
     # n_dims_1 = 4096 - 6
     print(n_samples_list)
 
@@ -307,12 +310,12 @@ if __name__ == "__main__":
 
     if param_name == "sas98":
         models = [
-            # "comight",
+            "comight-cmi",
             # "comight-perm",
-            "knn",
-            "rf",
-            "svm",
-            "lr",
+            # "knn",
+            # "rf",
+            # "svm",
+            # "lr",
             # "knn_viewone",
             # "knn_viewtwo",
             #    'might_viewone', 'might_viewtwo'
@@ -333,10 +336,14 @@ if __name__ == "__main__":
         models = ["cdcorr"]
     # for model_name in ["coleman_pvalues"]:
 
-    sim_names = ["mean_shiftv4", "multi_modalv2", "multi_equal"]
+    sim_names = [
+        # "mean_shiftv4",
+        "multi_modalv3",
+        #   "multi_equal"
+    ]
     for sim_name in sim_names:
         for model_name in models:
-            n_dims_1 = 512 - 6
+            n_dims_1 = 4096 - 3
             # save the dataframe to a csv file over n-samples
             df = make_csv_over_nsamples(
                 root_dir,
@@ -357,7 +364,7 @@ if __name__ == "__main__":
             # Save the dataframe over varying ndims
             n_samples = 4096
             # n_samples = 1024
-            n_samples = 512
+            n_samples = 256
             print(n_dims_list)
 
             # save the dataframe to a csv file over n-dims
