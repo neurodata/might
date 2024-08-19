@@ -233,7 +233,7 @@ MODEL_NAMES = {
     "rf": {
         "n_estimators": 1200,
         "max_features": 0.3,
-        "n_jobs": 4,
+        "n_jobs": 5,
     },
     "knn": {
         # XXX: above, we use sqrt of the total number of samples to allow
@@ -293,7 +293,7 @@ if __name__ == "__main__":
     n_samples = 256
     print(n_dims_list)
     for model_name in [
-        "rf",
+        # "rf",
         # "knn", "svm", "lr"
     ]:
         results = Parallel(n_jobs=n_jobs)(
