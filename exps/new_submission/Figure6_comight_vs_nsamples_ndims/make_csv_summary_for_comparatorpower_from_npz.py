@@ -148,7 +148,7 @@ def recompute_metric_n_samples(
     Each will have a separate csv file.
     """
     output_model_name = f"{model_name}-power"
-    n_samples_list = [2**x for x in range(7, 11)]
+    n_samples_list = [2**x for x in range(8, 11)]
 
     fname = (
         f"results_vs_nsamples_{sim_name}_{output_model_name}_{n_dims_1}_{n_repeats}.csv"
@@ -213,6 +213,7 @@ def recompute_metric_n_samples(
     df.to_csv(output_file, index=False)
 
     # now we do the same for comight-permuted
+    output_model_name = f"{model_name}-permuted-power"
     fname = (
         f"results_vs_nsamples_{sim_name}_{output_model_name}_{n_dims_1}_{n_repeats}.csv"
     )
@@ -295,7 +296,7 @@ def recompute_metric_n_dims(
     output_dir,
     overwrite=False,
 ):
-    n_dims_list = [2**i - 3 for i in range(3, 11)]
+    n_dims_list = [2**i - n_dims_2 for i in range(3, 11)]
     output_model_name = f"{model_name}-power"
     fname = (
         f"results_vs_ndims_{sim_name}_{output_model_name}_{n_samples}_{n_repeats}.csv"
@@ -358,6 +359,7 @@ def recompute_metric_n_dims(
     df.to_csv(output_file, index=False)
 
     # now we do the same for comight-permuted
+    output_model_name = f"{model_name}-permuted-power"
     fname = (
         f"results_vs_ndims_{sim_name}_{output_model_name}_{n_samples}_{n_repeats}.csv"
     )
@@ -424,22 +426,27 @@ if __name__ == "__main__":
 
     sim_names = [
         # "mean_shiftv4",
-        "multi_modalv3",
-        # "multi_equal"
+        # "multi_modalv3",
+        "multi_equal"
     ]
 
     # n_dims_1 = 4096 - 6
+    n_dims_ = 4096
+    n_dims_ = 512
+
     n_dims_2 = 3
-    n_dims_1 = 4096 - n_dims_2
+    n_dims_2 = 6
+    n_dims_1 = n_dims_ - n_dims_2
 
     # n_samples = 1024
     n_samples = 256
+    n_samples = 512
     n_repeats = 100
     n_jobs = -1
 
     model_name = "comight-cmi"
     # model_name = "svm"
-    # model_name = "lr"
+    model_name = "svm"
 
     for sim_name in sim_names:
         recompute_metric_n_samples(
@@ -453,13 +460,13 @@ if __name__ == "__main__":
             overwrite=True,
         )
 
-        recompute_metric_n_dims(
-            root_dir,
-            model_name,
-            sim_name,
-            n_samples,
-            n_dims_2,
-            n_repeats,
-            output_dir,
-            overwrite=True,
-        )
+        # recompute_metric_n_dims(
+        #     root_dir,
+        #     model_name,
+        #     sim_name,
+        #     n_samples,
+        #     n_dims_2,
+        #     n_repeats,
+        #     output_dir,
+        #     overwrite=True,
+        # )

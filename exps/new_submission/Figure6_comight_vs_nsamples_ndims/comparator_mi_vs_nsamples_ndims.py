@@ -251,7 +251,7 @@ MODEL_NAMES = {
 }
 
 if __name__ == "__main__":
-    # root_dir = Path("/Volumes/Extreme Pro/cancer")
+    root_dir = Path("/Volumes/Extreme Pro/cancer")
     root_dir = Path("/data/adam/")
 
     SIMULATIONS_NAMES = [

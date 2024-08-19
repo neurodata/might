@@ -10,7 +10,7 @@ import numpy as np
 import pandas as pd
 from sklearn.metrics import roc_auc_score, roc_curve
 
-n_dims_2_ = 3
+n_dims_2_ = 6
 
 
 def Calculate_SA98(y_true, y_pred_proba, max_fpr=0.02) -> float:
@@ -298,8 +298,10 @@ if __name__ == "__main__":
 
     n_repeats = 100
 
+    n_dims_ = 4096
+    n_dims_ = 512
     n_samples_list = [2**x for x in range(7, 11)]
-    n_dims_list = [2**x - 3 for x in range(3, 11)]
+    n_dims_list = [2**x - 6 for x in range(3, 11)]
     # n_dims_1 = 1024 - 6
     # n_dims_1 = 4096 - 6
     print(n_samples_list)
@@ -308,7 +310,7 @@ if __name__ == "__main__":
     # param_name = "cdcorr_pvalue"
     param_name = "cmi"
     param_name = "sas98"
-    # param_name = 'auc'
+    param_name = 'auc'
     # param_name = "pvalue"
 
     if param_name == "sas98":
@@ -325,11 +327,11 @@ if __name__ == "__main__":
         ]
     elif param_name == "auc":
         models = [
-            'comight-cmi',
+            # 'comight-cmi',
             # "knn",
             # "rf",
             # "svm",
-            # "lr",
+            "lr",
         ]
     elif param_name == "cmi":
         models = [
@@ -347,7 +349,7 @@ if __name__ == "__main__":
     ]
     for sim_name in sim_names:
         for model_name in models:
-            n_dims_1 = 4096 - 3
+            n_dims_1 = n_dims_ - n_dims_2_
             # save the dataframe to a csv file over n-samples
             df = make_csv_over_nsamples(
                 root_dir,
@@ -368,7 +370,7 @@ if __name__ == "__main__":
             # Save the dataframe over varying ndims
             n_samples = 4096
             # n_samples = 1024
-            n_samples = 256
+            n_samples = 512
             print(n_dims_list)
 
             # save the dataframe to a csv file over n-dims
