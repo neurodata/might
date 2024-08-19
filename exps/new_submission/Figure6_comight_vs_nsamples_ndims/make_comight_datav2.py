@@ -147,12 +147,12 @@ def make_multi_modal(
 def make_multi_equal(
     root_dir,
     n_samples=4096,
-    n_dim_1=4090,
+    n_dim_1=4093,
     mu_0=1,
     mu_1=5,
     mix=0.75,
     seed=None,
-    n_dim_2=6,
+    n_dim_2=3,
     return_params=False,
     overwrite=False,
 ):
@@ -200,8 +200,8 @@ def make_multi_equal(
     output_fname = (
         root_dir
         / "data"
-        / "multi_equal"
-        / f"multi_equal_{n_samples}_{n_dim_1}_{n_dim_2}_{seed}.npz"
+        / "multi_equalv2"
+        / f"multi_equalv2_{n_samples}_{n_dim_1}_{n_dim_2}_{seed}.npz"
     )
     output_fname.parent.mkdir(exist_ok=True, parents=True)
     if not overwrite and output_fname.exists():
@@ -264,7 +264,7 @@ if __name__ == "__main__":
     n_repeats = 100
 
     # Section: Make data
-    # root_dir = Path("/Volumes/Extreme Pro/cancer")
+    root_dir = Path("/Volumes/Extreme Pro/cancer")
     root_dir = Path("/data/adam/")
 
     Parallel(n_jobs=4)(
@@ -272,7 +272,7 @@ if __name__ == "__main__":
         for seed in range(n_start, n_repeats)
         for func in [
             # make_mean_shift,
-            make_multi_modal,
-            # make_multi_equal,
+            # make_multi_modal,
+            make_multi_equal,
         ]
     )

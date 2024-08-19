@@ -251,13 +251,13 @@ MODEL_NAMES = {
 }
 
 if __name__ == "__main__":
-    root_dir = Path("/Volumes/Extreme Pro/cancer")
-    # root_dir = Path("/data/adam/")
+    # root_dir = Path("/Volumes/Extreme Pro/cancer")
+    root_dir = Path("/data/adam/")
 
     SIMULATIONS_NAMES = [
         # "mean_shiftv4",
-        "multi_modalv3",
-        # "multi_equal",
+        # "multi_modalv3",
+        "multi_equalv2",
     ]
 
     overwrite = False
@@ -270,9 +270,8 @@ if __name__ == "__main__":
     n_samples_list = [2**x for x in range(7, 11)]
     print(n_samples_list)
     for model_name in [
-        # "knn",
         "rf",
-        #    "svm", "lr"
+        # "knn", "svm", "lr"
     ]:
         results = Parallel(n_jobs=n_jobs)(
             delayed(_run_simulation)(
@@ -290,21 +289,24 @@ if __name__ == "__main__":
         )
 
     # Section: varying model over dimensions
-    # n_dims_list = [2**i - 3 for i in range(3, 13)]
-    # n_samples = 256
-    # print(n_dims_list)
-    # for model_name in ["knn", "rf", "svm", "lr"]:
-    #     results = Parallel(n_jobs=n_jobs)(
-    #         delayed(_run_simulation)(
-    #             n_samples,
-    #             n_dims_1,
-    #             idx,
-    #             root_dir,
-    #             sim_name,
-    #             model_name,
-    #             overwrite=overwrite,
-    #         )
-    #         for sim_name in SIMULATIONS_NAMES
-    #         for n_dims_1 in n_dims_list
-    #         for idx in range(n_repeats)
-    #     )
+    n_dims_list = [2**i - 3 for i in range(3, 13)]
+    n_samples = 256
+    print(n_dims_list)
+    for model_name in [
+        "rf",
+        # "knn", "svm", "lr"
+    ]:
+        results = Parallel(n_jobs=n_jobs)(
+            delayed(_run_simulation)(
+                n_samples,
+                n_dims_1,
+                idx,
+                root_dir,
+                sim_name,
+                model_name,
+                overwrite=overwrite,
+            )
+            for sim_name in SIMULATIONS_NAMES
+            for n_dims_1 in n_dims_list
+            for idx in range(n_repeats)
+        )

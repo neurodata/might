@@ -94,8 +94,9 @@ def make_csv_over_nsamples(
             elif param_name == "auc":
                 y_score = loaded_data["posterior_arr"]
                 y_true = loaded_data["y"]
-                assert len(y_score) == n_samples
+
                 if "might" in model_name:
+                    assert y_score.shape[1] == n_samples, f"{y_score.shape[1]} != {n_samples}"
                     n_trees, n_samples, n_classes = y_score.shape
                     y_score_avg = np.nanmean(y_score, axis=0)
                     y_score_binary = y_score_avg[:, 1]
@@ -104,6 +105,7 @@ def make_csv_over_nsamples(
                     y_score_binary = y_score_binary[~nan_rows]
                     y_true = y_true[~nan_rows]
                 else:
+                    assert len(y_score) == n_samples, f"{len(y_score)} != {n_samples}"
                     y_score_binary = y_score[:, -1]
                 auc = roc_auc_score(y_true, y_score_binary)
                 results["auc"].append(auc)
@@ -142,7 +144,7 @@ def make_csv_over_nsamples(
         id_vars=["n_samples", "sim_type", "model"],
         value_vars=(
             [param_name]
-            if param_name == "sas98" or "comight" not in model_name
+            if param_name in ["sas98", 'auc'] or "comight" not in model_name
             else [param_name, "I_XZ_Y", "I_Z_Y"]
         ),
         var_name="metric",
@@ -230,8 +232,8 @@ def make_csv_over_ndims1(
             elif param_name == "auc":
                 y_score = loaded_data["posterior_arr"]
                 y_true = loaded_data["y"]
-                assert len(y_score) == n_samples
                 if "might" in model_name:
+                    assert y_score.shape[1] == n_samples, f"{y_score.shape[1]} != {n_samples}"
                     n_trees, n_samples, n_classes = y_score.shape
                     y_score_avg = np.nanmean(y_score, axis=0)
                     y_score_binary = y_score_avg[:, 1]
@@ -240,6 +242,7 @@ def make_csv_over_ndims1(
                     y_score_binary = y_score_binary[~nan_rows]
                     y_true = y_true[~nan_rows]
                 else:
+                    assert len(y_score) == n_samples
                     y_score_binary = y_score[:, -1]
                 auc = roc_auc_score(y_true, y_score_binary)
                 results["auc"].append(auc)
@@ -272,7 +275,7 @@ def make_csv_over_ndims1(
         id_vars=["n_dims_1", "sim_type", "model"],
         value_vars=(
             [param_name]
-            if param_name == "sas98" or "comight" not in model_name
+            if param_name in ["sas98", 'auc'] or "comight" not in model_name
             else [param_name, "I_XZ_Y", "I_Z_Y"]
         ),
         var_name="metric",
@@ -310,22 +313,23 @@ if __name__ == "__main__":
 
     if param_name == "sas98":
         models = [
-            "comight-cmi",
+            # "comight-cmi",
             # "comight-perm",
             # "knn",
             # "rf",
             # "svm",
-            # "lr",
+            "lr",
             # "knn_viewone",
             # "knn_viewtwo",
             #    'might_viewone', 'might_viewtwo'
         ]
     elif param_name == "auc":
         models = [
-            "knn",
-            "rf",
-            "svm",
-            "lr",
+            'comight-cmi',
+            # "knn",
+            # "rf",
+            # "svm",
+            # "lr",
         ]
     elif param_name == "cmi":
         models = [
@@ -338,8 +342,8 @@ if __name__ == "__main__":
 
     sim_names = [
         # "mean_shiftv4",
-        "multi_modalv3",
-        #   "multi_equal"
+        # "multi_modalv3",
+          "multi_equal"
     ]
     for sim_name in sim_names:
         for model_name in models:
