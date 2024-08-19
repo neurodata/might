@@ -233,7 +233,7 @@ MODEL_NAMES = {
     "rf": {
         "n_estimators": 1200,
         "max_features": 0.3,
-        "n_jobs": -2,
+        "n_jobs": 4,
     },
     "knn": {
         # XXX: above, we use sqrt of the total number of samples to allow
@@ -262,7 +262,7 @@ if __name__ == "__main__":
 
     overwrite = False
     n_repeats = 100
-    n_jobs = 1
+    n_jobs = 4
 
     # Section: varying model over samples
     n_dims_1 = 4093
