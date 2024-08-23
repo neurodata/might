@@ -252,7 +252,7 @@ MODEL_NAMES = {
 
 if __name__ == "__main__":
     root_dir = Path("/Volumes/Extreme Pro/cancer")
-    root_dir = Path("/data/adam/")
+    # root_dir = Path("/data/adam/")
 
     SIMULATIONS_NAMES = [
         # "mean_shiftv4",
@@ -270,7 +270,7 @@ if __name__ == "__main__":
     n_samples_list = [2**x for x in range(7, 11)]
     print(n_samples_list)
     for model_name in [
-        "rf",
+        # "rf",
         # "knn", "svm", "lr"
     ]:
         results = Parallel(n_jobs=n_jobs)(
@@ -293,7 +293,7 @@ if __name__ == "__main__":
     n_samples = 256
     print(n_dims_list)
     for model_name in [
-        # "rf",
+        "rf",
         # "knn", "svm", "lr"
     ]:
         results = Parallel(n_jobs=n_jobs)(

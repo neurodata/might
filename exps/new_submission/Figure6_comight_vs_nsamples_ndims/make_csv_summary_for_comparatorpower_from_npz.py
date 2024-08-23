@@ -427,46 +427,47 @@ if __name__ == "__main__":
     sim_names = [
         # "mean_shiftv4",
         # "multi_modalv3",
-        "multi_equal"
+        "multi_equalv2"
     ]
 
     # n_dims_1 = 4096 - 6
     n_dims_ = 4096
-    n_dims_ = 512
+    # n_dims_ = 512
 
     n_dims_2 = 3
-    n_dims_2 = 6
+    # n_dims_2 = 6
     n_dims_1 = n_dims_ - n_dims_2
 
     # n_samples = 1024
     n_samples = 256
-    n_samples = 512
+    # n_samples = 512
     n_repeats = 100
     n_jobs = -1
 
-    model_name = "comight-cmi"
+    # model_name = "comight-cmi"
     # model_name = "svm"
-    model_name = "svm"
+    # model_name = "svm"
 
-    for sim_name in sim_names:
-        recompute_metric_n_samples(
-            root_dir,
-            model_name,
-            sim_name,
-            n_dims_1,
-            n_dims_2,
-            n_repeats,
-            output_dir,
-            overwrite=True,
-        )
+    for model_name in ['rf', 'svm', 'lr', 'knn']:
+        for sim_name in sim_names:
+            recompute_metric_n_samples(
+                root_dir,
+                model_name,
+                sim_name,
+                n_dims_1,
+                n_dims_2,
+                n_repeats,
+                output_dir,
+                overwrite=True,
+            )
 
-        # recompute_metric_n_dims(
-        #     root_dir,
-        #     model_name,
-        #     sim_name,
-        #     n_samples,
-        #     n_dims_2,
-        #     n_repeats,
-        #     output_dir,
-        #     overwrite=True,
-        # )
+            recompute_metric_n_dims(
+                root_dir,
+                model_name,
+                sim_name,
+                n_samples,
+                n_dims_2,
+                n_repeats,
+                output_dir,
+                overwrite=True,
+            )

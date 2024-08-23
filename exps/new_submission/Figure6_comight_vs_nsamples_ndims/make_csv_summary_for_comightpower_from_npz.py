@@ -497,8 +497,8 @@ if __name__ == "__main__":
 
     sim_names = [
         # "mean_shiftv4", 
-        "multi_modalv3",
-        # "multi_equal"
+        # "multi_modalv3",
+        "multi_equalv2"
     ]
 
     n_dims_2 = 3
@@ -509,42 +509,43 @@ if __name__ == "__main__":
     n_samples = 256
     n_repeats = 100
     n_jobs = -1
-
+    overwrite = True
+    
     model_name = "comight-cmi"
     # model_name = "knn"
 
     for sim_name in sim_names:
-        # recompute_obs_metric_n_samples(
-        #     root_dir,
-        #     model_name,
-        #     sim_name,
-        #     n_dims_1,
-        #     n_dims_2,
-        #     n_repeats,
-        #     output_dir,
-        #     overwrite=True,
-        # )
-        # recompute_perm_metric_n_samples(
-        #     root_dir,
-        #     model_name,
-        #     sim_name,
-        #     n_dims_1,
-        #     n_dims_2,
-        #     n_repeats,
-        #     output_dir,
-        #     overwrite=True,
-        # )
+        recompute_obs_metric_n_samples(
+            root_dir,
+            model_name,
+            sim_name,
+            n_dims_1,
+            n_dims_2,
+            n_repeats,
+            output_dir,
+            overwrite=overwrite,
+        )
+        recompute_perm_metric_n_samples(
+            root_dir,
+            model_name,
+            sim_name,
+            n_dims_1,
+            n_dims_2,
+            n_repeats,
+            output_dir,
+            overwrite=overwrite,
+        )
 
-        # recompute_obs_metric_n_dims(
-        #     root_dir,
-        #     model_name,
-        #     sim_name,
-        #     n_samples,
-        #     n_dims_2,
-        #     n_repeats,
-        #     output_dir,
-        #     overwrite=True,
-        # )
+        recompute_obs_metric_n_dims(
+            root_dir,
+            model_name,
+            sim_name,
+            n_samples,
+            n_dims_2,
+            n_repeats,
+            output_dir,
+            overwrite=overwrite,
+        )
         recompute_perm_metric_n_dims(
             root_dir,
             model_name,
@@ -553,5 +554,5 @@ if __name__ == "__main__":
             n_dims_2,
             n_repeats,
             output_dir,
-            overwrite=True,
+            overwrite=overwrite,
         )

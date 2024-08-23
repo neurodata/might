@@ -30,8 +30,8 @@ def _run_simulation(
     overwrite=False,
 ):
     n_samples_ = 4096
-    n_dims_2_ = 6
-    n_dims_1_ = 4090
+    n_dims_2_ = 3
+    n_dims_1_ = 4096 - n_dims_2_
 
     fname = (
         root_dir
@@ -145,7 +145,7 @@ MODEL_NAMES = {
     "might": {
         "n_estimators": n_estimators,
         "honest_fraction": 0.5,
-        "n_jobs": 1,
+        "n_jobs": 4,
         "bootstrap": True,
         "stratify": True,
         "max_samples": 1.6,
@@ -159,19 +159,20 @@ if __name__ == "__main__":
     root_dir = Path("/data/adam/")
 
     SIMULATIONS_NAMES = [
-        "mean_shiftv4",
-        "multi_modalv2",
-        "multi_equal",
+        # "mean_shiftv4",
+        "multi_modalv3",
+        # "multi_equal",
     ]
 
     overwrite = True
     n_repeats = 100
-    n_jobs = -2
-    n_samples = 512
+    n_jobs = 4
+    n_samples = 256
+    n_dims_2_ = 3
 
     # Section: varying over dims
     model_name = "comight-cmi"
-    n_dims_1_list = [2**i - 6 for i in range(3, 13)]
+    n_dims_1_list = [2**i - n_dims_2_ for i in range(3, 10)]
     # n_dims_1_list = [2**i - 6 for i in range(10, 12)]
     print("Analyzing for the following dims: ", n_dims_1_list)
     results = Parallel(n_jobs=n_jobs)(
