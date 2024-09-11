@@ -2,7 +2,7 @@ import os
 
 n_repeats = 100
 sim_names = [
-    # "multi_modalv3",
+    "multi_modalv3",
     #  "mean_shiftv4",
      "multi_equalv2"
 ]

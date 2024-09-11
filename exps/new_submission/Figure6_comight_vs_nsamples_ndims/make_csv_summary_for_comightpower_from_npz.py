@@ -194,7 +194,7 @@ def recompute_obs_metric_n_samples(
             # model_perm_data = np.load(model_perm_fname)
             # perm_posteriors = model_perm_data["posterior_arr"]
             # perm_y = model_perm_data["y"]
-            perm_posteriors = model_data["posterior_arr"]
+            perm_posteriors = model_data["perm_posterior_arr"]
             perm_y = model_data["y"]
 
             # mutual information for both
@@ -213,7 +213,7 @@ def recompute_obs_metric_n_samples(
             result["idx"].append(idx)
             result["n_samples"].append(n_samples)
             result["n_dims_1"].append(n_dims_1)
-            result["n_dims_2"].append(n_dims_2_)
+            result["n_dims_2"].append(n_dims_2)
 
     df = pd.DataFrame(result)
     df.to_csv(output_file, index=False)
@@ -285,11 +285,11 @@ def recompute_perm_metric_n_samples(
             )
 
             model_data = np.load(model_fname)
-            obs_posteriors = model_data["posterior_arr"]
+            obs_posteriors = model_data["perm_posterior_arr"]
             obs_y = model_data["y"]
 
             model_perm_data = np.load(model_perm_fname)
-            perm_posteriors = model_perm_data["posterior_arr"]
+            perm_posteriors = model_perm_data["perm_posterior_arr"]
             perm_y = model_perm_data["y"]
 
             assert_array_equal(obs_y, perm_y)
@@ -366,7 +366,7 @@ def recompute_obs_metric_n_dims(
 
             obs_posteriors = comight_data["posterior_arr"]
             obs_y = comight_data["y"]
-            perm_posteriors = model_perm_data["posterior_arr"]
+            perm_posteriors = model_perm_data["perm_posterior_arr"]
             perm_y = model_perm_data["y"]
 
             # mutual information for both
@@ -459,9 +459,9 @@ def recompute_perm_metric_n_dims(
             comight_data = np.load(model_fname)
             model_perm_data = np.load(model_perm_fname)
 
-            obs_posteriors = comight_data["posterior_arr"]
+            obs_posteriors = comight_data["perm_posterior_arr"]
             obs_y = comight_data["y"]
-            perm_posteriors = model_perm_data["posterior_arr"]
+            perm_posteriors = model_perm_data["perm_posterior_arr"]
             perm_y = model_perm_data["y"]
 
             assert_array_equal(obs_y, perm_y)

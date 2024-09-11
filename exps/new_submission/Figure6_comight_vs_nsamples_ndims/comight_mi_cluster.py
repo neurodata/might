@@ -13,7 +13,7 @@ seed = 12345
 rng = np.random.default_rng(seed)
 
 ### hard-coded parameters
-n_estimators = 6000
+n_estimators = 100_000
 max_features = 0.3
 
 

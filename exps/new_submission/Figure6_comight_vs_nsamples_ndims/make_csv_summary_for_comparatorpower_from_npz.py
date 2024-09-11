@@ -426,8 +426,8 @@ if __name__ == "__main__":
 
     sim_names = [
         # "mean_shiftv4",
-        # "multi_modalv3",
-        "multi_equalv2"
+        "multi_modalv3",
+        # "multi_equalv2"
     ]
 
     # n_dims_1 = 4096 - 6
@@ -450,16 +450,16 @@ if __name__ == "__main__":
 
     for model_name in ['rf', 'svm', 'lr', 'knn']:
         for sim_name in sim_names:
-            recompute_metric_n_samples(
-                root_dir,
-                model_name,
-                sim_name,
-                n_dims_1,
-                n_dims_2,
-                n_repeats,
-                output_dir,
-                overwrite=True,
-            )
+            # recompute_metric_n_samples(
+            #     root_dir,
+            #     model_name,
+            #     sim_name,
+            #     n_dims_1,
+            #     n_dims_2,
+            #     n_repeats,
+            #     output_dir,
+            #     overwrite=True,
+            # )
 
             recompute_metric_n_dims(
                 root_dir,
