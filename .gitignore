@@ -6,6 +6,9 @@ __pycache__/
 # C extensions
 *.so
 
+# archive files
+exps/ARCHIVE/
+
 # Distribution / packaging
 .Python
 build/
@@ -25,6 +28,8 @@ share/python-wheels/
 .installed.cfg
 *.egg
 MANIFEST
+Pipfile
+Pipfile.lock
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
