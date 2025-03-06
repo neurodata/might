@@ -8,6 +8,31 @@ __pycache__/
 
 # archive files
 exps/ARCHIVE/
+# figures
+*.png 
+*.jpg
+*.jpeg
+*.pdf
+*.svg
+*.eps
+*.tif
+*.tiff
+*.gif
+*.bmp
+# data
+*.csv
+*.xlsx
+*.matrix
+# compressed files
+*.zip
+*.tar.gz
+*.pkl 
+*.h5
+*.npy
+*.npz
+*.mat
+*.pth
+*.pt
 
 # Distribution / packaging
 .Python
@@ -164,3 +189,7 @@ cython_debug/
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 #.idea/
 .DS_Store
+
+exps/submission/
+exps/ARCHIVE/
+exps/new_submission/
