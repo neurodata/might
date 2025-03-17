@@ -193,3 +193,15 @@ cython_debug/
 exps/submission/
 exps/ARCHIVE/
 exps/new_submission/
+cancer_data/ManuscriptFeatureMatrices/
+cancer_data/results/
+
+*.tar.gz
+*.zip
+*.tar
+*.gz
+*.tgz
+*.rar
+*.7z
+*.bz2
+*.xz
